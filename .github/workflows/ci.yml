@@ -14,6 +14,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm install --include=dev
+      - name: fail on leaked API keys
+        run: |
+          if grep -rInE "gsk_[A-Za-z0-9]{20,}" --exclude-dir=node_modules --exclude-dir=.next . ; then
+            echo "::error::Groq API key detected in tracked files. Remove it and rotate the key."
+            exit 1
+          fi
+          echo "no API keys found in tracked files"
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
