@@ -1,0 +1,26 @@
+# secrets
+.env
+.env.local
+.env*.local
+
+# runtime state (ledger lives here)
+data/*.sqlite3
+data/*.sqlite3-journal
+data/*.sqlite3-wal
+data/*.sqlite3-shm
+!data/.gitkeep
+
+# logs
+logs/
+*.log
+
+# node / next
+node_modules/
+.next/
+out/
+next-env.d.ts
+
+# misc
+.DS_Store
+*.tsbuildinfo
+.eslintcache
