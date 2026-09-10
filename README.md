@@ -1,8 +1,12 @@
 # WOLFPIT 🐺
 
-**The autonomous BTC trading desk with a council of rivals.**
+**An adversarial AI research system for understanding markets — plus the autonomous BTC desk that started it.**
 
-Five AI trading agents with opposing mandates debate every Bitcoin trade. A sixth — the red team — tries to tear each proposal apart. Only ideas that survive a hostile committee get sized and executed. Every vote, objection, and fill is persisted to an open SQLite ledger you can query yourself.
+WOLFPIT has two engines, one principle: *bad ideas must die in committee, on the record.*
+
+1. **Research platform (stocks):** enter any ticker and a council of six specialized AI analysts — Fundamentals, Valuation, Technicals, Macro, Competition, News — investigates it independently. A fact-checker strips every number they can't support against the data. A red team decides whether the evidence is even good enough to issue a thesis — and can REJECT the whole exercise. Every claim carries provenance; every thesis is versioned; every forecast is audited later, hits and misses alike.
+
+2. **The desk (BTC):** five rival trading agents debate every Bitcoin trade; the red team must approve before a satoshi moves (paper / Kraken / on-chain Degen Mode).
 
 Hedge funds are monoliths: one model, one opinion, one blind spot. WOLFPIT is adversarial by design.
 
@@ -77,6 +81,48 @@ What WOLFPIT refuses to do, in code: exceed the per-trade cap, exceed the total 
 
 Contract addresses (verified on-chain and against Basescan): SwapRouter02 `0x2626664c2603336E57B271c5C0b26F421741e481`, cbBTC `0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf`, USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`.
 
+## The research platform
+
+Type a ticker, get an intelligence dossier, not a chatbot answer:
+
+- **Council of rivals** — six analysts with separate mandates investigate the same company independently, then disagree on the record (stance + confidence + weight per agent).
+- **Fact-check layer** — every numeric claim an agent makes is extracted and verified against the deterministic data pack. Wrong or unsupported numbers are flagged, downweighted, and stripped from the report. The LLM never gets the last word on numbers.
+- **Evidence engine** — primary vs secondary vs derived sources, with recency decay and per-claim provenance. DATA UNAVAILABLE is shown honestly rather than estimated.
+- **Deterministic valuation** — DCF, reverse DCF (what growth is the price implying?), and peer comps, with every assumption exposed and a sensitivity grid. No bare fair-value numbers.
+- **Thesis engine** — base/bull/bear/extreme-bear cases, measurable invalidation conditions ("gross margin < X" — derived from current values, whitelisted metrics only), and probability-labeled model scenarios.
+- **Thesis history & forecast audit** — every run is versioned in SQLite. Return later and see what the system believed, when, and whether it was right. Directional accuracy is computed across ALL forecasts. No cherry-picking.
+- **Red team with veto** — if the evidence base is too thin, the red team rejects and NO thesis is issued. Fail-closed: an unreachable red team also rejects.
+
+### Using it
+
+```bash
+npm run dev
+# open http://localhost:3210
+```
+
+- `/research` — terminal: launch an investigation (`NVDA`, optional peer set), watch the stages, open the dossier
+- `/company/AAPL` — permanent dossier: live quote, fundamentals (with honest DATA UNAVAILABLE), headlines, thesis history
+- `/markets` — indices, sector performance, macro tape, mega-cap movers (useful with zero AI calls)
+- `/compare?t=NVDA vs AMD` — structured side-by-side comparison
+- `/watchlist` — what the pit believes + the forecast audit
+- `Ctrl+K` — command palette (analyze, compare, open, run red team)
+
+### API
+
+```
+GET  /api/markets                     indices, sectors, macro, movers
+GET  /api/securities/:ticker          data pack (quote, technicals, fundamentals, news)
+POST /api/research                    { ticker, peers? } → full council run (guarded)
+GET  /api/research?ticker=NVDA        latest run for a ticker
+GET  /api/research/:id                full audit trail for one run
+GET  /api/theses/:ticker              versioned thesis history
+GET  /api/watchlist                   watchlist + forecast audit
+POST /api/watchlist                   add ticker (guarded)
+PUT  /api/watchlist                   resolve matured forecasts
+```
+
+`DASHBOARD_TOKEN`, when set, protects the mutating endpoints (`x-desk-token` header).
+
 ## Quickstart
 
 ```bash
@@ -87,7 +133,7 @@ npm run engine:once           # one council cycle, end to end
 npm run dev                   # the website on http://localhost:3210
 ```
 
-Open `/desk` for the live desk: equity, position, last council transcript, blotter, kill switch, and a "run one cycle now" button.
+Open `/desk` for the live desk: equity, position, last council transcript, blotter, kill switch, and a "run one cycle now" button. Open `/research` for the stock research terminal.
 
 Continuous desk:
 
@@ -131,11 +177,26 @@ core/            domain: market data, indicators, council brain, risk, brokers, 
   kraken.ts        live broker: HMAC-SHA512 signed, exposure-capped (KYC exchange)
   dex.ts           Degen Mode: real USDC⇄cbBTC swaps on Base via Uniswap V3, self-custody, no KYC
   ledger.ts        SQLite: trades, cycles, equity, persisted account state
+  research/        THE RESEARCH PLATFORM
+    providers.ts     swappable MarketData/News/Fundamentals/Macro providers (keyless Yahoo + Google News)
+    indicators.ts    deterministic technicals — the AI interprets them, never invents them
+    datapack.ts      provenance-backed data assembly with per-section availability
+    valuation.ts     DCF / reverse DCF / comps with exposed assumptions + sensitivity
+    factcheck.ts     numeric-claim extraction, verification, violation stripping
+    prompts.ts       versioned agent prompts with untrusted-input + AI-safety rules
+    ai.ts            model router (Groq now; OpenAI/Anthropic/Google/local pluggable)
+    agents.ts        6-agent council runner + fail-closed red team
+    consensus.ts     evidence-weighted synthesis + confidence report (no fake percentages)
+    thesis.ts        cases, measurable invalidation conditions, model scenarios
+    engine.ts        orchestration: datapack → valuation → council → fact-check → red team → thesis
+    store.ts         SQLite: research_runs, theses (history), forecasts (audit), watchlist
 engine/          autonomous loop (own process, own schedule)
 mcp/             Model Context Protocol server
-src/app          Next.js 16 site: landing + /desk dashboard + control API
-tests/           vitest: tally, indicators, risk
+src/app          Next.js 16 site: landing + /desk + /research + /company + /markets + /compare + /watchlist
+tests/           vitest: tally, indicators, risk, dex, valuation, factcheck, consensus, AI safety
 ```
+
+Deeper detail in [ARCHITECTURE.md](ARCHITECTURE.md) and [AI_SYSTEM.md](AI_SYSTEM.md).
 
 ## Configuration
 

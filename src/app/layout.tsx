@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import CommandPalette from "@/components/research/CommandPalette";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -55,6 +56,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Link href="/desk" className="ember-underline font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bone/70 hover:text-bone">
                 Desk
               </Link>
+              <Link href="/markets" className="ember-underline hidden font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bone/70 hover:text-bone sm:block">
+                Markets
+              </Link>
+              <Link href="/research" className="ember-underline hidden font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bone/70 hover:text-bone sm:block">
+                Research
+              </Link>
+              <Link href="/watchlist" className="ember-underline hidden font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bone/70 hover:text-bone sm:block">
+                Watchlist
+              </Link>
               <a
                 href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER"
                 target="_blank"
@@ -67,6 +77,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </nav>
         </header>
         <main className="relative pt-16">{children}</main>
+        <CommandPalette />
         <footer className="border-t border-pit-300/10 py-10">
           <div className="mx-auto max-w-[1280px] px-5 sm:px-8">
             <p className="max-w-3xl text-[0.72rem] leading-relaxed text-bone/40">
