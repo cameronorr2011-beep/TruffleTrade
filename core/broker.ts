@@ -11,7 +11,7 @@ export interface Fill {
 }
 
 export interface Broker {
-  readonly mode: "paper" | "kraken";
+  readonly mode: "paper" | "kraken" | "onchain";
   marketBuy(qtyBtc: number, ref: string): Promise<Fill>;
   marketSell(qtyBtc: number, ref: string): Promise<Fill>;
 }

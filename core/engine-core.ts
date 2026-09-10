@@ -4,6 +4,7 @@ import { runCouncil } from "./brain";
 import { planOrder, shouldExit, checkKillSwitch } from "./risk";
 import { PaperBroker, type Broker } from "./broker";
 import { KrakenBroker } from "./kraken";
+import { DexBroker } from "./dex";
 import {
   getDb,
   loadAccount,
@@ -15,7 +16,9 @@ import {
 import type { AccountState, MarketSnapshot } from "./types";
 
 export function makeBroker(): Broker {
-  return config.brokerMode === "kraken" ? new KrakenBroker() : new PaperBroker();
+  if (config.brokerMode === "kraken") return new KrakenBroker();
+  if (config.brokerMode === "onchain") return new DexBroker();
+  return new PaperBroker();
 }
 
 export function markToMarket(snap: MarketSnapshot, acct: AccountState): AccountState {

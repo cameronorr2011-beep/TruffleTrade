@@ -4,6 +4,7 @@ import CouncilRoom from "@/components/desk/CouncilRoom";
 import TradeLog from "@/components/desk/TradeLog";
 import DeskControls from "@/components/desk/DeskControls";
 import PriceHeader from "@/components/desk/PriceHeader";
+import WalletCard from "@/components/desk/WalletCard";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +69,25 @@ export default async function DeskPage() {
         <section className="card p-6 lg:col-span-2">
           <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Desk controls</h2>
           <DeskControls halted={a.halted} />
+        </section>
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-5">
+        <section className="lg:col-span-2">
+          <WalletCard status={snap.onchain} />
+        </section>
+        <section className="card p-6 lg:col-span-3">
+          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Real-money notes</h2>
+          <p className="mt-4 text-[0.85rem] leading-relaxed text-bone/55">
+            Degen Mode executes <strong className="text-bone">real swaps on Base</strong> — USDC ⇄ cbBTC through
+            Uniswap V3, signed by your dedicated hot wallet. No exchange account, no identity verification:
+            self-custody is legal in California. Every swap is bounded by per-trade and total caps, a slippage
+            guard, and the kill switch — and every fill is recorded with its on-chain tx hash in the blotter.
+          </p>
+          <p className="mt-3 text-[0.78rem] leading-relaxed text-bone/40">
+            Gas is paid in ETH on Base (keep ~0.001 ETH). cbBTC redeems 1:1 for BTC via Coinbase. Swaps are
+            taxable events in the US — keep records; the ledger already does.
+          </p>
         </section>
       </div>
 

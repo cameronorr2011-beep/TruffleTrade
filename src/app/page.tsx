@@ -21,8 +21,8 @@ const PILLARS = [
   },
   {
     kicker: "No KYC",
-    title: "Keys, not accounts",
-    body: "Market data is keyless (Kraken, Coinbase, Yahoo Finance). Paper mode needs nothing at all. Live mode uses your own Kraken API key — crypto-only accounts require no identity verification — capped by a hard exposure limit and a drawdown kill switch.",
+    title: "Self-custody, not sign-ups",
+    body: "Market data is keyless (Kraken, Coinbase, Yahoo Finance). Paper mode needs nothing at all. Degen Mode trades real BTC exposure from your own wallet — USDC ⇄ cbBTC swaps on Base via Uniswap V3 — no exchange account, no identity verification, capped by hard limits and a drawdown kill switch. US exchanges themselves require KYC by federal law; trading from your own wallet does not.",
   },
   {
     kicker: "Defense in depth",

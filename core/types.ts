@@ -109,7 +109,7 @@ export interface LedgerTrade {
   feeUsd: number;
   slippageUsd: number;
   realizedPnlUsd: number | null;
-  mode: "paper" | "kraken";
+  mode: "paper" | "kraken" | "onchain";
   reason: string;
   cycleId?: number;
   ref?: string;
@@ -118,7 +118,7 @@ export interface LedgerTrade {
 export interface CycleRecord {
   id?: number;
   ts: number;
-  mode: "paper" | "kraken";
+  mode: "paper" | "kraken" | "onchain";
   btcPrice: number;
   decision: string;
   executed: boolean;

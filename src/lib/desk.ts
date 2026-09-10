@@ -1,6 +1,7 @@
 import { config } from "@core/config";
 import { loadAccount, recentTrades, equityCurve, stats, getDb } from "@core/ledger";
 import { btcPrice } from "@core/market";
+import { DexBroker } from "@core/dex";
 import type { AccountState, CouncilDecision, LedgerTrade } from "@core/types";
 
 export interface CouncilSummary {
@@ -23,6 +24,19 @@ export interface DeskSnapshot {
   lastCouncil: CouncilSummary | null;
   mode: string;
   cycleSeconds: number;
+  onchain: OnchainStatus;
+}
+
+export interface OnchainStatus {
+  configured: boolean;
+  enabled: boolean;
+  address?: string;
+  usdc?: number;
+  cbbtc?: number;
+  gasEth?: number;
+  maxUsdPerTrade: number;
+  maxTotalUsd: number;
+  slippageBps: number;
 }
 
 export function lastCouncil(): CouncilSummary | null {
@@ -50,6 +64,24 @@ export function lastCouncil(): CouncilSummary | null {
   }
 }
 
+export async function onchainStatus(): Promise<OnchainStatus> {
+  const base: OnchainStatus = {
+    configured: config.brokerMode === "onchain",
+    enabled: config.onchain.tradingEnabled && Boolean(config.onchain.privateKey),
+    maxUsdPerTrade: config.onchain.maxUsdPerTrade,
+    maxTotalUsd: config.onchain.maxTotalUsd,
+    slippageBps: config.onchain.slippageBps,
+  };
+  if (!base.enabled) return base;
+  try {
+    const dex = new DexBroker();
+    const [usdc, cbbtc, gas] = await Promise.all([dex.usdcBalance(), dex.cbbtcBalance(), dex.gasStatus()]);
+    return { ...base, address: dex.address, usdc, cbbtc, gasEth: gas.eth };
+  } catch {
+    return base;
+  }
+}
+
 export async function deskSnapshot(): Promise<DeskSnapshot> {
   const tick = await btcPrice().catch(() => ({ price: 0, source: "unreachable" }));
   const account = loadAccount(config.paperStartUsd);
@@ -65,5 +97,6 @@ export async function deskSnapshot(): Promise<DeskSnapshot> {
     lastCouncil: lastCouncil(),
     mode: config.brokerMode,
     cycleSeconds: config.cycleSeconds,
+    onchain: await onchainStatus(),
   };
 }

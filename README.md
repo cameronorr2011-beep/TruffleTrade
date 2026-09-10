@@ -40,11 +40,42 @@ Hedge funds are monoliths: one model, one opinion, one blind spot. WOLFPIT is ad
 
 The edge isn't a magic signal — it's that a trade must be argued for, attacked, and defended *on the record* before it exists.
 
-## No KYC, by architecture
+## No KYC, honestly
 
 - **Market data:** keyless public APIs (Kraken, Coinbase Exchange, Yahoo Finance). No signup.
 - **Paper mode (default):** simulated fills with realistic fees/slippage. Nothing to sign up for.
-- **Live mode (optional):** your own Kraken API key with only *"Create & Modify Orders"* enabled. Kraken crypto-only accounts require no identity verification. **Never enable withdrawals on the key.** Exposure is hard-capped by `KRAKEN_MAX_EXPOSURE_USD` in code.
+- **Degen Mode (real money, no KYC):** WOLFPIT trades **from your own wallet** — USDC ⇄ cbBTC swaps on Base (Coinbase's L2) via Uniswap V3. There is no exchange account, so there is no identity verification. Self-custody is legal in California and everywhere in the US. The cbBTC is yours, in your wallet, always.
+- **Kraken live mode (requires KYC in the US):** every regulated US exchange must verify identity by federal law (Bank Secrecy Act / FinCEN) — Kraken US requires SSN/ITIN + government ID. Use this only if you already have a verified account. Offshore "no-KYC" exchanges that accept US users are operating outside US law — WOLFPIT does not integrate them.
+- **Taxes are not optional:** swaps are taxable events in the US even on-chain. The SQLite ledger records every fill with its tx hash, so your records keep themselves.
+
+## Degen Mode — real on-chain trading (no KYC, self-custody)
+
+```
+WALLET (yours, dedicated to WOLFPIT)
+  └─ USDC on Base  ──Uniswap V3 (SwapRouter02)──▶  cbBTC in YOUR wallet
+  └─ ~0.001 ETH for L2 gas (pennies per swap)
+```
+
+Setup, in order:
+
+1. **Create a dedicated hot wallet** for WOLFPIT only — never the wallet holding your savings. (Rabby, MetaMask, or generate offline.) Export its private key.
+2. **Fund it small**: buy USDC on any on-ramp app (e.g. Coinbase, where SEPA/ACH funding is verified once by the *on-ramp*, not by WOLFPIT), withdraw to Base, plus ~0.001 ETH on Base for gas. Withdrawals to Base are cheap.
+3. `.env`:
+
+   ```
+   BROKER_MODE=onchain
+   ONCHAIN_TRADING=1
+   ONCHAIN_PRIVATE_KEY=0xyourkey
+   WOLF_MAX_USD_PER_TRADE=25      # start small. like, really small
+   WOLF_MAX_TOTAL_USD=50
+   WOLF_SLIPPAGE_BPS=100          # 1% guard — swaps revert beyond this
+   ```
+
+4. `npm run engine:once` — watch it: council → red team → risk caps → **real swap** with the tx hash in the blotter.
+
+What WOLFPIT refuses to do, in code: exceed the per-trade cap, exceed the total cap, trade with <0.0005 ETH gas, swap without a slippage bound, grant unlimited token approvals (exact-amount approvals only), or execute if the red team says no.
+
+Contract addresses (verified on-chain and against Basescan): SwapRouter02 `0x2626664c2603336E57B271c5C0b26F421741e481`, cbBTC `0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf`, USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`.
 
 ## Quickstart
 
@@ -80,14 +111,13 @@ npm run engine                # cycles every CYCLE_SECONDS (default 300s)
 
 Tools: `get_desk_status`, `get_btc_features`, `get_trade_log`, `get_last_council`, `run_cycle_once` (requires `confirm: "yes"`).
 
-## Going live (no KYC) — read this twice
+## Going live — read this twice
 
-1. Kraken → Settings → API → **Create key** with *only* "Create & Modify Orders".
-2. `.env`: `BROKER_MODE=kraken`, paste `KRAKEN_API_KEY` / `KRAKEN_API_SECRET`.
-3. Set `KRAKEN_MAX_EXPOSURE_USD` to money you can lose without flinching. The engine refuses to exceed it.
-4. `npm run engine:once` and read the council transcript before letting it loop.
+- **No-KYC real trading (Degen Mode):** follow the section above. Dedicated wallet, small caps, `BROKER_MODE=onchain` + `ONCHAIN_TRADING=1`.
+- **Kraken (only if you already have a verified account):** API key with *only* "Create & Modify Orders", `BROKER_MODE=kraken`, and a `KRAKEN_MAX_EXPOSURE_USD` you can lose without flinching. Never enable withdrawals on the key.
+- **Never** put a wallet key with significant funds into `.env`. This is a hot wallet for a robot. Treat it like cash in a glovebox.
 
-**This is open-source software, not investment advice.** Autonomous trading loses money. The kill switch (`KILL_SWITCH_DD`, default 15%) and exposure cap are seatbelts, not guarantees. You are responsible for your keys, capital, and local regulations.
+**This is open-source software, not investment advice.** Autonomous trading loses money — Degen Mode loses *real* money. The kill switch (`KILL_SWITCH_DD`, default 15%), per-trade caps, total cap, and slippage guard are seatbelts, not guarantees. You are responsible for your keys, capital, taxes, and local regulations.
 
 ## Architecture
 
@@ -97,8 +127,9 @@ core/            domain: market data, indicators, council brain, risk, brokers, 
   tally.ts         pure conviction-weighted vote tally (unit-tested)
   risk.ts          deterministic sizing/stops/kill-switch (unit-tested, overrides AI)
   market.ts        Kraken → Coinbase failover, Yahoo macro, feature engineering
-  broker.ts        paper broker (fees + slippage)
-  kraken.ts        live broker: HMAC-SHA512 signed, exposure-capped
+  broker.ts        broker interface + paper broker (fees + slippage)
+  kraken.ts        live broker: HMAC-SHA512 signed, exposure-capped (KYC exchange)
+  dex.ts           Degen Mode: real USDC⇄cbBTC swaps on Base via Uniswap V3, self-custody, no KYC
   ledger.ts        SQLite: trades, cycles, equity, persisted account state
 engine/          autonomous loop (own process, own schedule)
 mcp/             Model Context Protocol server

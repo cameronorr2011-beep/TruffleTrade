@@ -13,6 +13,7 @@
     "engine:once": "tsx engine/index.ts --once",
     "mcp": "tsx mcp/server.ts",
     "db:migrate": "tsx scripts/migrate.ts",
+    "quote": "tsx scripts/quote-cbbtc.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -23,6 +24,7 @@
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6",
+    "viem": "^2.56.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -35,6 +35,16 @@ export function planOrder(snap: MarketSnapshot, decision: CouncilDecision, accou
     if (config.brokerMode === "kraken") {
       qty = Math.min(qty, config.kraken.maxExposureUsd / price);
     }
+    if (config.brokerMode === "onchain") {
+      qty = Math.min(qty, config.onchain.maxUsdPerTrade / price);
+      // Cap total deployed exposure at WOLF_MAX_TOTAL_USD (qtyBtc is 0 when flat)
+      const deployed = account.position.qtyBtc * price;
+      const remaining = config.onchain.maxTotalUsd - deployed;
+      if (remaining <= 0) {
+        return { side: "buy", qtyBtc: 0, stop, target: price + 3 * a, riskUsd, note: "skip: total exposure cap reached" };
+      }
+      qty = Math.min(qty, remaining / price);
+    }
     if (qty * price < MIN_NOTIONAL_USD) {
       return { side: "buy", qtyBtc: 0, stop, target: price + 3 * a, riskUsd, note: "skip: below min notional" };
     }
