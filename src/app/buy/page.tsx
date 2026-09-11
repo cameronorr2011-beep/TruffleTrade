@@ -10,18 +10,18 @@ export const metadata: Metadata = {
 export default function BuyPage() {
   return (
     <div className="mx-auto max-w-[900px] px-5 py-20 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">Checkout</span>
+      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300">Checkout</span>
       <h1 className="font-display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] font-semibold leading-[1.05] text-bone">
         Thirty days of TruffleTrade
       </h1>
-      <p className="mt-4 max-w-2xl text-[0.98rem] leading-relaxed text-bone/60">
+      <p className="mt-4 max-w-2xl text-[0.98rem] leading-relaxed text-bone-soft">
         One Lightning payment of <span className="text-bone">1,000 sats</span>. No account creation, no email, no
         identity verification. Your access code is issued the moment payment confirms.
       </p>
 
-      <div className="mt-8 rounded-xl border border-truffle-400/25 bg-truffle-600/5 p-5">
-        <p className="text-[0.85rem] leading-relaxed text-bone/65">
-          <strong className="text-truffle-200">Age requirement:</strong> by purchasing you confirm you are 18 or older —
+      <div className="mt-8 rounded-xl border border-soil-500 bg-mint p-5">
+        <p className="text-[0.85rem] leading-relaxed text-bone-soft">
+          <strong className="text-truffle-600">Age requirement:</strong> by purchasing you confirm you are 18 or older —
           or that a parent or guardian has reviewed and approved this purchase and will supervise your use of the
           product. See the{" "}
           <Link href="/terms" className="text-truffle-300 underline decoration-truffle-400/40 underline-offset-2">
@@ -35,7 +35,7 @@ export default function BuyPage() {
         <BuyPanel />
         <div className="card p-7">
           <h3 className="font-display text-[1.2rem] font-semibold text-bone">What you get</h3>
-          <ul className="mt-4 space-y-3 text-[0.9rem] text-bone/60">
+          <ul className="mt-4 space-y-3 text-[0.9rem] text-bone-soft">
             {[
               "Unlimited AI chart analyses on any ticker",
               "Six-analyst council with fact-checker and red team",
@@ -50,7 +50,7 @@ export default function BuyPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-6 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bone/35">
+          <p className="mt-6 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-faint">
             Analysis software · not investment advice · no trade execution
           </p>
         </div>

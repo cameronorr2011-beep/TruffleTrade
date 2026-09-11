@@ -17,7 +17,7 @@ export default function ConfidenceCard({ run }: { run: ResearchRun }) {
 
   return (
     <div className="card p-6">
-      <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Confidence</h2>
+      <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">Confidence</h2>
       {showConf && (
         <p className="mt-3">
           <span
@@ -31,14 +31,14 @@ export default function ConfidenceCard({ run }: { run: ResearchRun }) {
       )}
       <dl className="mt-4 space-y-2">
         {rows.map((row) => (
-          <div key={row.label} className="flex items-baseline justify-between gap-4 border-b border-truffle-400/8 pb-1.5">
-            <dt className="font-mono text-[0.66rem] uppercase tracking-[0.16em] text-bone/45">{row.label}</dt>
-            <dd className="font-mono text-[0.72rem] text-bone/80">{row.value}</dd>
+          <div key={row.label} className="flex items-baseline justify-between gap-4 border-b border-soil-600 pb-1.5">
+            <dt className="font-mono text-[0.66rem] uppercase tracking-[0.16em] text-faint">{row.label}</dt>
+            <dd className="font-mono text-[0.72rem] text-ink">{row.value}</dd>
           </div>
         ))}
       </dl>
       {showConf && (
-        <ul className="mt-4 space-y-1 font-mono text-[0.6rem] leading-relaxed text-bone/40">
+        <ul className="mt-4 space-y-1 font-mono text-[0.6rem] leading-relaxed text-faint">
           {conf.breakdown.map((b, i) => (
             <li key={i}>· {b}</li>
           ))}

@@ -1,7 +1,7 @@
 export default function EquityCurve({ points }: { points: { ts: number; equityUsd: number }[] }) {
   if (points.length < 2) {
     return (
-      <p className="mt-6 font-mono text-[0.72rem] text-bone/40">
+      <p className="mt-6 font-mono text-[0.72rem] text-bone-soft">
         The curve draws itself as cycles complete. Run the engine and come back.
       </p>
     );

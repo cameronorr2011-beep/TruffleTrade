@@ -4,24 +4,24 @@ import StanceBadge from "./StanceBadge";
 export default function AgentCard({ agent }: { agent: AgentOutput }) {
   const isRed = agent.agent === "RedTeam";
   return (
-    <article className={`card p-6 ${isRed ? "border-truffle-400/35" : ""}`}>
+    <article className={`card p-6 ${isRed ? "border-soil-600" : ""}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className={`font-mono text-[0.85rem] font-semibold tracking-[0.12em] ${isRed ? "text-truffle-300" : "text-bone"}`}>
+        <h3 className={`font-mono text-[0.85rem] font-semibold tracking-[0.12em] ${isRed ? "text-truffle-300" : "text-ink"}`}>
           {agent.agent.toUpperCase()}
         </h3>
         <StanceBadge stance={agent.stance} />
       </div>
-      <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/35">
+      <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-faint">
         {agent.promptVersion} · {agent.model}
         {isRed && " · fail-closed"}
       </p>
 
-      <p className="mt-4 text-[0.86rem] leading-relaxed text-bone/70">{agent.rationale}</p>
+      <p className="mt-4 text-[0.86rem] leading-relaxed text-bone-soft">{agent.rationale}</p>
 
       {agent.strengths.length > 0 && (
         <div className="mt-4">
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-jade/70">Strengths</p>
-          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[0.8rem] leading-relaxed text-bone/60">
+          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[0.8rem] leading-relaxed text-bone-soft">
             {agent.strengths.map((s, i) => (
               <li key={i}>{s}</li>
             ))}
@@ -31,7 +31,7 @@ export default function AgentCard({ agent }: { agent: AgentOutput }) {
       {agent.weaknesses.length > 0 && (
         <div className="mt-3">
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-blood/70">Weaknesses</p>
-          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[0.8rem] leading-relaxed text-bone/60">
+          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[0.8rem] leading-relaxed text-bone-soft">
             {agent.weaknesses.map((s, i) => (
               <li key={i}>{s}</li>
             ))}
@@ -41,7 +41,7 @@ export default function AgentCard({ agent }: { agent: AgentOutput }) {
       {agent.assumptions.length > 0 && (
         <div className="mt-3">
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-gold/70">Assumptions</p>
-          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[0.8rem] leading-relaxed text-bone/60">
+          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[0.8rem] leading-relaxed text-bone-soft">
             {agent.assumptions.map((s, i) => (
               <li key={i}>{s}</li>
             ))}
@@ -50,13 +50,13 @@ export default function AgentCard({ agent }: { agent: AgentOutput }) {
       )}
 
       {agent.evidence.length > 0 && (
-        <div className="mt-4 border-t border-truffle-400/10 pt-3">
-          <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-bone/40">
+        <div className="mt-4 border-t border-soil-600 pt-3">
+          <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-faint">
             Evidence ({agent.evidence.length})
           </p>
           <ul className="mt-2 space-y-1">
             {agent.evidence.slice(0, 6).map((e) => (
-              <li key={e.id} className="font-mono text-[0.64rem] text-bone/50">
+              <li key={e.id} className="font-mono text-[0.64rem] text-bone-soft">
                 <span className="text-truffle-400">{e.sourceType}</span> · {e.claim} · {e.calculation}
               </li>
             ))}
@@ -71,7 +71,7 @@ export default function AgentCard({ agent }: { agent: AgentOutput }) {
           </p>
           <ul className="mt-1.5 space-y-1">
             {agent.violations.map((v, i) => (
-              <li key={i} className="font-mono text-[0.64rem] leading-relaxed text-bone/65">
+              <li key={i} className="font-mono text-[0.64rem] leading-relaxed text-bone-soft">
                 [{v.reason}] {v.claim} — {v.detail}
               </li>
             ))}

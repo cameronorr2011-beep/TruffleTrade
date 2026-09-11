@@ -14,10 +14,10 @@ export default function PriceHeader({ price, source, mode, cycleSeconds }: { pri
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-semibold tracking-tight text-bone">
+        <h1 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-semibold tracking-tight text-ink">
           The Desk
         </h1>
-        <p className="mt-1 font-mono text-[0.66rem] uppercase tracking-[0.22em] text-bone/40">
+        <p className="mt-1 font-mono text-[0.66rem] uppercase tracking-[0.22em] text-bone-soft">
           BTC {price > 0 ? price.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }) : "—"} via {source} · mode {mode} · cycle {cycleSeconds}s
         </p>
       </div>

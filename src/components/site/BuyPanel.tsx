@@ -60,7 +60,7 @@ export default function BuyPanel() {
         setInvoice(j.invoice);
         setLightningUri(j.lightningUri ?? null);
         setPhase("awaiting");
-        QRCode.toDataURL(j.invoice, { width: 240, margin: 1, color: { dark: "#f4efe9", light: "#0a0806" } })
+        QRCode.toDataURL(j.invoice, { width: 240, margin: 1, color: { dark: "#14231a", light: "#ffffff" } })
           .then(setQrDataUrl)
           .catch(() => setQrDataUrl(null));
       }
@@ -100,45 +100,44 @@ export default function BuyPanel() {
   if (phase === "paid" && accessCode) {
     const exp = expiresTs ? new Date(expiresTs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
     return (
-      <aside className="card border-truffle-400/40 p-7" id="your-code">
-        <p className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-jade">Payment confirmed</p>
-        <h3 className="font-display mt-2 text-[1.5rem] font-semibold text-bone">Your TruffleTrade access code</h3>
+      <aside className="card p-7" id="your-code" style={{ borderColor: "#a6bf8a", boxShadow: "0 4px 24px rgba(33,88,62,0.1)" }}>
+        <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[1.2px] text-jade">
+          <span aria-hidden className="live-dot" /> Payment confirmed
+        </p>
+        <h3 className="mt-2 text-[22px] font-bold tracking-[-0.8px] text-ink">Your TruffleTrade access code</h3>
         <button
           onClick={() => copy(accessCode, "code")}
-          className="mt-5 w-full rounded-xl border border-truffle-400/40 bg-void/80 px-4 py-4 font-mono text-[1.05rem] tracking-[0.14em] text-truffle-200 transition-colors hover:border-truffle-400/70"
+          className="code-block mt-5 w-full px-4 py-4 text-[16px] font-semibold tracking-[0.12em] transition-colors hover:border-[#3a5a44]"
           title="Click to copy"
         >
           {accessCode}
-          <span className="ml-3 text-[0.6rem] uppercase tracking-[0.2em] text-bone/40">{copied === "code" ? "copied ✓" : "copy"}</span>
+          <span className="ml-3 text-[10px] uppercase tracking-[0.2em] text-[#8aa88f]">{copied === "code" ? "copied ✓" : "copy"}</span>
         </button>
-        {exp && <p className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/40">Active through {exp} · no auto-renew</p>}
+        {exp && <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.6px] text-faint">Active through {exp} · no auto-renew</p>}
 
-        <ol className="mt-6 space-y-4 text-[0.9rem] leading-relaxed text-bone/70">
+        <ol className="mt-6 space-y-4 text-[13px] leading-relaxed text-ink/85">
           <li>
-            <span className="font-mono text-truffle-300">1 · Get the app</span>
-            <pre className="mt-2 overflow-x-auto rounded-lg border border-truffle-400/20 bg-void/70 p-3 font-mono text-[0.72rem] text-truffle-200/90">{`git clone https://github.com/cameronorr2011-beep/AI-STOCK-TRADER.git truffletrade
+            <span className="font-bold text-forest">1 · Get the app</span>
+            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`git clone https://github.com/cameronorr2011-beep/AI-STOCK-TRADER.git truffletrade
 cd truffletrade && npm install`}</pre>
           </li>
           <li>
-            <span className="font-mono text-truffle-300">2 · Add your code</span>
-            <pre className="mt-2 overflow-x-auto rounded-lg border border-truffle-400/20 bg-void/70 p-3 font-mono text-[0.72rem] text-truffle-200/90">{`cp .env.example .env
+            <span className="font-bold text-forest">2 · Add your code</span>
+            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`cp .env.example .env
 # then set in .env:
-TT_GATEWAY_URL=https://truffletrade.vercel.app
+TT_GATEWAY_URL=https://ai-stock-trader-two.vercel.app
 TT_ACCESS_CODE=${accessCode}`}</pre>
           </li>
           <li>
-            <span className="font-mono text-truffle-300">3 · Run it</span>
-            <pre className="mt-2 overflow-x-auto rounded-lg border border-truffle-400/20 bg-void/70 p-3 font-mono text-[0.72rem] text-truffle-200/90">{`npm run verify   # ✓ access active
+            <span className="font-bold text-forest">3 · Run it</span>
+            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`npm run verify   # ✓ access active
 npm run dev      # → http://localhost:3210`}</pre>
           </li>
         </ol>
-        <a
-          href="/install"
-          className="mt-6 inline-block rounded-full bg-truffle-500 px-6 py-3 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-void transition-colors hover:bg-truffle-400"
-        >
+        <a href="/install" className="btn-primary mt-6 inline-block">
           Full install guide
         </a>
-        <p className="mt-3 text-[0.75rem] leading-relaxed text-bone/45">
+        <p className="mt-3 text-[12px] leading-relaxed text-bone-soft">
           Keep this code — it&apos;s your license. You can retrieve it anytime from this page (bookmark the order link in
           your confirmation).
         </p>
@@ -148,127 +147,111 @@ npm run dev      # → http://localhost:3210`}</pre>
 
   return (
     <aside className="card p-7">
-      <h3 className="font-display text-[1.3rem] font-semibold text-bone">Buy in three steps</h3>
+      <h3 className="text-[19px] font-bold tracking-[-0.6px] text-ink">Buy in three steps</h3>
       {phase === "idle" && (
         <>
-          <ol className="mt-5 space-y-3 text-[0.9rem] text-bone/60">
+          <ol className="mt-5 space-y-3 text-[13px] text-bone-soft">
             <li>
-              <span className="font-mono text-truffle-300">1.</span> Click below — a Lightning invoice for{" "}
-              <span className="text-bone">1,000 sats</span> is generated just for you.
+              <span className="font-bold text-forest">1.</span> Click below — a Lightning invoice for{" "}
+              <span className="font-semibold text-ink">1,000 sats</span> is generated just for you.
             </li>
             <li>
-              <span className="font-mono text-truffle-300">2.</span> Scan the QR or pay from any Lightning wallet (Wallet
-              of Satoshi, Phoenix, Zeus…).
+              <span className="font-bold text-forest">2.</span> Scan the QR or pay from any Lightning wallet (Wallet of
+              Satoshi, Phoenix, Zeus…).
             </li>
             <li>
-              <span className="font-mono text-truffle-300">3.</span> Your access code + the app setup appear here the
-              moment payment confirms — usually seconds.
+              <span className="font-bold text-forest">3.</span> Your access code + the app setup appear here the moment
+              payment confirms — usually seconds.
             </li>
           </ol>
-          <button
-            onClick={startCheckout}
-            className="mt-7 w-full rounded-full bg-truffle-500 px-6 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-void transition-colors hover:bg-truffle-400"
-          >
+          <button onClick={startCheckout} className="btn-primary mt-7 w-full">
             Generate invoice
           </button>
-          <p className="mt-3 text-center font-mono text-[0.6rem] uppercase tracking-[0.18em] text-bone/35">
+          <p className="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.8px] text-faint">
             No account. No email. No KYC.
           </p>
         </>
       )}
 
-      {phase === "creating" && <p className="mt-6 animate-pulse font-mono text-[0.75rem] text-truffle-300">Creating invoice…</p>}
+      {phase === "creating" && <p className="mt-6 animate-pulse text-[13px] font-semibold text-forest">Creating invoice…</p>}
 
       {phase === "awaiting" && invoice && (
         <div className="mt-5">
           <div className="flex flex-col items-center">
             {qrDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={qrDataUrl} alt="Lightning invoice QR code" width={220} height={220} className="rounded-xl border border-truffle-400/30" />
+              <img src={qrDataUrl} alt="Lightning invoice QR code" width={220} height={220} className="rounded-xl border border-soil-500" />
             ) : (
-              <div className="flex h-[220px] w-[220px] items-center justify-center rounded-xl border border-truffle-400/30 font-mono text-[0.6rem] text-bone/40">
+              <div className="flex h-[220px] w-[220px] items-center justify-center rounded-xl border border-soil-500 text-[11px] text-faint">
                 generating QR…
               </div>
             )}
-            <p className="mt-3 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-truffle-300">Scan with any Lightning wallet</p>
+            <p className="mt-3 text-[11px] font-bold uppercase tracking-[1px] text-forest">Scan with any Lightning wallet</p>
           </div>
           <details className="mt-4">
-            <summary className="cursor-pointer font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/45 hover:text-bone/70">
+            <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.6px] text-faint hover:text-bone-soft">
               Or copy the invoice text
             </summary>
-            <div className="mt-2 max-h-28 overflow-y-auto break-all rounded-lg border border-truffle-400/20 bg-void/60 p-3 font-mono text-[0.6rem] leading-relaxed text-truffle-200/70">
-              {invoice}
-            </div>
+            <div className="code-block mt-2 max-h-28 overflow-y-auto break-all p-3 text-[10px] leading-relaxed">{invoice}</div>
             <div className="mt-2 flex gap-2">
-              <button
-                onClick={() => copy(invoice, "invoice")}
-                className="rounded-full border border-truffle-400/40 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-truffle-300 hover:bg-truffle-500/15"
-              >
+              <button onClick={() => copy(invoice, "invoice")} className="btn-secondary !px-4 !py-2 !text-[11px]">
                 {copied === "invoice" ? "Copied ✓" : "Copy"}
               </button>
               {lightningUri && (
-                <a
-                  href={lightningUri}
-                  className="rounded-full bg-truffle-500 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-void hover:bg-truffle-400"
-                >
+                <a href={lightningUri} className="btn-primary !px-4 !py-2 !text-[11px]">
                   Open wallet
                 </a>
               )}
             </div>
           </details>
-          <p className="mt-4 animate-pulse font-mono text-[0.68rem] uppercase tracking-[0.18em] text-bone/50">
-            Waiting for payment… this page confirms automatically
+          <p className="mt-4 flex items-center gap-2 animate-pulse text-[11.5px] font-semibold text-bone-soft">
+            <span aria-hidden className="live-dot" /> Waiting for payment… this page confirms automatically
           </p>
-          {orderId && <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.18em] text-bone/25">Order {orderId}</p>}
+          {orderId && <p className="mt-1 text-[10px] uppercase tracking-[0.6px] text-faint">Order {orderId}</p>}
         </div>
       )}
 
       {phase === "manual" && manual && (
         <div className="mt-5">
-          <p className="text-[0.9rem] leading-relaxed text-bone/70">
-            Send <span className="text-bone">1,000 sats</span> to this Lightning address from any wallet (Wallet of
-            Satoshi, Phoenix, Zeus…), then note your order id:
+          <p className="text-[13px] leading-relaxed text-bone-soft">
+            Send <span className="font-semibold text-ink">1,000 sats</span> to this Lightning address from any wallet
+            (Wallet of Satoshi, Phoenix, Zeus…), then note your order id:
           </p>
           <button
             onClick={() => copy(manual.address, "address")}
-            className="mt-3 w-full rounded-xl border border-truffle-400/40 bg-void/80 px-4 py-3.5 text-left font-mono text-[0.95rem] text-truffle-200 transition-colors hover:border-truffle-400/70"
+            className="mt-3 w-full rounded-xl border border-forest/30 bg-mint px-4 py-3.5 text-left text-[14px] font-bold text-forest transition-colors hover:border-forest/60"
           >
             {manual.address}
-            <span className="ml-3 text-[0.6rem] uppercase tracking-[0.2em] text-bone/40">
+            <span className="ml-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-forest/60">
               {copied === "address" ? "copied ✓" : "copy"}
             </span>
           </button>
-          <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/45">Your order id</p>
-          <div className="mt-1 break-all rounded-lg border border-truffle-400/20 bg-void/60 p-3 font-mono text-[0.72rem] text-truffle-200/90">
-            {manual.orderId}
-          </div>
-          <ol className="mt-4 space-y-2 text-[0.85rem] leading-relaxed text-bone/60">
+          <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.6px] text-faint">Your order id</p>
+          <div className="code-block mt-1 break-all p-3 text-[11.5px]">{manual.orderId}</div>
+          <ol className="mt-4 space-y-2 text-[12.5px] leading-relaxed text-bone-soft">
             <li>
-              <span className="font-mono text-truffle-300">1.</span> Pay the 1,000 sats (reference: your order id in
-              the wallet note if your wallet supports notes).
+              <span className="font-bold text-forest">1.</span> Pay the 1,000 sats (reference: your order id in the
+              wallet note if your wallet supports notes).
             </li>
             <li>
-              <span className="font-mono text-truffle-300">2.</span> Your access code appears on this page as soon as
-              the deposit is confirmed — usually within minutes.
+              <span className="font-bold text-forest">2.</span> Your access code appears on this page as soon as the
+              deposit is confirmed — usually within minutes.
             </li>
             <li>
-              <span className="font-mono text-truffle-300">3.</span> Keep this page open; it confirms automatically.
+              <span className="font-bold text-forest">3.</span> Keep this page open; it confirms automatically.
             </li>
           </ol>
-          <p className="mt-4 animate-pulse font-mono text-[0.68rem] uppercase tracking-[0.18em] text-bone/50">
-            Waiting for operator approval…
+          <p className="mt-4 flex items-center gap-2 animate-pulse text-[11.5px] font-semibold text-bone-soft">
+            <span aria-hidden className="live-dot" /> Waiting for operator approval…
           </p>
-          {orderId && <p className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.18em] text-bone/25">Order {orderId}</p>}
+          {orderId && <p className="mt-1 text-[10px] uppercase tracking-[0.6px] text-faint">Order {orderId}</p>}
         </div>
       )}
 
       {phase === "error" && (
         <div className="mt-5">
-          <p className="text-[0.9rem] text-blood">{error}</p>
-          <button
-            onClick={startCheckout}
-            className="mt-4 rounded-full border border-bone/25 px-5 py-2.5 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bone/75 hover:border-bone/50"
-          >
+          <p className="text-[13px] text-blood">{error}</p>
+          <button onClick={startCheckout} className="btn-secondary mt-4">
             Try again
           </button>
         </div>

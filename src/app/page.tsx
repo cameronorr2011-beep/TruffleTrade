@@ -1,13 +1,14 @@
 import Link from "next/link";
 import BuyPanel from "@/components/site/BuyPanel";
+import CandleChart from "@/components/market/CandleChart";
 
 const ANALYSTS = [
-  { name: "FUNDAMENTALS", brief: "Balance sheets, margins, growth quality. Numbers first, narrative second.", color: "#f5c26b" },
-  { name: "VALUATION", brief: "DCF, reverse-DCF, peer comps — every assumption exposed, no bare fair-value promises.", color: "#d9903c" },
-  { name: "TECHNICALS", brief: "Deterministic indicators computed in code; the AI interprets them, never invents them.", color: "#e8ae52" },
-  { name: "MACRO", brief: "SPY, VIX, yields, the dollar. Regime first, chart second.", color: "#f8d795" },
-  { name: "COMPETITION", brief: "Reads the peer set: who's winning the margin war, who's losing the multiple.", color: "#b98434" },
-  { name: "NEWS", brief: "Headlines as evidence — sourced, dated, and distrusted until verified.", color: "#9c7a4a" },
+  { name: "Fundamentals", brief: "Balance sheets, margins, growth quality. Numbers first, narrative second.", tint: "#eaf1e5", ink: "#408260" },
+  { name: "Valuation", brief: "DCF, reverse-DCF, peer comps — every assumption exposed, no bare fair-value promises.", tint: "#f2eddf", ink: "#a3884d" },
+  { name: "Technicals", brief: "Deterministic indicators computed in code; the AI interprets them, never invents them.", tint: "#e8f0f1", ink: "#5f9aa3" },
+  { name: "Macro", brief: "SPY, VIX, yields, the dollar. Regime first, chart second.", tint: "#efedf3", ink: "#8d80a8" },
+  { name: "Competition", brief: "Reads the peer set: who's winning the margin war, who's losing the multiple.", tint: "#f3e9e0", ink: "#b08262" },
+  { name: "News", brief: "Headlines as evidence — sourced, dated, and distrusted until verified.", tint: "#f1e7e7", ink: "#ad7c7c" },
 ];
 
 const FAQ = [
@@ -41,43 +42,38 @@ export default function LandingPage() {
   return (
     <div className="relative">
       {/* Hero */}
-      <section className="relative overflow-hidden px-5 pb-16 pt-16 sm:px-8">
+      <section className="relative overflow-hidden px-5 pb-14 pt-12 sm:px-8">
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-[-320px] h-[640px] w-[900px] -translate-x-1/2 rounded-full opacity-25 blur-3xl"
-          style={{ background: "radial-gradient(closest-side, #57452f, transparent)" }}
+          className="pointer-events-none absolute left-1/2 top-[-280px] h-[560px] w-[880px] -translate-x-1/2 rounded-full opacity-50 blur-3xl"
+          style={{ background: "radial-gradient(closest-side, #dcead9, transparent)" }}
         />
         <div className="relative mx-auto max-w-[1280px]">
           <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
             <div>
-              <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">
-                AI chart intelligence · Council of rivals · Memory included
+              <span className="inline-flex items-center gap-2 rounded-full border border-soil-500 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[1.4px] text-forest">
+                <span aria-hidden className="live-dot" style={{ width: 5, height: 5 }} />
+                Live candles · Council of rivals · Memory included
               </span>
-              <h1 className="font-display mt-6 text-[clamp(2.6rem,6vw,4.8rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-bone">
-                The market buries signal.
+              <h1 className="mt-6 text-[clamp(2.4rem,5.4vw,4.2rem)] font-extrabold leading-[1.04] tracking-[-2.4px] text-ink">
+                Less noise.
                 <br />
-                <span className="text-truffle-400">We dig it up.</span>
+                <span className="text-forest">More signal.</span>
               </h1>
-              <p className="mt-7 max-w-xl text-[1.05rem] leading-relaxed text-bone/60">
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-bone-soft">
                 TruffleTrade points six rival AI analysts, a fact-checker, and a red team at any stock chart — then
                 remembers what it learned. It doesn&apos;t trade for you. It makes sure you&apos;ve seen every side of
                 the argument before you click the button yourself.
               </p>
-              <div className="mt-9 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/buy"
-                  className="rounded-full bg-truffle-500 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-void transition-colors hover:bg-truffle-400"
-                >
+              <div className="mt-8 flex flex-wrap items-center gap-3.5">
+                <Link href="/buy" className="btn-primary !px-7 !py-3.5">
                   Get access — 1,000 sats/mo
                 </Link>
-                <Link
-                  href="/install"
-                  className="rounded-full border border-bone/25 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-bone/75 transition-colors hover:border-truffle-400/50 hover:text-bone"
-                >
-                  How to install
+                <Link href="/dashboard" className="btn-secondary !px-7 !py-3.5">
+                  See live charts
                 </Link>
               </div>
-              <dl className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <dl className="mt-11 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
                   ["6+1", "analysts incl. red team"],
                   ["100%", "claims fact-checked"],
@@ -85,8 +81,8 @@ export default function LandingPage() {
                   ["1,000", "sats a month"],
                 ].map(([n, l]) => (
                   <div key={l} className="card px-4 py-3.5">
-                    <dt className="font-display text-[1.5rem] font-semibold text-bone">{n}</dt>
-                    <dd className="mt-0.5 font-mono text-[0.56rem] uppercase tracking-[0.18em] text-bone/45">{l}</dd>
+                    <dt className="text-[22px] font-bold tracking-[-0.8px] text-ink">{n}</dt>
+                    <dd className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.8px] text-faint">{l}</dd>
                   </div>
                 ))}
               </dl>
@@ -94,61 +90,77 @@ export default function LandingPage() {
             <div className="relative">
               <div
                 aria-hidden
-                className="absolute -inset-6 rounded-[2rem] opacity-40 blur-2xl"
-                style={{ background: "radial-gradient(closest-side, #57452f55, transparent)" }}
+                className="absolute -inset-5 rounded-[2rem] opacity-60 blur-2xl"
+                style={{ background: "radial-gradient(closest-side, #dcead988, transparent)" }}
               />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/terminal-mock.svg"
-                alt="TruffleTrade research terminal: live chart, council votes, and an audited thesis"
-                className="relative w-full rounded-2xl border border-truffle-400/20 shadow-2xl shadow-black/60"
-              />
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/terminal-mock.svg"
+                  alt="TruffleTrade research terminal: live chart, council votes, and an audited thesis"
+                  className="w-full rounded-2xl border border-soil-500 shadow-xl shadow-emerald-900/10"
+                />
+                <p className="mt-2 text-center text-[10px] font-semibold uppercase tracking-[1.2px] text-faint">
+                  and below — the real thing, running live
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Pipeline image band */}
-      <section className="px-5 pb-8 sm:px-8">
-        <div className="mx-auto max-w-[1280px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/council-flow.svg"
-            alt="Pipeline: ingest, model, debate, verify, attack, remember"
-            className="w-full rounded-2xl border border-truffle-400/15"
-          />
+          {/* Live chart strip — proof the data is real */}
+          <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <CandleChart ticker="NVDA" compact title="NVDA — live market candles" />
+            <div className="card flex flex-col justify-between p-5">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[1.4px] text-faint">Right now</p>
+                <p className="mt-2 text-[14px] font-bold leading-snug text-ink">
+                  The workspace on this page is fed by live markets.
+                </p>
+                <p className="mt-2 text-[12px] leading-relaxed text-bone-soft">
+                  Keyless Yahoo Finance candles, macro series, sector breadth — the same data the council reasons over.
+                </p>
+              </div>
+              <Link href="/dashboard" className="btn-secondary mt-4 w-full">
+                Open the dashboard
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Council */}
       <section id="product" className="scroll-mt-20 px-5 py-20 sm:px-8">
         <div className="mx-auto max-w-[1280px]">
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">The council</span>
-          <h2 className="font-display mt-5 max-w-2xl text-[clamp(1.9rem,4vw,3.1rem)] font-semibold leading-[1.05] text-bone">
+          <span className="text-[10px] font-bold uppercase tracking-[1.6px] text-faint">The council</span>
+          <h2 className="mt-4 max-w-2xl text-[clamp(1.8rem,3.8vw,2.9rem)] font-extrabold leading-[1.08] tracking-[-1.6px] text-ink">
             Rivals, not yes-men
           </h2>
-          <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-bone/55">
+          <p className="mt-4 max-w-2xl text-[14px] leading-relaxed text-bone-soft">
             Every analysis is a structured argument, not a chatbot answer. Six specialists with conflicting mandates
             investigate the same chart independently — then fight it out in front of a hostile referee.
           </p>
-          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-11 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {ANALYSTS.map((a) => (
-              <article key={a.name} className="card group relative overflow-hidden p-6">
-                <div
+              <article key={a.name} className="card p-6 transition-transform hover:-translate-y-0.5">
+                <span
+                  className="grid h-9 w-9 place-items-center rounded-[10px] text-[13px] font-bold"
+                  style={{ background: a.tint, color: a.ink }}
                   aria-hidden
-                  className="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-15 blur-2xl transition-opacity group-hover:opacity-30"
-                  style={{ background: a.color }}
-                />
-                <h3 className="font-mono text-[0.95rem] font-semibold tracking-[0.14em]" style={{ color: a.color }}>
+                >
+                  {a.name[0]}
+                </span>
+                <h3 className="mt-4 text-[15px] font-bold tracking-[-0.3px]" style={{ color: a.ink }}>
                   {a.name}
                 </h3>
-                <p className="mt-4 text-[0.92rem] leading-relaxed text-bone/60">{a.brief}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-bone-soft">{a.brief}</p>
               </article>
             ))}
-            <article className="card relative overflow-hidden border-blood/30 p-6">
-              <div aria-hidden className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blood opacity-20 blur-2xl" />
-              <h3 className="font-mono text-[0.95rem] font-semibold tracking-[0.14em] text-blood">RED TEAM</h3>
-              <p className="mt-4 text-[0.92rem] leading-relaxed text-bone/60">
+            <article className="card p-6" style={{ background: "#f7efe9", borderColor: "#ecd8cc" }}>
+              <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-[#f0ded2] text-[13px] font-bold text-[#a05a42]" aria-hidden>
+                R
+              </span>
+              <h3 className="mt-4 text-[15px] font-bold tracking-[-0.3px] text-[#a05a42]">Red team</h3>
+              <p className="mt-2 text-[13px] leading-relaxed text-bone-soft">
                 A hostile risk committee paid to say no. If the evidence is too thin, no analysis is issued at all.
                 Fail-closed, always.
               </p>
@@ -157,23 +169,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Memory section with image */}
+      {/* Memory section */}
       <section className="px-5 py-20 sm:px-8">
         <div className="mx-auto max-w-[1280px]">
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.15fr]">
             <div>
-              <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">The memory</span>
-              <h2 className="font-display mt-5 text-[clamp(1.9rem,4vw,3.1rem)] font-semibold leading-[1.05] text-bone">
+              <span className="text-[10px] font-bold uppercase tracking-[1.6px] text-faint">The memory</span>
+              <h2 className="mt-4 text-[clamp(1.8rem,3.8vw,2.9rem)] font-extrabold leading-[1.08] tracking-[-1.6px] text-ink">
                 It remembers.
                 <br />
-                <span className="text-truffle-400">It gets better.</span>
+                <span className="text-forest">It gets better.</span>
               </h2>
-              <p className="mt-5 text-[0.95rem] leading-relaxed text-bone/55">
-                Most AI tools reset to zero every session. TruffleTrade builds a memory on your device: every
-                prediction is stored and later resolved against reality, every regime observation is kept, and every
-                analysis leaves behind distilled insights.
+              <p className="mt-5 text-[14px] leading-relaxed text-bone-soft">
+                Most AI tools reset to zero every session. TruffleTrade builds a memory on your device: every prediction
+                is stored and later resolved against reality, every regime observation is kept, and every analysis
+                leaves behind distilled insights.
               </p>
-              <ul className="mt-6 space-y-3 text-[0.92rem] text-bone/65">
+              <ul className="mt-6 space-y-3 text-[13.5px] text-ink/85">
                 {[
                   "Digital-twin trainer: thousands of simulated markets calibrated on real candles",
                   "Automatic consolidation every 6 hours — duplicates merge, stale facts decay",
@@ -181,7 +193,7 @@ export default function LandingPage() {
                   "Forecast audit computes directional accuracy across every matured prediction",
                 ].map((f) => (
                   <li key={f} className="flex gap-3">
-                    <span aria-hidden className="text-truffle-400">◆</span>
+                    <span aria-hidden className="mt-0.5 text-forest">◆</span>
                     {f}
                   </li>
                 ))}
@@ -191,7 +203,7 @@ export default function LandingPage() {
             <img
               src="/images/memory-graph.svg"
               alt="Memory graph: outcome, regime, risk, insight, twin, prediction, federated and audit nodes"
-              className="w-full rounded-2xl border border-truffle-400/15"
+              className="w-full rounded-2xl border border-soil-500 bg-white"
             />
           </div>
         </div>
@@ -200,11 +212,11 @@ export default function LandingPage() {
       {/* Open source band */}
       <section className="px-5 pb-20 sm:px-8">
         <div className="mx-auto max-w-[1280px]">
-          <div className="card flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center">
+          <div className="card-quiet flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center">
             <div>
-              <span className="font-mono text-[0.6rem] uppercase tracking-[0.28em] text-truffle-300/70">Open source, honestly</span>
-              <h3 className="font-display mt-2 text-[1.6rem] font-semibold text-bone">Read every line before you trust it</h3>
-              <p className="mt-2 max-w-2xl text-[0.92rem] leading-relaxed text-bone/55">
+              <span className="text-[10px] font-bold uppercase tracking-[1.4px] text-faint">Open source, honestly</span>
+              <h3 className="mt-2 text-[24px] font-bold tracking-[-1px] text-ink">Read every line before you trust it</h3>
+              <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-bone-soft">
                 The council, the fact-checker, the red team, the memory, the twin — all MIT-licensed on GitHub. A no-KYC
                 product earns trust by being auditable.
               </p>
@@ -213,7 +225,7 @@ export default function LandingPage() {
               href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER"
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 rounded-full border border-truffle-400/40 px-7 py-3.5 font-mono text-[0.7rem] uppercase tracking-[0.22em] text-truffle-300 transition-colors hover:bg-truffle-500/15"
+              className="btn-secondary shrink-0"
             >
               View source
             </a>
@@ -224,20 +236,20 @@ export default function LandingPage() {
       {/* Pricing */}
       <section id="pricing" className="scroll-mt-20 px-5 pb-24 sm:px-8">
         <div className="mx-auto max-w-[1280px]">
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">Pricing</span>
-          <h2 className="font-display mt-5 max-w-2xl text-[clamp(1.9rem,4vw,3.1rem)] font-semibold leading-[1.05] text-bone">
+          <span className="text-[10px] font-bold uppercase tracking-[1.6px] text-faint">Pricing</span>
+          <h2 className="mt-4 max-w-2xl text-[clamp(1.8rem,3.8vw,2.9rem)] font-extrabold leading-[1.08] tracking-[-1.6px] text-ink">
             One price. No KYC. Paid in sats.
           </h2>
-          <div className="mt-12 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
-            <article className="card border-truffle-400/30 p-8">
-              <span className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-truffle-300">TruffleTrade</span>
+          <div className="mt-11 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+            <article className="card border-forest/25 p-8" style={{ boxShadow: "0 4px 24px rgba(33,88,62,0.08)" }}>
+              <span className="text-[10px] font-bold uppercase tracking-[1.4px] text-forest">TruffleTrade</span>
               <div className="mt-4 flex items-baseline gap-2">
-                <span className="font-display text-[3.2rem] font-semibold leading-none text-bone">1,000</span>
-                <span className="font-mono text-[0.8rem] uppercase tracking-[0.2em] text-bone/50">sats / 30 days</span>
+                <span className="text-[52px] font-extrabold leading-none tracking-[-2px] text-ink">1,000</span>
+                <span className="text-[12px] font-semibold uppercase tracking-[0.8px] text-bone-soft">sats / 30 days</span>
               </div>
-              <ul className="mt-6 space-y-3 text-[0.92rem] text-bone/65">
+              <ul className="mt-6 space-y-3 text-[13.5px] text-ink/85">
                 {[
-                  "Unlimited chart analyses — any ticker, any time",
+                  "Live candlestick dashboard + unlimited chart analyses",
                   "Six-analyst council + fact-checker + red team",
                   "Local memory system with automatic updates",
                   "Federated learning from every installation",
@@ -245,18 +257,15 @@ export default function LandingPage() {
                   "No KYC — pay from any Lightning wallet",
                 ].map((f) => (
                   <li key={f} className="flex gap-3">
-                    <span aria-hidden className="text-truffle-400">◆</span>
+                    <span aria-hidden className="mt-0.5 text-forest">◆</span>
                     {f}
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/buy"
-                className="mt-8 inline-block rounded-full bg-truffle-500 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-void transition-colors hover:bg-truffle-400"
-              >
+              <Link href="/buy" className="btn-primary mt-8 inline-block">
                 Pay with Lightning
               </Link>
-              <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/35">
+              <p className="mt-4 text-[10.5px] font-semibold uppercase tracking-[0.8px] text-faint">
                 30-day access · no auto-renew · pay again when you want
               </p>
             </article>
@@ -268,26 +277,29 @@ export default function LandingPage() {
       {/* FAQ */}
       <section className="px-5 pb-24 sm:px-8">
         <div className="mx-auto max-w-[900px]">
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">FAQ</span>
-          <h2 className="font-display mt-5 text-[clamp(1.9rem,4vw,3rem)] font-semibold leading-[1.05] text-bone">
+          <span className="text-[10px] font-bold uppercase tracking-[1.6px] text-faint">FAQ</span>
+          <h2 className="mt-4 text-[clamp(1.8rem,3.6vw,2.8rem)] font-extrabold leading-[1.08] tracking-[-1.6px] text-ink">
             Straight answers
           </h2>
-          <div className="mt-10 space-y-3">
+          <div className="mt-9 space-y-3">
             {FAQ.map((f) => (
               <details key={f.q} className="card group p-5">
-                <summary className="cursor-pointer list-none font-display text-[1.1rem] font-semibold text-bone marker:hidden">
-                  <span className="mr-3 font-mono text-truffle-400 transition-transform group-open:rotate-90 inline-block">→</span>
+                <summary className="cursor-pointer list-none text-[15px] font-bold text-ink marker:hidden">
+                  <span className="mr-3 inline-block text-forest transition-transform group-open:rotate-90">→</span>
                   {f.q}
                 </summary>
-                <p className="mt-3 pl-8 text-[0.92rem] leading-relaxed text-bone/60">{f.a}</p>
+                <p className="mt-3 pl-8 text-[13px] leading-relaxed text-bone-soft">{f.a}</p>
               </details>
             ))}
           </div>
-          <p className="mt-10 max-w-3xl rounded-xl border border-truffle-400/20 bg-truffle-600/5 p-5 text-[0.85rem] leading-relaxed text-bone/55">
-            <strong className="text-truffle-200">Honest disclaimer:</strong> TruffleTrade produces research and analysis
-            — it does not execute trades and is not investment advice. You must be 18+, or 13–17 with parental consent
-            and supervision. See the{" "}
-            <Link href="/terms" className="text-truffle-300 underline decoration-truffle-400/40 underline-offset-2">Terms</Link>.
+          <p className="mt-10 max-w-3xl rounded-xl border border-soil-500 bg-white p-5 text-[12.5px] leading-relaxed text-bone-soft">
+            <strong className="font-bold text-ink">Honest disclaimer:</strong> TruffleTrade produces research and
+            analysis — it does not execute trades and is not investment advice. You must be 18+, or 13–17 with parental
+            consent and supervision. See the{" "}
+            <Link href="/terms" className="font-semibold text-forest underline decoration-forest/40 underline-offset-2">
+              Terms
+            </Link>
+            .
           </p>
         </div>
       </section>

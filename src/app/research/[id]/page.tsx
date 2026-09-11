@@ -37,14 +37,14 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
           <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
             Research dossier · run #{run.id}
           </span>
-          <h1 className="font-display mt-2 text-[clamp(2rem,4.5vw,3.4rem)] font-semibold text-bone">
+          <h1 className="font-display mt-2 text-[clamp(2rem,4.5vw,3.4rem)] font-semibold text-ink">
             {run.ticker}
             <span className={`ml-4 align-middle font-mono text-[0.85rem] ${run.status === "complete" ? "text-jade" : "text-gold"}`}>
               {run.status}
             </span>
           </h1>
         </div>
-        <div className="text-right font-mono text-[0.66rem] text-bone/45">
+        <div className="text-right font-mono text-[0.66rem] text-faint">
           <p>{timeAgo(run.ts)}</p>
           <p>{(run.durationMs / 1000).toFixed(1)}s · 7 AI calls</p>
           <Link href={`/company/${run.ticker}`} className="gold-underline text-truffle-300">
@@ -57,14 +57,14 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
       <section className="card mt-8 p-6">
         <div className="flex flex-wrap items-center gap-4">
           <StanceBadge stance={c.stance} />
-          <span className="font-mono text-[0.72rem] text-bone/60">
+          <span className="font-mono text-[0.72rem] text-bone-soft">
             consensus score {c.score >= 0 ? "+" : ""}
             {c.score.toFixed(2)} · disagreement {c.disagreement}
             {c.redTeamVeto && <strong className="ml-2 text-blood">RED TEAM REJECT</strong>}
           </span>
         </div>
-        <p className="mt-4 text-[0.95rem] leading-relaxed text-bone/75">{c.synthesis}</p>
-        <p className="mt-3 font-mono text-[0.62rem] text-bone/40">
+        <p className="mt-4 text-[0.95rem] leading-relaxed text-bone-soft">{c.synthesis}</p>
+        <p className="mt-3 font-mono text-[0.62rem] text-faint">
           {c.redTeamVeto
             ? "No thesis issued — the red team judged the evidence insufficient."
             : run.thesis.summary}
@@ -74,10 +74,10 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
       {/* Council table */}
       <section className="mt-5 grid gap-5 lg:grid-cols-2">
         <div className="card p-6">
-          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Council verdicts</h2>
+          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">Council verdicts</h2>
           <table className="mt-4 w-full text-left">
             <thead>
-              <tr className="border-b border-truffle-400/15 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-bone/40">
+              <tr className="border-b border-soil-600 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-faint">
                 <th className="pb-2">Agent</th>
                 <th className="pb-2">Stance</th>
                 <th className="pb-2">Self</th>
@@ -87,30 +87,30 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
             </thead>
             <tbody>
               {councilLines.map((l) => (
-                <tr key={l.agent} className="border-b border-truffle-400/8 last:border-0">
-                  <td className="py-2.5 font-mono text-[0.78rem] text-bone">{l.agent}</td>
+                <tr key={l.agent} className="border-b border-soil-600 last:border-0">
+                  <td className="py-2.5 font-mono text-[0.78rem] text-ink">{l.agent}</td>
                   <td className="py-2.5">
                     <StanceBadge stance={l.stance} />
                   </td>
-                  <td className="py-2.5 font-mono text-[0.7rem] text-bone/50">{l.selfConfidence.toFixed(2)}</td>
-                  <td className="py-2.5 font-mono text-[0.7rem] text-bone/75">{l.verifiedConfidence.toFixed(2)}</td>
+                  <td className="py-2.5 font-mono text-[0.7rem] text-bone-soft">{l.selfConfidence.toFixed(2)}</td>
+                  <td className="py-2.5 font-mono text-[0.7rem] text-bone-soft">{l.verifiedConfidence.toFixed(2)}</td>
                   <td className="py-2.5 font-mono text-[0.7rem] text-truffle-300">{l.weight.toFixed(2)}</td>
                 </tr>
               ))}
               {redTeamLine && (
-                <tr className="border-t border-truffle-400/25">
+                <tr className="border-t border-soil-500">
                   <td className="py-2.5 font-mono text-[0.78rem] text-truffle-300">RedTeam</td>
                   <td className="py-2.5">
                     <StanceBadge stance={redTeamLine.stance} />
                   </td>
-                  <td className="py-2.5 font-mono text-[0.7rem] text-bone/50">{redTeamLine.selfConfidence.toFixed(2)}</td>
-                  <td className="py-2.5 font-mono text-[0.7rem] text-bone/75">{redTeamLine.verifiedConfidence.toFixed(2)}</td>
+                  <td className="py-2.5 font-mono text-[0.7rem] text-bone-soft">{redTeamLine.selfConfidence.toFixed(2)}</td>
+                  <td className="py-2.5 font-mono text-[0.7rem] text-bone-soft">{redTeamLine.verifiedConfidence.toFixed(2)}</td>
                   <td className="py-2.5 font-mono text-[0.7rem] text-truffle-300">{redTeamLine.weight.toFixed(2)}</td>
                 </tr>
               )}
             </tbody>
           </table>
-          <p className="mt-3 font-mono text-[0.6rem] leading-relaxed text-bone/35">{councilLines[0]?.weightBreakdown}</p>
+          <p className="mt-3 font-mono text-[0.6rem] leading-relaxed text-faint">{councilLines[0]?.weightBreakdown}</p>
         </div>
         <ConfidenceCard run={run} />
       </section>
@@ -120,7 +120,7 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
 
       {/* Agents */}
       <section className="mt-5">
-        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">
+        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">
           Agent transcripts & evidence
         </h2>
         <div className="mt-4 grid gap-5 md:grid-cols-2">
@@ -137,7 +137,7 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
 
       {/* Fact-check violations */}
       <section className="card mt-5 p-6">
-        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">
+        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">
           Fact-check ledger
         </h2>
         {violations.length === 0 ? (
@@ -148,9 +148,9 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
           <ul className="mt-4 space-y-2">
             {violations.map((v, i) => (
               <li key={i} className="rounded-lg border border-blood/30 bg-blood/5 p-3 font-mono text-[0.7rem] leading-relaxed">
-                <span className="text-blood">{v.agent}</span> <span className="text-bone/50">[{v.reason}]</span>{" "}
-                <span className="text-bone/80">{v.claim}</span>
-                <span className="block text-bone/45">{v.detail}</span>
+                <span className="text-blood">{v.agent}</span> <span className="text-bone-soft">[{v.reason}]</span>{" "}
+                <span className="text-ink">{v.claim}</span>
+                <span className="block text-faint">{v.detail}</span>
               </li>
             ))}
           </ul>
@@ -160,18 +160,18 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
       {/* Prompt versions + errors */}
       <section className="mt-5 grid gap-5 lg:grid-cols-2">
         <div className="card p-6">
-          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Prompt versions</h2>
-          <ul className="mt-3 space-y-1.5 font-mono text-[0.68rem] text-bone/55">
+          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">Prompt versions</h2>
+          <ul className="mt-3 space-y-1.5 font-mono text-[0.68rem] text-bone-soft">
             {Object.entries(run.promptVersions).map(([k, v]) => (
               <li key={k}>
-                <span className="text-bone/40">{k}</span> {v}
+                <span className="text-faint">{k}</span> {v}
               </li>
             ))}
           </ul>
         </div>
         <div className="card p-6">
-          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Run diagnostics</h2>
-          <ul className="mt-3 space-y-1.5 font-mono text-[0.68rem] text-bone/55">
+          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">Run diagnostics</h2>
+          <ul className="mt-3 space-y-1.5 font-mono text-[0.68rem] text-bone-soft">
             <li>sources: {run.dataPack.sources.join(", ") || "none"}</li>
             <li>duration: {(run.durationMs / 1000).toFixed(1)}s</li>
             {run.errors.length === 0 ? (

@@ -42,9 +42,9 @@ export default async function MarketsPage() {
           <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
             Market dashboard
           </span>
-          <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-bone">Markets</h1>
+          <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-ink">Markets</h1>
         </div>
-        <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bone/35">
+        <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-faint">
           keyless · yahoo finance · {new Date().toLocaleDateString("en-US")}
         </p>
       </div>
@@ -54,8 +54,8 @@ export default async function MarketsPage() {
         {indices.map((i) => (
           <div key={i.symbol} className="card flex items-baseline justify-between px-5 py-4">
             <div>
-              <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bone/45">{i.symbol}</p>
-              <p className="font-display mt-1 text-[1.5rem] font-semibold text-bone">{price(i.price)}</p>
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-faint">{i.symbol}</p>
+              <p className="font-display mt-1 text-[1.5rem] font-semibold text-ink">{price(i.price)}</p>
             </div>
             <p className={`font-mono text-[0.8rem] ${(i.changePct ?? 0) >= 0 ? "text-jade" : "text-blood"}`}>
               {pct(i.changePct)}
@@ -67,11 +67,11 @@ export default async function MarketsPage() {
       {/* Sectors */}
       <section className="mt-5 grid gap-5 lg:grid-cols-2">
         <div className="card p-6">
-          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Sector performance</h2>
+          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">Sector performance</h2>
           <ul className="mt-4 space-y-2">
             {sortedSectors.map((s) => (
               <li key={s.symbol} className="flex items-center gap-3">
-                <span className="w-44 shrink-0 font-mono text-[0.7rem] text-bone/65">{s.label}</span>
+                <span className="w-44 shrink-0 font-mono text-[0.7rem] text-bone-soft">{s.label}</span>
                 <div className="h-2 flex-1 rounded-full bg-soil-900">
                   <div
                     className={`h-2 rounded-full ${(s.changePct ?? 0) >= 0 ? "bg-jade" : "bg-blood"}`}
@@ -87,13 +87,13 @@ export default async function MarketsPage() {
         </div>
 
         <div className="card p-6">
-          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Macro tape</h2>
+          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">Macro tape</h2>
           <table className="mt-4 w-full text-left">
             <tbody>
               {macro.map((m) => (
-                <tr key={m.symbol} className="border-b border-truffle-400/8 last:border-0">
-                  <td className="py-2 font-mono text-[0.72rem] text-bone/65">{m.label}</td>
-                  <td className="py-2 text-right font-mono text-[0.72rem] text-bone">{price(m.price)}</td>
+                <tr key={m.symbol} className="border-b border-soil-600 last:border-0">
+                  <td className="py-2 font-mono text-[0.72rem] text-bone-soft">{m.label}</td>
+                  <td className="py-2 text-right font-mono text-[0.72rem] text-ink">{price(m.price)}</td>
                   <td className={`py-2 text-right font-mono text-[0.72rem] ${(m.changePct ?? 0) >= 0 ? "text-jade" : "text-blood"}`}>
                     {pct(m.changePct)}
                   </td>
@@ -106,7 +106,7 @@ export default async function MarketsPage() {
 
       {/* Movers */}
       <section className="card mt-5 p-6">
-        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">
+        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">
           Mega-cap movers
         </h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -114,16 +114,16 @@ export default async function MarketsPage() {
             <a
               key={m.symbol}
               href={`/company/${m.symbol}`}
-              className="rounded-xl border border-truffle-400/12 bg-soil-900/40 px-4 py-3 transition-colors hover:border-truffle-400/40"
+              className="rounded-xl border border-soil-600 bg-soil-950 px-4 py-3 transition-colors hover:border-forest/35"
             >
               <div className="flex items-baseline justify-between">
-                <span className="font-mono text-[0.78rem] font-semibold text-bone">{m.symbol}</span>
+                <span className="font-mono text-[0.78rem] font-semibold text-ink">{m.symbol}</span>
                 <span className={`font-mono text-[0.72rem] ${(m.changePct ?? 0) >= 0 ? "text-jade" : "text-blood"}`}>
                   {pct(m.changePct)}
                 </span>
               </div>
-              <p className="mt-1 font-mono text-[0.72rem] text-bone/55">{price(m.price)}</p>
-              <p className="mt-0.5 truncate font-mono text-[0.58rem] text-bone/35">{m.name ?? ""}</p>
+              <p className="mt-1 font-mono text-[0.72rem] text-bone-soft">{price(m.price)}</p>
+              <p className="mt-0.5 truncate font-mono text-[0.58rem] text-faint">{m.name ?? ""}</p>
             </a>
           ))}
         </div>

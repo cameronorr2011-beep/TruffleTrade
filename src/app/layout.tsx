@@ -26,41 +26,37 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0806",
-  colorScheme: "dark",
+  themeColor: "#fafbf9",
+  colorScheme: "light",
 };
 
 const NAV = [
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/#product", label: "Product" },
   { href: "/install", label: "Install" },
   { href: "/blog", label: "Blog" },
-  { href: "/#pricing", label: "Pricing" },
 ];
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" style={{ backgroundColor: "#0a0806", colorScheme: "dark" }}>
+    <html lang="en" style={{ backgroundColor: "#fafbf9", colorScheme: "light" }}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         />
       </head>
-      <body className="grain vignette relative min-h-screen bg-void antialiased">
-        <header className="fixed inset-x-0 top-0 z-[65] border-b border-truffle-400/10 bg-void/80 backdrop-blur-xl">
-          <nav className="mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3.5 sm:px-8">
-            <Link href="/" className="flex items-center gap-3">
+      <body className="relative min-h-screen bg-void antialiased">
+        <header className="fixed inset-x-0 top-0 z-[65] border-b border-soil-600 bg-white/85 backdrop-blur-xl">
+          <nav className="mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3 sm:px-8">
+            <Link href="/" className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.svg" alt="TruffleTrade logo" width={38} height={38} className="rounded-lg" />
-              <span className="leading-none">
-                <span className="font-display block text-[1.05rem] font-semibold tracking-tight text-bone">
-                  TRUFFLE<span className="text-truffle-400">TRADE</span>
-                </span>
-                <span className="block font-mono text-[0.55rem] uppercase tracking-[0.34em] text-bone/40">
-                  AI chart intelligence · Memory included
-                </span>
+              <img src="/logo.svg" alt="TruffleTrade logo" width={34} height={34} className="rounded-lg" />
+              <span className="text-[1.25rem] font-extrabold tracking-[-1.2px] text-ink">
+                truffle<span className="font-semibold text-truffle-500">trade</span>
+                <span className="text-truffle-400">.</span>
               </span>
             </Link>
             <div className="flex items-center gap-5">
@@ -68,7 +64,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <Link
                   key={n.href}
                   href={n.href}
-                  className="gold-underline hidden font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bone/70 hover:text-bone sm:block"
+                  className="gold-underline hidden text-[11.5px] font-semibold text-bone-soft hover:text-ink sm:block"
                 >
                   {n.label}
                 </Link>
@@ -77,39 +73,37 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER"
                 target="_blank"
                 rel="noreferrer"
-                className="gold-underline hidden font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bone/70 hover:text-bone md:block"
+                className="gold-underline hidden text-[11.5px] font-semibold text-bone-soft hover:text-ink md:block"
               >
                 GitHub
               </a>
-              <Link
-                href="/buy"
-                className="rounded-full bg-truffle-500 px-5 py-2.5 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-truffle-400"
-              >
+              <Link href="/buy" className="btn-primary !py-2.5 !px-5">
                 Get access
               </Link>
             </div>
           </nav>
         </header>
-        <main className="relative pt-16">{children}</main>
-        <footer className="border-t border-truffle-400/10 py-10">
+        <main className="relative pt-[57px]">{children}</main>
+        <footer className="border-t border-soil-600 bg-white py-10">
           <div className="mx-auto max-w-[1280px] px-5 sm:px-8">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bone/50">
-              <Link href="/privacy" className="hover:text-bone">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-bone">Terms</Link>
-              <Link href="/blog" className="hover:text-bone">Blog</Link>
-              <a href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER" target="_blank" rel="noreferrer" className="hover:text-bone">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11.5px] font-semibold text-bone-soft">
+              <Link href="/privacy" className="hover:text-ink">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-ink">Terms</Link>
+              <Link href="/blog" className="hover:text-ink">Blog</Link>
+              <Link href="/dashboard" className="hover:text-ink">Dashboard</Link>
+              <a href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER" target="_blank" rel="noreferrer" className="hover:text-ink">
                 Source (MIT)
               </a>
             </div>
-            <p className="mt-4 max-w-3xl text-[0.72rem] leading-relaxed text-bone/40">
+            <p className="mt-4 max-w-3xl text-[12px] leading-relaxed text-bone-soft/90">
               TruffleTrade is analysis and research software — not investment advice, not a broker, and it does not
               place trades. Markets are risky; you can lose money. You must be 18+, or 13–17 with a parent or
-              guardian&apos;s consent and supervision. Payments are in Bitcoin Lightning via ZBD; subscriptions are
-              per 30 days and don&apos;t auto-renew. You are responsible for your own capital, taxes, and your
-              jurisdiction&apos;s rules.
+              guardian&apos;s consent and supervision. Payments are in Bitcoin Lightning; subscriptions are per 30 days
+              and don&apos;t auto-renew. You are responsible for your own capital, taxes, and your jurisdiction&apos;s rules.
             </p>
-            <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/30">
-              Dig where the market hides its value · © {new Date().getFullYear()} TruffleTrade
+            <p className="mt-4 flex items-center gap-2 text-[10px] font-semibold tracking-wide text-bone-soft/70">
+              <span aria-hidden className="live-dot" />
+              Live market data · Yahoo Finance · © {new Date().getFullYear()} TruffleTrade
             </p>
           </div>
         </footer>

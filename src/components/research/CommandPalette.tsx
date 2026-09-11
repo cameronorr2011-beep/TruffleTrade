@@ -72,7 +72,7 @@ export default function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-start justify-center bg-void/80 pt-[14vh] backdrop-blur-sm"
+      className="fixed inset-0 z-[90] flex items-start justify-center bg-[#1c2b20]/45 pt-[14vh] backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
       <div className="card w-full max-w-xl overflow-hidden p-0" onClick={(e) => e.stopPropagation()}>
@@ -89,9 +89,9 @@ export default function CommandPalette() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={pending.argPlaceholder}
-              className="w-full bg-transparent px-5 py-4 font-mono text-[0.95rem] text-bone outline-none placeholder:text-bone/30"
+              className="w-full bg-transparent px-5 py-4 font-mono text-[0.95rem] text-ink outline-none placeholder:text-faint"
             />
-            <div className="border-t border-truffle-400/10 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bone/40">
+            <div className="border-t border-soil-600 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-faint">
               Enter to run · Esc to cancel
             </div>
           </form>
@@ -102,9 +102,9 @@ export default function CommandPalette() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Type a command… (Ctrl+K)"
-              className="w-full bg-transparent px-5 py-4 font-mono text-[0.95rem] text-bone outline-none placeholder:text-bone/30"
+              className="w-full bg-transparent px-5 py-4 font-mono text-[0.95rem] text-ink outline-none placeholder:text-faint"
             />
-            <ul className="max-h-[50vh] overflow-y-auto border-t border-truffle-400/10">
+            <ul className="max-h-[50vh] overflow-y-auto border-t border-soil-600">
               {filtered.map((c) => (
                 <li key={c.id}>
                   <button
@@ -117,17 +117,17 @@ export default function CommandPalette() {
                         setOpen(false);
                       }
                     }}
-                    className="flex w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-soil-800/40"
+                    className="flex w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-soil-800"
                   >
-                    <span className="text-[0.9rem] text-bone/85">{c.label}</span>
-                    <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-bone/35">
+                    <span className="text-[0.9rem] text-bone-soft">{c.label}</span>
+                    <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-faint">
                       {c.hint ?? "Enter"}
                     </span>
                   </button>
                 </li>
               ))}
               {filtered.length === 0 && (
-                <li className="px-5 py-4 font-mono text-[0.7rem] text-bone/40">No matching command</li>
+                <li className="px-5 py-4 font-mono text-[0.7rem] text-faint">No matching command</li>
               )}
             </ul>
           </>

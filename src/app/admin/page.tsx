@@ -120,8 +120,8 @@ export default function AdminPage() {
   if (!authed) {
     return (
       <div className="mx-auto max-w-md px-5 py-24 sm:px-8">
-        <h1 className="font-display text-2xl font-semibold text-bone">TruffleTrade Admin</h1>
-        <p className="mt-2 text-sm text-bone/50">
+        <h1 className="font-display text-2xl font-semibold text-ink">TruffleTrade Admin</h1>
+        <p className="mt-2 text-sm text-bone-soft">
           Operator access only. Enter the ADMIN_TOKEN to manage orders and access codes.
         </p>
         <input
@@ -130,12 +130,12 @@ export default function AdminPage() {
           onChange={(e) => setToken(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && login()}
           placeholder="ADMIN_TOKEN"
-          className="mt-6 w-full rounded-lg border border-truffle-400/30 bg-void/70 px-4 py-3 font-mono text-sm text-bone outline-none focus:border-truffle-400/60"
+          className="mt-6 w-full rounded-lg border border-soil-500  px-4 py-3 font-mono text-sm text-ink outline-none focus:border-forest/55"
         />
         {error && <p className="mt-3 text-sm text-blood">{error}</p>}
         <button
           onClick={login}
-          className="mt-4 w-full rounded-full bg-truffle-500 px-6 py-3 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-void hover:bg-truffle-400"
+          className="mt-4 w-full rounded-full bg-truffle-500 px-6 py-3 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-white hover:bg-truffle-600"
         >
           Sign in
         </button>
@@ -146,14 +146,14 @@ export default function AdminPage() {
   return (
     <div className="mx-auto max-w-4xl px-5 py-16 sm:px-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-[1.8rem] font-semibold text-bone">TruffleTrade Admin</h1>
+        <h1 className="font-display text-[1.8rem] font-semibold text-ink">TruffleTrade Admin</h1>
         <button
           onClick={() => {
             sessionStorage.removeItem("tt-admin-token");
             setAuthed(false);
             setToken("");
           }}
-          className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/45 hover:text-bone"
+          className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-faint hover:text-ink"
         >
           Sign out
         </button>
@@ -165,7 +165,7 @@ export default function AdminPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-full px-4 py-2 font-mono text-[0.64rem] uppercase tracking-[0.18em] transition-colors ${
-              tab === t ? "bg-truffle-500 text-void" : "border border-bone/20 text-bone/60 hover:border-bone/40"
+              tab === t ? "bg-truffle-500 text-white" : "border border-soil-500 text-bone-soft hover:border-soil-500"
             }`}
           >
             {t === "orders" ? "Orders & payments" : "Access codes"}
@@ -177,18 +177,18 @@ export default function AdminPage() {
 
       {tab === "orders" && (
         <div className="mt-6">
-          <p className="text-[0.85rem] leading-relaxed text-bone/55">
+          <p className="text-[0.85rem] leading-relaxed text-bone-soft">
             When a buyer pays your Wallet of Satoshi address, their order appears here as{" "}
             <span className="font-mono text-truffle-300">pending</span>. Check your WoS app for the matching 1,000-sat
             deposit, then press Approve — their code appears on their screen instantly.
           </p>
           <div className="mt-4 space-y-2">
-            {orders.length === 0 && <p className="text-sm text-bone/40">No orders yet.</p>}
+            {orders.length === 0 && <p className="text-sm text-faint">No orders yet.</p>}
             {orders.map((o) => (
               <div key={o.id} className="card flex flex-wrap items-center justify-between gap-3 p-4">
                 <div>
-                  <p className="font-mono text-[0.78rem] text-bone/85">{o.id}</p>
-                  <p className="mt-0.5 font-mono text-[0.58rem] uppercase tracking-[0.18em] text-bone/40">
+                  <p className="font-mono text-[0.78rem] text-bone-soft">{o.id}</p>
+                  <p className="mt-0.5 font-mono text-[0.58rem] uppercase tracking-[0.18em] text-faint">
                     {new Date(o.createdTs).toLocaleString()} · {o.status}
                   </p>
                 </div>
@@ -198,8 +198,8 @@ export default function AdminPage() {
                       o.status === "issued"
                         ? "bg-jade/15 text-jade"
                         : o.status === "pending"
-                          ? "bg-truffle-500/15 text-truffle-300"
-                          : "bg-bone/10 text-bone/50"
+                          ? "bg-truffle-200/60 text-truffle-300"
+                          : "bg-soil-700 text-bone-soft"
                     }`}
                   >
                     {o.status}
@@ -208,7 +208,7 @@ export default function AdminPage() {
                     <button
                       onClick={() => approve(o.id)}
                       disabled={busy === o.id}
-                      className="rounded-full bg-jade px-4 py-2 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-void hover:opacity-85 disabled:opacity-50"
+                      className="rounded-full bg-jade px-4 py-2 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-white hover:opacity-85 disabled:opacity-50"
                     >
                       {busy === o.id ? "…" : "Approve"}
                     </button>
@@ -225,7 +225,7 @@ export default function AdminPage() {
           {issuedCode && (
             <div className="card border-jade/40 p-5">
               <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-jade">Issued code</p>
-              <p className="mt-2 select-all font-mono text-[1.1rem] tracking-[0.12em] text-bone">{issuedCode}</p>
+              <p className="mt-2 select-all font-mono text-[1.1rem] tracking-[0.12em] text-ink">{issuedCode}</p>
             </div>
           )}
           <div className="card p-5">
@@ -233,7 +233,7 @@ export default function AdminPage() {
             <button
               onClick={() => runAction("issue")}
               disabled={busy === "issue"}
-              className="mt-3 rounded-full bg-truffle-500 px-5 py-2.5 font-mono text-[0.64rem] uppercase tracking-[0.18em] text-void hover:bg-truffle-400 disabled:opacity-50"
+              className="mt-3 rounded-full bg-truffle-500 px-5 py-2.5 font-mono text-[0.64rem] uppercase tracking-[0.18em] text-white hover:bg-truffle-600 disabled:opacity-50"
             >
               {busy === "issue" ? "…" : "Generate new code"}
             </button>
@@ -244,10 +244,10 @@ export default function AdminPage() {
               value={actionCode}
               onChange={(e) => setActionCode(e.target.value)}
               placeholder="TT-XXXX-XXXX-XXXX-XXXX"
-              className="mt-3 w-full rounded-lg border border-truffle-400/25 bg-void/70 px-4 py-2.5 font-mono text-sm text-bone outline-none focus:border-truffle-400/60"
+              className="mt-3 w-full rounded-lg border border-soil-500  px-4 py-2.5 font-mono text-sm text-ink outline-none focus:border-forest/55"
             />
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-bone/50">
+              <label className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-bone-soft">
                 Days
                 <input
                   type="number"
@@ -255,13 +255,13 @@ export default function AdminPage() {
                   max={365}
                   value={actionDays}
                   onChange={(e) => setActionDays(Number(e.target.value))}
-                  className="w-20 rounded-lg border border-truffle-400/25 bg-void/70 px-2 py-1.5 font-mono text-sm text-bone outline-none"
+                  className="w-20 rounded-lg border border-soil-500  px-2 py-1.5 font-mono text-sm text-ink outline-none"
                 />
               </label>
               <button
                 onClick={() => runAction("extend")}
                 disabled={busy === "extend" || !actionCode}
-                className="rounded-full border border-truffle-400/40 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-truffle-300 hover:bg-truffle-500/15 disabled:opacity-40"
+                className="rounded-full border border-forest/35 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-truffle-300 hover:bg-truffle-200/60 disabled:opacity-40"
               >
                 {busy === "extend" ? "…" : "Extend"}
               </button>

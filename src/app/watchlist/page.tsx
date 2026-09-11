@@ -33,13 +33,13 @@ export default async function WatchlistPage() {
       <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
         Watchlist & audit
       </span>
-      <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-bone">
+      <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-ink">
         What the pit believes
       </h1>
 
       <section className="card mt-8 overflow-x-auto p-0">
         {rows.length === 0 ? (
-          <p className="p-6 font-mono text-[0.75rem] text-bone/45">
+          <p className="p-6 font-mono text-[0.75rem] text-faint">
             Watchlist empty. Open any{" "}
             <Link href="/markets" className="gold-underline text-truffle-300">
               company dossier
@@ -49,7 +49,7 @@ export default async function WatchlistPage() {
         ) : (
           <table className="w-full min-w-[640px] text-left">
             <thead>
-              <tr className="border-b border-truffle-400/15 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/40">
+              <tr className="border-b border-soil-600 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-faint">
                 <th className="px-5 py-3">Ticker</th>
                 <th className="px-5 py-3">Price</th>
                 <th className="px-5 py-3">Day</th>
@@ -60,13 +60,13 @@ export default async function WatchlistPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.ticker} className="border-b border-truffle-400/8 last:border-0 hover:bg-soil-800/30">
+                <tr key={r.ticker} className="border-b border-soil-600 last:border-0 hover:bg-soil-800/30">
                   <td className="px-5 py-3">
-                    <Link href={`/company/${r.ticker}`} className="gold-underline font-mono text-[0.82rem] text-bone">
+                    <Link href={`/company/${r.ticker}`} className="gold-underline font-mono text-[0.82rem] text-ink">
                       {r.ticker}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 font-mono text-[0.75rem] text-bone/80">
+                  <td className="px-5 py-3 font-mono text-[0.75rem] text-ink">
                     {r.price == null ? "—" : r.price.toFixed(2)}
                   </td>
                   <td className={`px-5 py-3 font-mono text-[0.72rem] ${(r.changePct ?? 0) >= 0 ? "text-jade" : "text-blood"}`}>
@@ -81,16 +81,16 @@ export default async function WatchlistPage() {
                         </Link>
                       </div>
                     ) : (
-                      <span className="font-mono text-[0.68rem] text-bone/35">no runs</span>
+                      <span className="font-mono text-[0.68rem] text-faint">no runs</span>
                     )}
                   </td>
-                  <td className="px-5 py-3 font-mono text-[0.68rem] uppercase text-bone/55">
+                  <td className="px-5 py-3 font-mono text-[0.68rem] uppercase text-bone-soft">
                     {r.run ? r.run.thesis.confidence.level : "—"}
                   </td>
                   <td className="px-5 py-3 text-right">
                     <Link
                       href={`/research?ticker=${r.ticker}&autorun=1`}
-                      className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-bone/45 hover:text-truffle-300"
+                      className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-faint hover:text-truffle-300"
                     >
                       re-run →
                     </Link>
@@ -104,19 +104,19 @@ export default async function WatchlistPage() {
 
       {/* Forecast audit — no cherry-picking (§22) */}
       <section className="card mt-5 p-6">
-        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">
+        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">
           Forecast audit — every forecast counted
         </h2>
         {audit.resolved === 0 ? (
-          <p className="mt-3 font-mono text-[0.72rem] leading-relaxed text-bone/45">
+          <p className="mt-3 font-mono text-[0.72rem] leading-relaxed text-faint">
             No resolved forecasts yet. Forecasts (90-day direction) are recorded with each run and resolved
             automatically against live prices — hits and misses both stay on the record.
           </p>
         ) : (
           <div className="mt-4 grid gap-4 sm:grid-cols-4">
-            <div className="rounded-xl border border-truffle-400/15 bg-soil-900/40 p-4">
-              <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-bone/40">Directional accuracy</p>
-              <p className="font-display mt-1 text-[1.6rem] font-semibold text-bone">
+            <div className="rounded-xl border border-soil-600 bg-soil-950 p-4">
+              <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-faint">Directional accuracy</p>
+              <p className="font-display mt-1 text-[1.6rem] font-semibold text-ink">
                 {audit.directionalAccuracy == null ? "—" : `${Math.round(audit.directionalAccuracy * 100)}%`}
               </p>
             </div>
@@ -125,9 +125,9 @@ export default async function WatchlistPage() {
               ["Pending", String(audit.pending)],
               ["Total", String(audit.total)],
             ].map(([k, v]) => (
-              <div key={k} className="rounded-xl border border-truffle-400/15 bg-soil-900/40 p-4">
-                <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-bone/40">{k}</p>
-                <p className="font-display mt-1 text-[1.6rem] font-semibold text-bone">{v}</p>
+              <div key={k} className="rounded-xl border border-soil-600 bg-soil-950 p-4">
+                <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-faint">{k}</p>
+                <p className="font-display mt-1 text-[1.6rem] font-semibold text-ink">{v}</p>
               </div>
             ))}
           </div>
@@ -135,7 +135,7 @@ export default async function WatchlistPage() {
         {audit.byTicker.length > 0 && (
           <ul className="mt-4 space-y-1.5">
             {audit.byTicker.map((t) => (
-              <li key={t.ticker} className="flex items-center justify-between font-mono text-[0.7rem] text-bone/60">
+              <li key={t.ticker} className="flex items-center justify-between font-mono text-[0.7rem] text-bone-soft">
                 <span>{t.ticker}</span>
                 <span>
                   {t.correct}/{t.resolved} correct

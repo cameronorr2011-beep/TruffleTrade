@@ -25,8 +25,8 @@ const STANCE_COLOR: Record<string, string> = {
   bullish: "text-jade",
   bearish: "text-blood",
   caution: "text-gold",
-  neutral: "text-bone/70",
-  "insufficient-evidence": "text-bone/45",
+  neutral: "text-bone-soft",
+  "insufficient-evidence": "text-faint",
 };
 
 export default async function CompanyPage({ params }: { params: Promise<{ ticker: string }> }) {
@@ -51,20 +51,20 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
           <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
             Company dossier
           </span>
-          <h1 className="font-display mt-2 text-[clamp(2.2rem,5vw,3.8rem)] font-semibold text-bone">
+          <h1 className="font-display mt-2 text-[clamp(2.2rem,5vw,3.8rem)] font-semibold text-ink">
             {q.ticker}
           </h1>
-          <p className="font-mono text-[0.7rem] text-bone/50">
+          <p className="font-mono text-[0.7rem] text-bone-soft">
             {q.name ?? "DATA UNAVAILABLE"} · {q.exchange ?? "exchange unknown"} · {q.currency}
           </p>
         </div>
         <div className="text-right">
-          <p className="font-display text-[2.4rem] font-semibold text-bone">{fmt(q.price)}</p>
+          <p className="font-display text-[2.4rem] font-semibold text-ink">{fmt(q.price)}</p>
           <p className={`font-mono text-[0.78rem] ${(q.changePct ?? 0) >= 0 ? "text-jade" : "text-blood"}`}>
             {q.changePct == null ? "—" : `${q.changePct >= 0 ? "+" : ""}${q.changePct.toFixed(2)}%`} prev close{" "}
             {fmt(q.prevClose)}
           </p>
-          <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/35">
+          <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-faint">
             Data as of {q.asOf ? new Date(q.asOf).toLocaleString("en-US") : "unknown"} · {q.source}
           </p>
         </div>
@@ -75,7 +75,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
         <section className="card mt-6 flex flex-wrap items-center justify-between gap-4 p-5">
           <div className="flex flex-wrap items-center gap-3">
             <StanceBadge stance={lastRun.consensus.stance} />
-            <span className="font-mono text-[0.68rem] text-bone/55">
+            <span className="font-mono text-[0.68rem] text-bone-soft">
               run #{lastRun.id} · score {lastRun.consensus.score >= 0 ? "+" : ""}
               {lastRun.consensus.score.toFixed(2)} · confidence {lastRun.thesis.confidence.level}
             </span>
@@ -83,13 +83,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
           <div className="flex gap-3">
             <Link
               href={`/research/${lastRun.id}`}
-              className="rounded-full border border-truffle-400/40 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-truffle-200 hover:bg-truffle-500/15"
+              className="rounded-full border border-forest/35 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-truffle-600 hover:bg-truffle-200/60"
             >
               Open dossier
             </Link>
             <Link
               href={`/research?ticker=${ticker}&autorun=1`}
-              className="rounded-full bg-truffle-500 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-void hover:bg-truffle-400"
+              className="rounded-full bg-truffle-500 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-white hover:bg-truffle-600"
             >
               Re-run investigation
             </Link>
@@ -114,8 +114,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
           ["Revenue growth YoY", f?.revenueGrowthYoYPct == null ? "DATA UNAVAILABLE" : `${f.revenueGrowthYoYPct >= 0 ? "+" : ""}${f.revenueGrowthYoYPct.toFixed(1)}%`],
         ].map(([k, v]) => (
           <div key={k} className="card px-5 py-4">
-            <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-bone/40">{k}</p>
-            <p className={`mt-1.5 font-mono text-[0.92rem] ${v === "DATA UNAVAILABLE" ? "text-bone/30" : "text-bone"}`}>
+            <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-faint">{k}</p>
+            <p className={`mt-1.5 font-mono text-[0.92rem] ${v === "DATA UNAVAILABLE" ? "text-faint" : "text-ink"}`}>
               {v}
             </p>
           </div>
@@ -125,19 +125,19 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
       {/* News + thesis history */}
       <section className="mt-5 grid gap-5 lg:grid-cols-2">
         <div className="card p-6">
-          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">
+          <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">
             Recent headlines (untrusted input, provenance tracked)
           </h2>
           {pack.news.length === 0 ? (
-            <p className="mt-3 font-mono text-[0.72rem] text-bone/45">DATA UNAVAILABLE.</p>
+            <p className="mt-3 font-mono text-[0.72rem] text-faint">DATA UNAVAILABLE.</p>
           ) : (
             <ul className="mt-4 space-y-3">
               {pack.news.slice(0, 8).map((n, i) => (
-                <li key={i} className="border-b border-truffle-400/8 pb-3 last:border-0 last:pb-0">
-                  <a href={n.link} target="_blank" rel="noreferrer nofollow" className="text-[0.84rem] leading-snug text-bone/75 hover:text-bone">
+                <li key={i} className="border-b border-soil-600 pb-3 last:border-0 last:pb-0">
+                  <a href={n.link} target="_blank" rel="noreferrer nofollow" className="text-[0.84rem] leading-snug text-bone-soft hover:text-ink">
                     {n.title}
                   </a>
-                  <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-bone/35">
+                  <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-faint">
                     {n.source}
                     {n.publishedTs ? ` · ${new Date(n.publishedTs).toLocaleDateString("en-US")}` : " · date unknown"}
                   </p>
@@ -149,30 +149,30 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
 
         <div className="card p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Thesis history</h2>
+            <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">Thesis history</h2>
             <WatchButton ticker={ticker} />
           </div>
           {history.length === 0 ? (
-            <p className="mt-3 font-mono text-[0.72rem] text-bone/45">
+            <p className="mt-3 font-mono text-[0.72rem] text-faint">
               No theses yet. Run an investigation to start the audit trail.
             </p>
           ) : (
-            <ol className="mt-4 space-y-3 border-l border-truffle-400/20 pl-4">
+            <ol className="mt-4 space-y-3 border-l border-soil-600 pl-4">
               {history.map((h) => (
                 <li key={h.id} className="relative">
                   <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-truffle-400" />
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`font-mono text-[0.7rem] uppercase tracking-[0.14em] ${STANCE_COLOR[h.stance] ?? "text-bone/60"}`}>
+                    <span className={`font-mono text-[0.7rem] uppercase tracking-[0.14em] ${STANCE_COLOR[h.stance] ?? "text-bone-soft"}`}>
                       {h.stance}
                     </span>
-                    <span className="font-mono text-[0.6rem] text-bone/35">
+                    <span className="font-mono text-[0.6rem] text-faint">
                       {new Date(h.ts).toLocaleDateString("en-US")} ·{" "}
                       <Link href={`/research/${h.runId}`} className="gold-underline text-truffle-300">
                         run #{h.runId}
                       </Link>
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-[0.78rem] leading-relaxed text-bone/55">{h.summary}</p>
+                  <p className="mt-1 line-clamp-2 text-[0.78rem] leading-relaxed text-bone-soft">{h.summary}</p>
                 </li>
               ))}
             </ol>
@@ -180,7 +180,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
         </div>
       </section>
 
-      <p className="mt-6 font-mono text-[0.6rem] uppercase tracking-[0.24em] text-bone/30">
+      <p className="mt-6 font-mono text-[0.6rem] uppercase tracking-[0.24em] text-faint">
         sources: {pack.sources.join(" · ") || "none"} · retrieved {new Date(pack.retrievalTs).toLocaleTimeString("en-US")}
       </p>
     </div>

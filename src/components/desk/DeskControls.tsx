@@ -30,7 +30,7 @@ export default function DeskControls({ halted }: { halted: boolean }) {
         type="button"
         onClick={() => call("/api/cycle", "cycle")}
         disabled={busy !== null || pending}
-        className="rounded-lg bg-truffle-500 px-5 py-3 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-truffle-400 disabled:opacity-40"
+        className="rounded-lg bg-truffle-500 px-5 py-3 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-white transition-colors hover:bg-truffle-600 disabled:opacity-40"
       >
         {busy === "cycle" ? "Council in session…" : "Run one cycle now"}
       </button>
@@ -42,8 +42,8 @@ export default function DeskControls({ halted }: { halted: boolean }) {
       >
         {halted ? "Desk halted" : "Halt desk (flatten & stop)"}
       </button>
-      {msg ? <p className="font-mono text-[0.66rem] text-bone/50">{msg}</p> : null}
-      <p className="mt-1 text-[0.72rem] leading-relaxed text-bone/35">
+      {msg ? <p className="font-mono text-[0.66rem] text-bone-soft">{msg}</p> : null}
+      <p className="mt-1 text-[0.72rem] leading-relaxed text-bone-soft">
         The engine runs on its own process — these controls trigger the same audited cycle the
         scheduler uses. Halting flattens any position and the desk stays flat until you restart it.
       </p>

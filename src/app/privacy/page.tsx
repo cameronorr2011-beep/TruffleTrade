@@ -74,15 +74,15 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-[760px] px-5 py-20 sm:px-8">
       <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">Legal</span>
-      <h1 className="font-display mt-5 text-[clamp(2.2rem,5vw,3.4rem)] font-semibold leading-[1.05] text-bone">
+      <h1 className="font-display mt-5 text-[clamp(2.2rem,5vw,3.4rem)] font-semibold leading-[1.05] text-ink">
         Privacy Policy
       </h1>
       <div className="mt-10 space-y-8">
         {SECTIONS.map((s) => (
           <section key={s.heading}>
-            <h2 className="font-display text-[1.35rem] font-semibold text-truffle-200">{s.heading}</h2>
+            <h2 className="font-display text-[1.35rem] font-semibold text-truffle-600">{s.heading}</h2>
             {s.paras.map((p, i) => (
-              <p key={i} className="mt-3 text-[0.94rem] leading-[1.75] text-bone/70">
+              <p key={i} className="mt-3 text-[0.94rem] leading-[1.75] text-bone-soft">
                 {p}
               </p>
             ))}

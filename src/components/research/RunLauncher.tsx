@@ -87,7 +87,7 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
         className="flex flex-wrap items-end gap-4"
       >
         <div>
-          <label htmlFor="ticker" className="font-mono text-[0.6rem] uppercase tracking-[0.24em] text-bone/45">
+          <label htmlFor="ticker" className="font-mono text-[0.6rem] uppercase tracking-[0.24em] text-faint">
             Ticker
           </label>
           <input
@@ -96,11 +96,11 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
             onChange={(e) => setTicker(e.target.value.toUpperCase())}
             placeholder="NVDA"
             maxLength={10}
-            className="mt-2 w-36 rounded-lg border border-truffle-400/25 bg-void/60 px-4 py-2.5 font-mono text-[1rem] uppercase text-bone outline-none focus:border-truffle-400/60"
+            className="mt-2 w-36 rounded-lg border border-soil-500 bg-white px-4 py-2.5 font-mono text-[1rem] uppercase text-ink outline-none focus:border-forest/50"
           />
         </div>
         <div className="min-w-[240px] flex-1">
-          <label htmlFor="peers" className="font-mono text-[0.6rem] uppercase tracking-[0.24em] text-bone/45">
+          <label htmlFor="peers" className="font-mono text-[0.6rem] uppercase tracking-[0.24em] text-faint">
             Peer set (optional, up to 4)
           </label>
           <input
@@ -108,13 +108,13 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
             value={peers}
             onChange={(e) => setPeers(e.target.value.toUpperCase())}
             placeholder="AMD AVGO INTC"
-            className="mt-2 w-full rounded-lg border border-truffle-400/25 bg-void/60 px-4 py-2.5 font-mono text-[0.9rem] text-bone outline-none focus:border-truffle-400/60 placeholder:text-bone/25"
+            className="mt-2 w-full rounded-lg border border-soil-500 bg-white px-4 py-2.5 font-mono text-[0.9rem] text-ink outline-none focus:border-forest/50 placeholder:text-faint"
           />
         </div>
         <button
           type="submit"
           disabled={busy || !ticker.trim()}
-          className="rounded-full bg-truffle-500 px-6 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-truffle-400 disabled:opacity-40"
+          className="rounded-full bg-truffle-500 px-6 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-white transition-colors hover:bg-truffle-600 disabled:opacity-40"
         >
           {busy ? "Investigating…" : "Run investigation"}
         </button>
@@ -126,7 +126,7 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
             <li
               key={s}
               className={`flex items-center gap-3 font-mono text-[0.72rem] ${
-                i < stage ? "text-jade" : i === stage ? "text-truffle-300" : "text-bone/30"
+                i < stage ? "text-jade" : i === stage ? "text-truffle-300" : "text-faint"
               }`}
             >
               <span>{i < stage ? "✓" : i === stage ? "▸" : "·"}</span>
@@ -137,7 +137,7 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
       )}
 
       {error && (
-        <p className="mt-6 rounded-lg border border-blood/40 bg-blood/10 p-4 font-mono text-[0.75rem] text-bone/80">
+        <p className="mt-6 rounded-lg border border-blood/30 bg-[#faf1ec] p-4 font-mono text-[0.75rem] text-blood">
           {error}
         </p>
       )}
@@ -146,16 +146,16 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
         <div className="mt-6 rounded-xl border border-jade/25 bg-jade/5 p-5">
           <div className="flex flex-wrap items-center gap-3">
             <StanceBadge stance={result.run.consensus.stance} />
-            <span className="font-mono text-[0.7rem] text-bone/55">
+            <span className="font-mono text-[0.7rem] text-bone-soft">
               score {result.run.consensus.score >= 0 ? "+" : ""}
               {result.run.consensus.score.toFixed(2)}
               {result.run.consensus.redTeamVeto ? " · RED TEAM REJECT" : ""}
             </span>
           </div>
-          <p className="mt-3 text-[0.88rem] leading-relaxed text-bone/75">{result.run.thesis.summary}</p>
+          <p className="mt-3 text-[0.88rem] leading-relaxed text-bone-soft">{result.run.thesis.summary}</p>
           <a
             href={`/research/${result.runId}`}
-            className="mt-4 inline-block rounded-full border border-truffle-400/40 px-5 py-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-truffle-200 hover:bg-truffle-500/15"
+            className="mt-4 inline-block rounded-full border border-forest/35 px-5 py-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-truffle-600 hover:bg-truffle-200/60"
           >
             Open full dossier
           </a>
