@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 480" role="img" aria-label="Memory graph: episodic facts organized by kind with twin and federation nodes">
+  <defs>
+    <radialGradient id="mglow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#d9903c" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mpanel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#171009"/>
+      <stop offset="100%" stop-color="#0a0704"/>
+    </linearGradient>
+  </defs>
+  <rect width="1120" height="480" rx="24" fill="url(#mpanel)"/>
+  <ellipse cx="560" cy="240" rx="480" ry="200" fill="url(#mglow)"/>
+
+  <!-- edges -->
+  <g stroke="#f5c26b" stroke-opacity="0.25" stroke-width="1.5">
+    <line x1="560" y1="240" x2="220" y2="110"/>
+    <line x1="560" y1="240" x2="200" y2="250"/>
+    <line x1="560" y1="240" x2="250" y2="380"/>
+    <line x1="560" y1="240" x2="520" y2="90"/>
+    <line x1="560" y1="240" x2="840" y2="120"/>
+    <line x1="560" y1="240" x2="880" y2="260"/>
+    <line x1="560" y1="240" x2="820" y2="380"/>
+    <line x1="560" y1="240" x2="450" y2="400"/>
+  </g>
+
+  <!-- central memory node -->
+  <g font-family="Menlo, monospace" text-anchor="middle">
+    <circle cx="560" cy="240" r="74" fill="#0e0a06" stroke="#f5c26b" stroke-width="2"/>
+    <circle cx="560" cy="240" r="86" fill="none" stroke="#f5c26b" stroke-opacity="0.25" stroke-dasharray="3 6"/>
+    <text x="560" y="232" fill="#f5c26b" font-size="16" letter-spacing="2">MEMORY</text>
+    <text x="560" y="256" fill="#f4efe988" font-size="11">your device · sqlite</text>
+  </g>
+
+  <!-- fact nodes -->
+  <g font-family="Menlo, monospace" text-anchor="middle">
+    <g><circle cx="220" cy="110" r="42" fill="#1c1610" stroke="#35c98e55" stroke-width="1.5"/><text x="220" y="106" fill="#35c98e" font-size="11">OUTCOME</text><text x="220" y="122" fill="#f4efe977" font-size="10">+18 facts</text></g>
+    <g><circle cx="200" cy="250" r="42" fill="#1c1610" stroke="#f5c26b55" stroke-width="1.5"/><text x="200" y="246" fill="#f5c26b" font-size="11">REGIME</text><text x="200" y="262" fill="#f4efe977" font-size="10">+31 facts</text></g>
+    <g><circle cx="250" cy="380" r="42" fill="#1c1610" stroke="#d1462f55" stroke-width="1.5"/><text x="250" y="376" fill="#d1462f" font-size="11">RISK</text><text x="250" y="392" fill="#f4efe977" font-size="10">+9 facts</text></g>
+    <g><circle cx="520" cy="90" r="40" fill="#1c1610" stroke="#f5c26b55" stroke-width="1.5"/><text x="520" y="86" fill="#f5c26b" font-size="11">INSIGHT</text><text x="520" y="102" fill="#f4efe977" font-size="10">+44 facts</text></g>
+    <g><circle cx="840" cy="120" r="46" fill="#1c1610" stroke="#8464d855" stroke-width="1.5"/><text x="840" y="116" fill="#ab93ee" font-size="11">TWIN</text><text x="840" y="132" fill="#f4efe977" font-size="10">500 paths</text></g>
+    <g><circle cx="880" cy="260" r="44" fill="#1c1610" stroke="#f5c26b55" stroke-width="1.5"/><text x="880" y="256" fill="#f5c26b" font-size="11">PREDICTION</text><text x="880" y="272" fill="#f4efe977" font-size="10">+12 facts</text></g>
+    <g><circle cx="820" cy="380" r="40" fill="#1c1610" stroke="#35c98e55" stroke-width="1.5"/><text x="820" y="376" fill="#35c98e" font-size="11">FEDERATED</text><text x="820" y="392" fill="#f4efe977" font-size="10">peers: 128</text></g>
+    <g><circle cx="450" cy="400" r="36" fill="#1c1610" stroke="#f4efe933" stroke-width="1.5"/><text x="450" y="396" fill="#f4efe9aa" font-size="11">AUDIT</text><text x="450" y="412" fill="#f4efe977" font-size="10">61% dir.</text></g>
+  </g>
+
+  <!-- footer strip -->
+  <g font-family="Menlo, monospace">
+    <text x="40" y="452" fill="#f4efe966" font-size="12">consolidation every 6h · duplicates merge · stale facts decay</text>
+    <text x="1080" y="452" text-anchor="end" fill="#f4efe944" font-size="12">raw content never leaves the device</text>
+  </g>
+</svg>

@@ -77,10 +77,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border border-truffle-400/40 px-4 py-2 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-truffle-300 transition-colors hover:bg-truffle-500/15"
+                className="gold-underline hidden font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bone/70 hover:text-bone md:block"
               >
                 GitHub
               </a>
+              <Link
+                href="/buy"
+                className="rounded-full bg-truffle-500 px-5 py-2.5 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-truffle-400"
+              >
+                Get access
+              </Link>
             </div>
           </nav>
         </header>

@@ -14,6 +14,10 @@ export interface OrderRow {
   createdTs: number;
   paidTs: number | null;
   codeHash: string | null;
+  /** Plaintext access code, stored on the order so the buyer can retrieve it
+   *  from the status endpoint after payment. Codes are hashed in tt_codes;
+   *  the plaintext lives only here, tied to this one order. */
+  codePlain: string | null;
 }
 
 export interface CodeRow {
@@ -36,6 +40,8 @@ export interface LicensingDb {
   getOrderByCharge(chargeId: string): Awaitable<OrderRow | null>;
   setOrderPaid(id: string, ts: number): Awaitable<void>;
   setOrderIssued(id: string, codeHash: string): Awaitable<void>;
+  setOrderIssuedPlain(id: string, codeHash: string, codePlain: string): Awaitable<void>;
+  getOrderPlainCode(orderId: string): Awaitable<string | null>;
   setOrderStatus(id: string, status: OrderRow["status"]): Awaitable<void>;
   createCode(row: { codeHash: string; orderId: string; activatedTs: number; expiresTs: number }): Awaitable<void>;
   getCode(codeHash: string): Awaitable<CodeRow | null>;
@@ -55,7 +61,8 @@ CREATE TABLE IF NOT EXISTS tt_orders (
   status TEXT NOT NULL DEFAULT 'pending',
   created_ts INTEGER NOT NULL,
   paid_ts INTEGER,
-  code_hash TEXT
+  code_hash TEXT,
+  code_plain TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_tt_orders_charge ON tt_orders(charge_id);
 
@@ -88,7 +95,8 @@ CREATE TABLE IF NOT EXISTS tt_orders (
   status TEXT NOT NULL DEFAULT 'pending',
   created_ts BIGINT NOT NULL,
   paid_ts BIGINT,
-  code_hash TEXT
+  code_hash TEXT,
+  code_plain TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_tt_orders_charge ON tt_orders(charge_id);
 
@@ -156,6 +164,7 @@ function rowToOrder(r: Record<string, unknown>): OrderRow {
     createdTs: Number(r.created_ts),
     paidTs: r.paid_ts == null ? null : Number(r.paid_ts),
     codeHash: r.code_hash == null ? null : String(r.code_hash),
+    codePlain: r.code_plain == null ? null : String(r.code_plain),
   };
 }
 
@@ -191,6 +200,13 @@ class SqliteLicensingDb implements LicensingDb {
   }
   setOrderIssued(id: string, codeHash: string): void {
     this.db.prepare(`UPDATE tt_orders SET status = 'issued', code_hash = ? WHERE id = ?`).run(codeHash, id);
+  }
+  setOrderIssuedPlain(id: string, codeHash: string, codePlain: string): void {
+    this.db.prepare(`UPDATE tt_orders SET status = 'issued', code_hash = ?, code_plain = ? WHERE id = ?`).run(codeHash, codePlain, id);
+  }
+  getOrderPlainCode(orderId: string): string | null {
+    const r = this.db.prepare(`SELECT code_plain FROM tt_orders WHERE id = ?`).get(orderId) as { code_plain: string | null } | undefined;
+    return r?.code_plain ?? null;
   }
   setOrderStatus(id: string, status: OrderRow["status"]): void {
     this.db.prepare(`UPDATE tt_orders SET status = ? WHERE id = ?`).run(status, id);
@@ -263,6 +279,13 @@ class PostgresLicensingDb implements LicensingDb {
   }
   async setOrderIssued(id: string, codeHash: string): Promise<void> {
     await this.q(`UPDATE tt_orders SET status = 'issued', code_hash = $2 WHERE id = $1`, [id, codeHash]);
+  }
+  async setOrderIssuedPlain(id: string, codeHash: string, codePlain: string): Promise<void> {
+    await this.q(`UPDATE tt_orders SET status = 'issued', code_hash = $2, code_plain = $3 WHERE id = $1`, [id, codeHash, codePlain]);
+  }
+  async getOrderPlainCode(orderId: string): Promise<string | null> {
+    const rows = await this.q(`SELECT code_plain FROM tt_orders WHERE id = $1`, [orderId]);
+    return rows[0] ? (rows[0].code_plain == null ? null : String(rows[0].code_plain)) : null;
   }
   async setOrderStatus(id: string, status: OrderRow["status"]): Promise<void> {
     await this.q(`UPDATE tt_orders SET status = $2 WHERE id = $1`, [id, status]);

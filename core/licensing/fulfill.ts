@@ -29,7 +29,9 @@ function issueCode(orderId: string): string {
       activatedTs: now,
       expiresTs: now + 30 * 86_400_000, // 30 days
     });
-    licensingDb().setOrderIssued(orderId, hash);
+    // Store the plaintext on the order row so the buyer can always retrieve
+    // their code from the status endpoint (the tt_codes row stays hashed).
+    licensingDb().setOrderIssuedPlain(orderId, hash, code);
     return code;
   }
   throw new Error("could not issue a unique access code after 5 attempts");
@@ -81,16 +83,34 @@ export async function orderStatus(orderId: string): Promise<{
   status: OrderRow["status"];
   paid: boolean;
   chargeStatus?: string;
+  accessCode?: string;
+  expiresTs?: number;
 }> {
   const db = licensingDb();
   const order = await db.getOrder(orderId);
   if (!order) throw new Error(`unknown order ${orderId}`);
-  if (order.status === "issued") return { status: "issued", paid: true };
+  if (order.status === "issued") {
+    // Deliver the app: return the access code + expiry so the UI can show
+    // the code and the download/setup steps immediately after payment.
+    const code = order.codePlain ?? (await db.getOrderPlainCode(orderId));
+    const codeRow = order.codeHash ? await db.getCode(order.codeHash) : null;
+    return {
+      status: "issued",
+      paid: true,
+      accessCode: code ?? undefined,
+      expiresTs: codeRow?.expiresTs,
+    };
+  }
   const { getCharge } = await import("./zbd");
   const charge = await getCharge(order.chargeId);
   // Opportunistically fulfill if ZBD says paid but the webhook hasn't arrived.
   if (charge.status === "completed" && charge.amount === PRICE_MSATS) {
     const r = await verifyAndFulfillOrder(orderId);
+    if (r.status === "issued") {
+      const code = await db.getOrderPlainCode(orderId);
+      const codeRow = order.codeHash ? await db.getCode(order.codeHash) : null;
+      return { status: "issued", paid: true, accessCode: code ?? undefined, expiresTs: codeRow?.expiresTs };
+    }
     return { status: r.status, paid: r.paid, chargeStatus: charge.status };
   }
   if (charge.status === "expired") {

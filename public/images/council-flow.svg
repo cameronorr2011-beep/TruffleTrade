@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 300" role="img" aria-label="Pipeline: ingest, model, debate, verify, attack, remember">
+  <defs>
+    <linearGradient id="fpanel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#171009"/>
+      <stop offset="100%" stop-color="#0a0704"/>
+    </linearGradient>
+    <linearGradient id="fgold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f5c26b"/>
+      <stop offset="100%" stop-color="#9c5a1c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1120" height="300" rx="24" fill="url(#fpanel)"/>
+
+  <g font-family="Menlo, monospace" text-anchor="middle">
+    <g>
+      <rect x="50" y="90" width="140" height="120" rx="14" fill="#1c1610" stroke="#f5c26b44" stroke-width="1.5"/>
+      <text x="120" y="130" fill="#f5c26b" font-size="13" letter-spacing="1">INGEST</text>
+      <text x="120" y="152" fill="#f4efe988" font-size="10">candles · news</text>
+      <text x="120" y="168" fill="#f4efe988" font-size="10">fundamentals</text>
+      <text x="120" y="190" fill="#f4efe955" font-size="9">keyless sources</text>
+    </g>
+    <line x1="190" y1="150" x2="230" y2="150" stroke="url(#fgold)" stroke-width="2" marker-end="url(#arr)"/>
+    <g>
+      <rect x="232" y="90" width="140" height="120" rx="14" fill="#1c1610" stroke="#f5c26b44" stroke-width="1.5"/>
+      <text x="302" y="130" fill="#f5c26b" font-size="13" letter-spacing="1">MODEL</text>
+      <text x="302" y="152" fill="#f4efe988" font-size="10">DCF · comps</text>
+      <text x="302" y="168" fill="#f4efe988" font-size="10">indicators</text>
+      <text x="302" y="190" fill="#f4efe955" font-size="9">assumptions shown</text>
+    </g>
+    <line x1="372" y1="150" x2="412" y2="150" stroke="url(#fgold)" stroke-width="2"/>
+    <g>
+      <rect x="414" y="90" width="140" height="120" rx="14" fill="#1c1610" stroke="#f5c26b66" stroke-width="1.5"/>
+      <text x="484" y="130" fill="#f5c26b" font-size="13" letter-spacing="1">DEBATE</text>
+      <text x="484" y="152" fill="#f4efe988" font-size="10">6 rival analysts</text>
+      <text x="484" y="168" fill="#f4efe988" font-size="10">stance + confidence</text>
+      <text x="484" y="190" fill="#f4efe955" font-size="9">on the record</text>
+    </g>
+    <line x1="554" y1="150" x2="594" y2="150" stroke="url(#fgold)" stroke-width="2"/>
+    <g>
+      <rect x="596" y="90" width="140" height="120" rx="14" fill="#1c1610" stroke="#f5c26b44" stroke-width="1.5"/>
+      <text x="666" y="130" fill="#f5c26b" font-size="13" letter-spacing="1">VERIFY</text>
+      <text x="666" y="152" fill="#f4efe988" font-size="10">fact-checker</text>
+      <text x="666" y="168" fill="#f4efe988" font-size="10">claims vs data</text>
+      <text x="666" y="190" fill="#f4efe955" font-size="9">violations stripped</text>
+    </g>
+    <line x1="736" y1="150" x2="776" y2="150" stroke="url(#fgold)" stroke-width="2"/>
+    <g>
+      <rect x="778" y="90" width="140" height="120" rx="14" fill="#2a1210" stroke="#d1462f88" stroke-width="1.5"/>
+      <text x="848" y="130" fill="#d1462f" font-size="13" letter-spacing="1">ATTACK</text>
+      <text x="848" y="152" fill="#f4efe988" font-size="10">red team veto</text>
+      <text x="848" y="168" fill="#f4efe988" font-size="10">fail-closed</text>
+      <text x="848" y="190" fill="#f4efe955" font-size="9">thin evidence = reject</text>
+    </g>
+    <line x1="918" y1="150" x2="958" y2="150" stroke="url(#fgold)" stroke-width="2"/>
+    <g>
+      <rect x="960" y="90" width="120" height="120" rx="14" fill="#1c1610" stroke="#35c98e55" stroke-width="1.5"/>
+      <text x="1020" y="130" fill="#35c98e" font-size="13" letter-spacing="1">REMEMBER</text>
+      <text x="1020" y="152" fill="#f4efe988" font-size="10">memory facts</text>
+      <text x="1020" y="168" fill="#f4efe988" font-size="10">twin training</text>
+      <text x="1020" y="190" fill="#f4efe955" font-size="9">federated sync</text>
+    </g>
+
+    <text x="560" y="52" fill="#f4efe9" font-size="15" letter-spacing="3">ONE ANALYSIS, END TO END</text>
+    <text x="560" y="262" fill="#f4efe955" font-size="11">every step audited · every number verified · nothing forced through</text>
+  </g>
+</svg>
