@@ -210,9 +210,13 @@ let cachedSqlite: Database.Database | null = null;
 function sqliteHandle(): Database.Database {
   if (cachedSqlite) return cachedSqlite;
   const file = process.env.SQLITE_PATH?.trim() || "data/truffletrade.sqlite3";
-  const dir = path.dirname(path.resolve(file));
+  // Statically scope relative paths under data/ so Turbopack does not trace the
+  // whole project on Vercel (build failure otherwise). Absolute paths (tests)
+  // pass through unchanged. SQLite is only used off-Vercel.
+  const resolved = path.isAbsolute(file) ? file : path.join(process.cwd(), "data", path.basename(file));
+  const dir = path.dirname(resolved);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const db = new Database(file);
+  const db = new Database(resolved);
   db.pragma("journal_mode = WAL");
   db.exec(SCHEMA_SQLITE);
   cachedSqlite = db;
