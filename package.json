@@ -16,6 +16,10 @@
     "quote": "tsx scripts/quote-cbbtc.ts",
     "memory:update": "tsx core/memory/updater.ts",
     "verify": "tsx scripts/verify-access.ts",
+    "check:payments": "tsx scripts/check-payments.ts",
+    "icons": "node scripts/gen-icons.mjs",
+    "app": "electron electron/main.js",
+    "app:dist": "npm run build && electron-builder --win --publish never",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -39,9 +43,12 @@
     "@types/pg": "^8.11.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.2.6",
     "postcss": "^8.5.8",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.1.17",
     "tsx": "^4.20.3",
     "typescript": "^5.9.3",
@@ -49,5 +56,36 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "build": {
+    "appId": "com.truffletrade.desktop",
+    "productName": "TruffleTrade",
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "electron/**",
+      ".next/**",
+      "public/**",
+      "package.json",
+      "node_modules/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "electron/icons/truffle.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "TruffleTrade"
+    }
   }
 }

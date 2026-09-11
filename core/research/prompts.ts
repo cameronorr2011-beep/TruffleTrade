@@ -76,6 +76,19 @@ function primer(pack: DataPack): string {
   } else {
     lines.push("News: DATA UNAVAILABLE.");
   }
+  // Raw recent OHLC for the Chart Patterns agent (last 30 daily bars).
+  if (pack.candles1d.length >= 30) {
+    const recent = pack.candles1d.slice(-30);
+    lines.push(
+      `Recent daily candles (date O H L C volume), oldest first:\n` +
+        recent
+          .map(
+            (c) =>
+              `${new Date(c.ts).toISOString().slice(0, 10)} O${c.open.toFixed(2)} H${c.high.toFixed(2)} L${c.low.toFixed(2)} C${c.close.toFixed(2)} V${Math.round(c.volume / 1000)}k`,
+          )
+          .join("\n"),
+    );
+  }
   lines.push(
     `Macro: ` +
       pack.macro
@@ -156,6 +169,44 @@ export const NEWS_AGENT: AgentSpec = {
     SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
 };
 
+export const PATTERNS_AGENT: AgentSpec = {
+  key: "patterns",
+  name: "Chart Patterns",
+  mandate: "Read the actual OHLC series: structure, patterns, volatility contraction/expansion",
+  system:
+    "You are CHART PATTERNS, a price-action specialist. You receive the raw recent OHLC candles plus computed " +
+    "indicators (not an image). Describe the structure the candles actually show: higher-highs/lower-lows, ranges, " +
+    "breakouts/breakdowns, gaps, volatility contraction before expansion, distance from support/resistance. " +
+    "Name the bars (dates) for every pattern claim. If the candle series is too short or noisy to support a " +
+    "structural read, your stance MUST be insufficient-evidence. " +
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+};
+
+export const SCENARIO_AGENT: AgentSpec = {
+  key: "scenario",
+  name: "Scenario",
+  mandate: "Bull/base/bear price scenarios with the assumption each one needs",
+  system:
+    "You are SCENARIO, a scenario planner. Produce a bull, base, and bear case for the next 12 months. " +
+    "For EACH case name the assumption that must come true (from the data: growth, margins, multiple, macro) — " +
+    "never a bare price target. Use the reverse-DCF implied growth and the 52-week range as anchors where shown. " +
+    "Assign probabilities only as coarse words (likely/unlikely) — never fake precision. " +
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+};
+
+export const BACKTEST_AGENT: AgentSpec = {
+  key: "backtest",
+  name: "Backtest",
+  mandate: "Check the council's structural read against what similar setups did historically",
+  system:
+    "You are BACKTEST, a quantitative historian. You receive the deterministic result of replaying this setup " +
+    "(trend regime + RSI bucket + relative strength) over the ticker's own past 3 years: how often similar setups " +
+    "resolved up or down over 20 and 60 trading days, and the median move. Judge whether the council's directional " +
+    "lean is historically supported or contradicted. Cite the sample sizes. If the sample is under 8 occurrences, " +
+    "your stance MUST be insufficient-evidence. " +
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+};
+
 export const RED_TEAM_AGENT: AgentSpec = {
   key: "redteam",
   name: "RedTeam",
@@ -177,6 +228,9 @@ export const ALL_AGENT_SPECS: AgentSpec[] = [
   MACRO_AGENT,
   COMPETITIVE_AGENT,
   NEWS_AGENT,
+  PATTERNS_AGENT,
+  SCENARIO_AGENT,
+  BACKTEST_AGENT,
 ];
 
 export function redTeamUser(pack: DataPack, agentJson: string): string {
@@ -187,6 +241,12 @@ export function redTeamUser(pack: DataPack, agentJson: string): string {
   );
 }
 
-export function agentUser(kind: string, pack: DataPack, valuationContext: string): string {
-  return `Company data:\n${primer(pack)}\n${valuationContext}\n\nCast your independent analysis.`;
+export function agentUser(
+  kind: string,
+  pack: DataPack,
+  valuationContext: string,
+  backtest?: string,
+): string {
+  const bt = kind === "backtest" && backtest ? `\n${backtest}\n` : "";
+  return `Company data:\n${primer(pack)}\n${valuationContext}${bt}\nCast your independent analysis.`;
 }

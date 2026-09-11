@@ -12,6 +12,7 @@ import type {
 import { buildDataPack } from "./datapack";
 import { runComps, runDcf, runReverseDcf } from "./valuation";
 import { runAgentCouncil } from "./agents";
+import { replaySetup, backtestContext } from "./backtest";
 import { buildConfidence, buildConsensus, allPromptVersions } from "./consensus";
 import { makeProvider } from "./ai";
 import { buildThesis, nullThesis } from "./thesis";
@@ -45,8 +46,10 @@ export async function runResearch(opts: ResearchOptions): Promise<ResearchRun> {
   };
 
   const valuationContext = buildValuationContext(valuation);
+  // Deterministic historical replay feeds the Backtest worker (computed fact, not opinion).
+  const bt = replaySetup(pack.candles1d, pack.spyCloses, pack.technicals);
   const provider = makeProvider();
-  const { agents } = await runAgentCouncil(provider, pack, valuationContext);
+  const { agents } = await runAgentCouncil(provider, pack, valuationContext, backtestContext(bt));
   const consensus = buildConsensus(agents);
   const confidence = buildConfidence(pack, agents);
 

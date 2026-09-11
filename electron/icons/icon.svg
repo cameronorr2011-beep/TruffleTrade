@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TruffleTrade">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe9b8"/>
+      <stop offset=".45" stop-color="#e8ae52"/>
+      <stop offset="1" stop-color="#9a611e"/>
+    </linearGradient>
+    <linearGradient id="goldDim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9973f"/>
+      <stop offset="1" stop-color="#6e4514"/>
+    </linearGradient>
+    <radialGradient id="body" cx=".34" cy=".28" r=".9">
+      <stop offset="0" stop-color="#6b5843"/>
+      <stop offset=".3" stop-color="#3d3126"/>
+      <stop offset=".62" stop-color="#1c150e"/>
+      <stop offset="1" stop-color="#070503"/>
+    </radialGradient>
+  </defs>
+
+  <!-- rounded dark tile so the mark reads on any taskbar -->
+  <rect width="512" height="512" rx="108" fill="#0c1210"/>
+
+  <!-- truffle: irregular lobed silhouette -->
+  <path fill="url(#body)" d="M259 60c62-4 122 22 152 72 26 44 27 102 3 150-25 51-76 88-138 97-64 9-130-10-165-57C79 279 71 213 96 160c26-55 86-96 152-99 4-1 8-1 11-1z"/>
+  <!-- lobes -->
+  <g opacity=".85">
+    <circle cx="150" cy="160" r="62" fill="#241b12"/>
+    <circle cx="352" cy="148" r="54" fill="#221910"/>
+    <circle cx="380" cy="300" r="58" fill="#241b12"/>
+    <circle cx="160" cy="330" r="52" fill="#1f170f"/>
+    <circle cx="262" cy="384" r="46" fill="#1d150d"/>
+  </g>
+  <!-- warts -->
+  <g fill="#000" opacity=".38">
+    <circle cx="112" cy="216" r="14"/><circle cx="134" cy="262" r="10"/>
+    <circle cx="204" cy="92" r="11"/><circle cx="300" cy="80" r="12"/>
+    <circle cx="404" cy="196" r="13"/><circle cx="418" cy="260" r="11"/>
+    <circle cx="386" cy="368" r="12"/><circle cx="296" cy="420" r="11"/>
+    <circle cx="204" cy="428" r="10"/><circle cx="122" cy="356" r="11"/>
+    <circle cx="252" cy="150" r="10"/><circle cx="330" cy="250" r="11"/>
+  </g>
+  <!-- fissures -->
+  <g stroke="#000" stroke-opacity=".45" fill="none" stroke-linecap="round">
+    <path d="M96 232c26 18 38 48 32 82" stroke-width="7"/>
+    <path d="M212 84c11 29 8 55-8 81" stroke-width="6"/>
+    <path d="M352 106c-15 22-18 48-11 74" stroke-width="6.5"/>
+    <path d="M416 252c-22 15-33 41-29 70" stroke-width="6"/>
+    <path d="M300 396c-22-7-48-4-70 11" stroke-width="6.5"/>
+  </g>
+  <!-- sheen -->
+  <path fill="#c9a06a" opacity=".14" d="M259 60c62-4 122 22 152 72 26 44 27 102 3 150-25 51-76 88-138 97-64 9-130-10-165-57C79 279 71 213 96 160c26-55 86-96 152-99 4-1 8-1 11-1z"/>
+
+  <!-- three candlesticks across the circumference: bearish / tall bull / bull -->
+  <g stroke-linecap="round">
+    <!-- left (bearish, dim gold) -->
+    <line x1="34" y1="212" x2="34" y2="330" stroke="url(#goldDim)" stroke-width="11"/>
+    <rect x="22" y="240" width="24" height="62" rx="4" fill="url(#goldDim)"/>
+    <!-- middle (tall bullish, bright gold) -->
+    <line x1="258" y1="52" x2="258" y2="188" stroke="url(#gold)" stroke-width="11"/>
+    <rect x="246" y="84" width="24" height="70" rx="4" fill="url(#gold)"/>
+    <!-- right (bullish, bright gold) -->
+    <line x1="478" y1="226" x2="478" y2="344" stroke="url(#gold)" stroke-width="11"/>
+    <rect x="466" y="254" width="24" height="60" rx="4" fill="url(#gold)"/>
+  </g>
+</svg>

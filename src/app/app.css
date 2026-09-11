@@ -1,0 +1,172 @@
+/* TruffleTrade app shell — the paid desktop workspace theme.
+   Scoped under .tt-app so the public website stays light while the app is dark. */
+
+.tt-app {
+  --app-bg: #0c1210;
+  --app-bg-raised: #121a16;
+  --app-panel: #141d18;
+  --app-line: #22302a;
+  --app-line-strong: #2e4038;
+  --app-ink: #dce7de;
+  --app-ink-soft: #9db1a3;
+  --app-ink-faint: #66796d;
+  --app-accent: #58a97b;
+  --app-accent-deep: #2f6b47;
+  --app-gold: #e8ae52;
+  --app-pos: #4ade80;
+  --app-neg: #f07a5a;
+  --app-radius: 12px;
+
+  background: var(--app-bg);
+  color: var(--app-ink);
+  min-height: 100vh;
+  font-size: 13.5px;
+}
+
+.tt-app ::selection { background: #2f6b47; color: #eef5ee; }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.tt-shell { display: flex; min-height: 100vh; }
+
+.tt-sidebar {
+  width: 232px;
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 45;
+  background: #0a100e;
+  border-right: 1px solid var(--app-line);
+  padding: 22px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-line-strong) transparent;
+}
+
+.tt-main { margin-left: 232px; flex: 1; min-width: 0; }
+.tt-content { max-width: 1220px; margin: 0 auto; padding: 26px 28px 60px; }
+
+/* Brand */
+.tt-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 4px; }
+.tt-brand img { width: 30px; height: 30px; border-radius: 8px; }
+.tt-brand strong { font-size: 15px; letter-spacing: -0.6px; color: #eef5ee; font-weight: 800; }
+.tt-brand strong em { color: var(--app-accent); font-style: normal; }
+.tt-brand small { display: block; font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--app-ink-faint); margin-top: 2px; }
+
+.tt-nav-label { font-size: 8.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--app-ink-faint); font-weight: 700; padding: 0 10px; margin: 22px 0 8px; }
+
+.tt-nav { display: flex; flex-direction: column; gap: 3px; }
+.tt-nav a {
+  display: flex; align-items: center; gap: 11px;
+  min-height: 38px; padding: 8px 11px; border-radius: 8px;
+  color: var(--app-ink-soft); font-size: 12.5px; font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+.tt-nav a:hover { background: #101814; color: var(--app-ink); }
+.tt-nav a.is-active {
+  background: linear-gradient(90deg, #14251c, #101a15);
+  border-color: var(--app-line-strong);
+  color: #eaf5ea; font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--app-accent);
+}
+.tt-nav a .tt-ico { width: 17px; text-align: center; font-size: 13px; opacity: 0.85; }
+.tt-nav a .tt-badge {
+  margin-left: auto; font-size: 8.5px; padding: 2px 6px; border-radius: 5px;
+  background: #1a2b21; border: 1px solid var(--app-line-strong); color: var(--app-accent); font-weight: 700;
+}
+
+/* promo card at sidebar bottom */
+.tt-promo {
+  margin-top: auto; position: relative; isolation: isolate; overflow: hidden;
+  background: linear-gradient(150deg, #14251c, #0e1913);
+  border: 1px solid var(--app-line-strong); border-radius: 12px; padding: 16px 14px;
+}
+.tt-promo h3 { font-size: 13.5px; color: #d9ead9; font-weight: 700; line-height: 1.4; }
+.tt-promo p { font-size: 10.5px; color: var(--app-ink-faint); margin-top: 6px; line-height: 1.6; }
+.tt-promo a {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 12px; padding: 8px 10px; border-radius: 7px;
+  background: var(--app-accent-deep); color: #eaf5ea; font-size: 10.5px; font-weight: 700;
+}
+.tt-promo a:hover { background: #3a7d54; }
+.tt-promo::after {
+  content: ""; position: absolute; width: 150px; height: 150px; border-radius: 50%;
+  border: 1px solid #58a97b1f; right: -50px; top: -40px; z-index: -1;
+}
+
+/* ── Cards & panels ─────────────────────────────────────── */
+.tt-card {
+  background: var(--app-panel);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius);
+}
+.tt-card-pad { padding: 18px; }
+
+.tt-page-title { font-size: 24px; font-weight: 800; letter-spacing: -1px; color: #eef5ee; }
+.tt-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--app-ink-faint); }
+.tt-sub { font-size: 12px; color: var(--app-ink-soft); margin-top: 4px; }
+
+.tt-grid { display: grid; gap: 16px; }
+
+/* index / stat cards */
+.tt-stat { position: relative; overflow: hidden; padding: 15px 16px; }
+.tt-stat h3 { font-size: 10.5px; font-weight: 700; color: var(--app-ink-soft); }
+.tt-stat .tt-val { font-size: 21px; font-weight: 800; letter-spacing: -0.7px; color: #eef5ee; margin-top: 6px; }
+.tt-stat .tt-delta { font-size: 11px; font-weight: 600; margin-top: 2px; }
+
+.pos { color: var(--app-pos) !important; }
+.neg { color: var(--app-neg) !important; }
+.tt-muted { color: var(--app-ink-soft); }
+.tt-faint { color: var(--app-ink-faint); }
+
+/* tables */
+.tt-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+.tt-table th {
+  padding: 9px 12px; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--app-ink-faint); font-weight: 600;
+  border-bottom: 1px solid var(--app-line);
+  background: #101814;
+}
+.tt-table td { padding: 11px 12px; border-bottom: 1px solid var(--app-line); color: var(--app-ink); }
+.tt-table tr:last-child td { border-bottom: 0; }
+.tt-table tbody tr:hover td { background: #17231d; }
+
+/* buttons */
+.tt-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border-radius: 8px; font-weight: 700; font-size: 11.5px; letter-spacing: 0.02em;
+  padding: 10px 18px; border: 1px solid transparent; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tt-btn-primary { background: var(--app-accent-deep); color: #eaf5ea; }
+.tt-btn-primary:hover { background: #3a7d54; }
+.tt-btn-ghost { background: transparent; border-color: var(--app-line-strong); color: var(--app-ink-soft); }
+.tt-btn-ghost:hover { border-color: var(--app-accent); color: var(--app-ink); }
+.tt-btn-gold { background: #8a5f1d; color: #ffe9b8; }
+.tt-btn-gold:hover { background: #a06e22; }
+
+.tt-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 6px;
+  background: #1a2b21; border: 1px solid var(--app-line-strong); color: var(--app-accent);
+}
+
+/* live dot */
+.tt-live { position: relative; width: 7px; height: 7px; border-radius: 50%; background: var(--app-pos); display: inline-block; flex-shrink: 0; }
+.tt-live::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid var(--app-pos); animation: ttPing 1.6s ease-out infinite; }
+@keyframes ttPing { 0% { transform: scale(0.5); opacity: 0.9; } 100% { transform: scale(1.7); opacity: 0; } }
+
+/* mobile nav fallback */
+.tt-mobile-nav { display: none; }
+@media (max-width: 900px) {
+  .tt-sidebar { display: none; }
+  .tt-main { margin-left: 0; }
+  .tt-mobile-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .tt-mobile-nav a { padding: 8px 12px; border: 1px solid var(--app-line-strong); border-radius: 8px; font-size: 11px; font-weight: 600; color: var(--app-ink-soft); }
+}
+
+/* CandleChart sits comfortably on dark: soften card borders */
+.tt-app .card { background: var(--app-panel); border-color: var(--app-line); }
+.tt-app .live-dot { background: var(--app-pos); }

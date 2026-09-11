@@ -9,6 +9,9 @@ const ANALYSTS = [
   { name: "Macro", brief: "SPY, VIX, yields, the dollar. Regime first, chart second.", tint: "#efedf3", ink: "#8d80a8" },
   { name: "Competition", brief: "Reads the peer set: who's winning the margin war, who's losing the multiple.", tint: "#f3e9e0", ink: "#b08262" },
   { name: "News", brief: "Headlines as evidence — sourced, dated, and distrusted until verified.", tint: "#f1e7e7", ink: "#ad7c7c" },
+  { name: "Chart patterns", brief: "Reads the raw OHLC series: structure, breaks, volatility contraction before expansion.", tint: "#e7eef7", ink: "#5b7fa8" },
+  { name: "Scenario", brief: "Bull / base / bear cases — each with the assumption that must come true.", tint: "#eef0e7", ink: "#7a8757" },
+  { name: "Backtest", brief: "Replays this exact setup over the ticker's own 3-year history. Sample sizes cited.", tint: "#f0e9f0", ink: "#8d6f8d" },
 ];
 
 const FAQ = [
@@ -61,7 +64,7 @@ export default function LandingPage() {
                 <span className="text-forest">More signal.</span>
               </h1>
               <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-bone-soft">
-                TruffleTrade points six rival AI analysts, a fact-checker, and a red team at any stock chart — then
+                TruffleTrade points nine rival AI analysts, a fact-checker, and a red team at any stock chart — then
                 remembers what it learned. It doesn&apos;t trade for you. It makes sure you&apos;ve seen every side of
                 the argument before you click the button yourself.
               </p>
@@ -75,7 +78,7 @@ export default function LandingPage() {
               </div>
               <dl className="mt-11 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
-                  ["6+1", "analysts incl. red team"],
+                  ["9+1", "analysts incl. red team"],
                   ["100%", "claims fact-checked"],
                   ["24/7", "memory on your device"],
                   ["1,000", "sats a month"],
@@ -136,9 +139,19 @@ export default function LandingPage() {
             Rivals, not yes-men
           </h2>
           <p className="mt-4 max-w-2xl text-[14px] leading-relaxed text-bone-soft">
-            Every analysis is a structured argument, not a chatbot answer. Six specialists with conflicting mandates
-            investigate the same chart independently — then fight it out in front of a hostile referee.
+            Every analysis is a structured argument, not a chatbot answer. Nine specialists with conflicting mandates
+            investigate the same chart in parallel — then defend it in front of a hostile referee.
           </p>
+
+          {/* Simulated session — the product's look, honestly labeled */}
+          <div className="mt-8 overflow-hidden rounded-2xl border border-soil-500">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/council-sim-dark.svg"
+              alt="Simulated council session: candlesticks with nine analyst votes and the consensus band"
+              className="w-full"
+            />
+          </div>
           <div className="mt-11 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {ANALYSTS.map((a) => (
               <article key={a.name} className="card p-6 transition-transform hover:-translate-y-0.5">
@@ -249,11 +262,11 @@ export default function LandingPage() {
               </div>
               <ul className="mt-6 space-y-3 text-[13.5px] text-ink/85">
                 {[
-                  "Live candlestick dashboard + unlimited chart analyses",
-                  "Six-analyst council + fact-checker + red team",
+                  "Live candlestick dashboard + real-time news, free tier included",
+                  "Nine-analyst council + historical backtester + red team",
+                  "Desktop app for Windows — pin it, launch it, it's yours",
                   "Local memory system with automatic updates",
                   "Federated learning from every installation",
-                  "All future engine upgrades while subscribed",
                   "No KYC — pay from any Lightning wallet",
                 ].map((f) => (
                   <li key={f} className="flex gap-3">

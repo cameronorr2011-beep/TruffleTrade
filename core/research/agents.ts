@@ -1,7 +1,8 @@
 // Agent runner: executes the council with evidence extraction and red team.
-// Council runs sequentially (not parallel) so a run stays under free-tier LLM
-// rate limits; the provider retries transient 429/5xx with backoff as backup.
-// Red team runs after and can REJECT the whole run.
+// The six analysts run IN PARALLEL (each is a delegated subagent with its own
+// mandate and prompt version); the shared provider serializes on 429s with
+// backoff, and per-agent failures degrade to insufficient-evidence instead of
+// killing the run. Red team runs after and can REJECT the whole run.
 
 import type { AgentOutput, DataPack, Evidence, NumericClaim, Stance } from "./types";
 import { factCheckAgent, stripViolatedNumbers } from "./factcheck";
@@ -60,16 +61,19 @@ export async function runAgentCouncil(
   provider: AIProvider,
   pack: DataPack,
   valuationContext: string,
+  backtestCtx?: string,
 ): Promise<CouncilResult> {
-  const council: AgentOutput[] = [];
-  for (const spec of ALL_AGENT_SPECS) {
-    council.push(
-      await (async (): Promise<AgentOutput> => {
+  // Delegated subagents: every analyst is an independent worker with its own
+  // mandate, fired concurrently. One agent failing never fails the council.
+  const council: AgentOutput[] = await Promise.all(
+    ALL_AGENT_SPECS.map(
+      (spec): Promise<AgentOutput> =>
+        (async (): Promise<AgentOutput> => {
       try {
         const r = await provider.chatJson<RawAgentJson>(
           [
             { role: "system", content: spec.system },
-            { role: "user", content: agentUser(spec.key, pack, valuationContext) },
+            { role: "user", content: agentUser(spec.key, pack, valuationContext, backtestCtx) },
           ],
           promptVersion(spec.key),
           1600,
@@ -118,13 +122,13 @@ export async function runAgentCouncil(
           model: "unreachable",
         };
       }
-      })(),
-    );
-  }
+        })(),
+    ),
+  );
 
   // Red team sees the council's raw outputs and attacks (§7).
   const redTeam = await runRedTeam(provider, pack, council);
-  return { agents: [...council, redTeam], aiCalls: 7 };
+  return { agents: [...council, redTeam], aiCalls: ALL_AGENT_SPECS.length + 1 };
 }
 
 async function runRedTeam(provider: AIProvider, pack: DataPack, council: AgentOutput[]): Promise<AgentOutput> {
