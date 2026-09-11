@@ -28,9 +28,25 @@ export async function POST(req: Request) {
   }
 
   const orderId = newOrderId();
-  const origin = parsed.data.callbackUrl
-    ? undefined
-    : new URL(req.url).origin;
+
+  // Manual mode: no ZBD_API_KEY configured (or TT_PAYMENT_MODE=manual).
+  // The buyer sends 1,000 sats to the operator's Lightning address from any
+  // wallet; the operator approves the order via /api/admin/orders and the
+  // access code appears on the buyer's screen. This keeps the site sellable
+  // while ZBD business onboarding (KYB) is pending.
+  const manualMode = !process.env.ZBD_API_KEY?.trim() || process.env.TT_PAYMENT_MODE === "manual";
+  if (manualMode) {
+    await licensingDb().createOrder(orderId, `wos-manual-${orderId}`, Date.now());
+    return NextResponse.json({
+      ok: true,
+      manual: true,
+      orderId,
+      priceSats: PRICE_SATS,
+      lightningAddress: process.env.TT_WOS_LIGHTNING_ADDRESS?.trim() || "clumsyparsnip913@walletofsatoshi.com",
+    });
+  }
+
+  const origin = parsed.data.callbackUrl ? undefined : new URL(req.url).origin;
   const callbackUrl =
     parsed.data.callbackUrl ??
     (origin ? `${process.env.TT_SITE_URL?.replace(/\/$/, "") || origin}/api/billing/zbd-webhook` : undefined);

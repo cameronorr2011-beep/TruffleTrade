@@ -52,6 +52,7 @@ export interface LicensingDb {
   saveFederationUpdate(ts: number, peerHash: string, tokens: number, epoch: number, batchJson: string): Awaitable<void>;
   recentFederationUpdates(limit: number): Awaitable<{ id: number; ts: number; peerHash: string; tokens: number; epoch: number; batchJson: string }[]>;
   pruneFederation(beforeTs: number): Awaitable<void>;
+  recentOrders(limit: number): Awaitable<OrderRow[]>;
 }
 
 const SCHEMA_SQLITE = `
@@ -253,6 +254,11 @@ class SqliteLicensingDb implements LicensingDb {
   pruneFederation(beforeTs: number): void {
     this.db.prepare(`DELETE FROM tt_federation_updates WHERE ts < ?`).run(beforeTs);
   }
+  recentOrders(limit: number): OrderRow[] {
+    return (
+      this.db.prepare(`SELECT * FROM tt_orders ORDER BY created_ts DESC LIMIT ?`).all(limit) as Record<string, unknown>[]
+    ).map(rowToOrder);
+  }
 }
 
 class PostgresLicensingDb implements LicensingDb {
@@ -329,6 +335,10 @@ class PostgresLicensingDb implements LicensingDb {
   }
   async pruneFederation(beforeTs: number): Promise<void> {
     await this.q(`DELETE FROM tt_federation_updates WHERE ts < $1`, [beforeTs]);
+  }
+  async recentOrders(limit: number): Promise<OrderRow[]> {
+    const rows = await this.q(`SELECT * FROM tt_orders ORDER BY created_ts DESC LIMIT $1`, [limit]);
+    return rows.map(rowToOrder);
   }
 }
 

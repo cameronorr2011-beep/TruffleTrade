@@ -89,6 +89,17 @@ export async function orderStatus(orderId: string): Promise<{
   const db = licensingDb();
   const order = await db.getOrder(orderId);
   if (!order) throw new Error(`unknown order ${orderId}`);
+
+  // Manual (Wallet of Satoshi) orders have no ZBD charge to poll.
+  if (order.chargeId.startsWith("wos-manual-")) {
+    if (order.status === "issued") {
+      const code = order.codePlain ?? (await db.getOrderPlainCode(orderId));
+      const codeRow = order.codeHash ? await db.getCode(order.codeHash) : null;
+      return { status: "issued", paid: true, accessCode: code ?? undefined, expiresTs: codeRow?.expiresTs };
+    }
+    return { status: order.status, paid: false };
+  }
+
   if (order.status === "issued") {
     // Deliver the app: return the access code + expiry so the UI can show
     // the code and the download/setup steps immediately after payment.
