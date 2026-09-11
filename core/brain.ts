@@ -15,6 +15,32 @@ async function groqJson<T>(
   user: string,
   maxTokens = 2500,
 ): Promise<T> {
+  // Subscriber path: no local Groq key — route through the TruffleTrade gateway.
+  const gatewayUrl = process.env.TT_GATEWAY_URL?.trim();
+  const accessCode = process.env.TT_ACCESS_CODE?.trim();
+  if (gatewayUrl && accessCode) {
+    const res = await fetch(`${gatewayUrl.replace(/\/$/, "")}/api/gateway/ai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-access-code": accessCode },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+        model,
+        maxTokens,
+        promptVersion: "desk-v1",
+      }),
+      signal: AbortSignal.timeout(120_000),
+    });
+    const gj = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; data?: T };
+    if (!res.ok || !gj.ok || gj.data === undefined) {
+      throw new Error(`Gateway (${res.status}): ${gj.error ?? "request failed"}`);
+    }
+    return gj.data;
+  }
+
+  // Operator path: direct Groq with the server-side key.
   const res = await fetch(GROQ_URL, {
     method: "POST",
     headers: {

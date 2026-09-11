@@ -4,7 +4,7 @@
 import type { Candle, DataPack, Fundamentals, NewsItem, Quote } from "./types";
 
 const YAHOO = "https://query1.finance.yahoo.com";
-const UA = "Mozilla/5.0 (compatible; WOLFPIT/1.0; research terminal)";
+const UA = "Mozilla/5.0 (compatible; TruffleTrade/1.0; research terminal)";
 
 async function getJson<T>(url: string, timeoutMs = 15_000): Promise<T> {
   const res = await fetch(url, {
@@ -127,13 +127,60 @@ export interface SummaryData {
   targetMeanPrice: number | null;
 }
 
-/** Fundamentals from Yahoo quoteSummary. Frequently gated — callers must handle null. */
+// ── Yahoo cookie+crumb auth ───────────────────────────────────────────
+// quoteSummary requires an A3 cookie + crumb since 2023. Cached process-wide.
+let crumbCache: { cookie: string; crumb: string; ts: number } | null = null;
+const CRUMB_TTL_MS = 30 * 60_000;
+
+async function yahooCrumb(): Promise<{ cookie: string; crumb: string }> {
+  if (crumbCache && Date.now() - crumbCache.ts < CRUMB_TTL_MS) {
+    return { cookie: crumbCache.cookie, crumb: crumbCache.crumb };
+  }
+  // Step 1: collect the A3 consent cookie (response body is irrelevant).
+  const cRes = await fetch("https://fc.yahoo.com", {
+    headers: { "User-Agent": UA },
+    signal: AbortSignal.timeout(10_000),
+  }).catch(() => null);
+  const setCookies = cRes?.headers.getSetCookie?.() ?? [];
+  const a3 = setCookies.map((c) => c.split(";")[0]).find((c) => c.startsWith("A3="));
+  if (!a3) throw new Error("yahoo: no A3 cookie issued");
+  // Step 2: exchange the cookie for a crumb.
+  const crumbRes = await fetch(`${YAHOO}/v1/test/getcrumb`, {
+    headers: { "User-Agent": UA, Cookie: a3, Accept: "text/plain" },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!crumbRes.ok) throw new Error(`yahoo: getcrumb HTTP ${crumbRes.status}`);
+  const crumb = (await crumbRes.text()).trim();
+  if (!crumb || crumb.startsWith("<")) throw new Error("yahoo: empty crumb");
+  crumbCache = { cookie: a3, crumb, ts: Date.now() };
+  return { cookie: a3, crumb };
+}
+
+/** Fundamentals from Yahoo quoteSummary (cookie+crumb auth). Callers must handle null. */
 export async function yahooSummary(ticker: string): Promise<SummaryData | null> {
   const modules = "summaryDetail,defaultKeyStatistics,financialData,assetProfile";
-  const url = `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}`;
   let j: YahooSummary;
   try {
-    j = await getJson<YahooSummary>(url);
+    const { cookie, crumb } = await yahooCrumb();
+    const url = `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}&crumb=${encodeURIComponent(crumb)}`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": UA, Cookie: cookie, Accept: "application/json" },
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (res.status === 401 || res.status === 403 || res.status === 404) {
+      // Stale crumb or unknown ticker — retry once with a fresh crumb.
+      crumbCache = null;
+      const fresh = await yahooCrumb();
+      const retry = await fetch(`${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}&crumb=${encodeURIComponent(fresh.crumb)}`, {
+        headers: { "User-Agent": UA, Cookie: fresh.cookie, Accept: "application/json" },
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!retry.ok) throw new Error(`HTTP ${retry.status} from ${new URL(url).host}`);
+      j = (await retry.json()) as YahooSummary;
+    } else {
+      if (!res.ok) throw new Error(`HTTP ${res.status} from ${new URL(url).host}`);
+      j = (await res.json()) as YahooSummary;
+    }
   } catch {
     return null; // gated/blocked — DATA UNAVAILABLE, honest fallback
   }

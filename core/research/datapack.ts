@@ -65,7 +65,6 @@ export async function buildDataPack(ticker: string): Promise<DataPack> {
     source: "unavailable",
   };
   if (quote.marketCap == null && summary?.marketCap != null) quote.marketCap = summary.marketCap;
-  if (quote.name == null && summary) quote.name = null;
 
   const availability: Record<string, boolean> = {
     quote: quote.price != null,

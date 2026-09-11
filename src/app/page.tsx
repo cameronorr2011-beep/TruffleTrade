@@ -1,34 +1,45 @@
 import Link from "next/link";
+import BuyPanel from "@/components/site/BuyPanel";
 
-const AGENTS = [
-  { name: "MOMENTUM", style: "Trend-follower", creed: "Rides breakouts and Donchian surges. Wrong in chop, right in trends.", color: "#e2762f" },
-  { name: "REVERSION", style: "Mean-reverter", creed: "Fades exhaustion at the bands. Buys panic, sells euphoria.", color: "#ab93ee" },
-  { name: "MACRO", style: "Strategist", creed: "Reads SPY, VIXY and the dollar. Regime first, chart second.", color: "#f09a4f" },
-  { name: "FLOW", style: "Volume analyst", creed: "Trusts only confirmed volume. Distrusts thin breakouts on principle.", color: "#8464d8" },
-  { name: "SENTINEL", style: "Risk guardian", creed: "Votes to protect capital. Would rather miss ten trades than take one bad one.", color: "#d1462f" },
+const ANALYSTS = [
+  { name: "FUNDAMENTALS", brief: "Balance sheets, margins, growth quality. Numbers first, narrative second.", color: "#f5c26b" },
+  { name: "VALUATION", brief: "DCF, reverse-DCF, peer comps — every assumption exposed, no bare fair-value promises.", color: "#d9903c" },
+  { name: "TECHNICALS", brief: "Deterministic indicators computed in code; the AI interprets them, never invents them.", color: "#9c5a1c" },
+  { name: "MACRO", brief: "SPY, VIX, yields, the dollar. Regime first, chart second.", color: "#f8d795" },
+  { name: "COMPETITION", brief: "Reads the peer set: who's winning the margin war, who's losing the multiple.", color: "#75603f" },
+  { name: "NEWS", brief: "Headlines as evidence — sourced, dated, and distrusted until verified.", color: "#57452f" },
 ];
 
 const PILLARS = [
   {
     kicker: "The novel part",
     title: "Adversarial by design",
-    body: "Hedge funds are monoliths: one model, one opinion, one blind spot. WOLFPIT runs five rival agents with opposing mandates, then makes a sixth — the red team — argue against the winning idea before a single satoshi moves. Bad trades have to survive a hostile committee to exist.",
+    body: "One model, one opinion, one blind spot — that's a hedge fund. TruffleTrade runs six rival analysts with opposing mandates, then makes an adversary attack the winning case before it reaches you. If the evidence is too thin, the red team rejects the whole exercise and nothing is issued. Bad analysis has to survive a hostile committee.",
   },
   {
-    kicker: "Full transparency",
-    title: "Every debate, on the record",
-    body: "Each cycle persists every vote with confidence and rationale, the red team's objections, and the exact fills — in an open SQLite ledger you can query yourself. No black box, no 'our proprietary model'.",
+    kicker: "A memory that learns",
+    title: "Every prediction audited, forever",
+    body: "Each run distills what the system believed into memory facts: regimes observed, predictions made, outcomes resolved. A digital-twin trainer replays thousands of synthetic markets calibrated on real candles to build priors. Your memory lives on your device, updates automatically, and improves the next analysis.",
   },
   {
-    kicker: "No KYC",
-    title: "Self-custody, not sign-ups",
-    body: "Market data is keyless (Kraken, Coinbase, Yahoo Finance). Paper mode needs nothing at all. Degen Mode trades real BTC exposure from your own wallet — USDC ⇄ cbBTC swaps on Base via Uniswap V3 — no exchange account, no identity verification, capped by hard limits and a drawdown kill switch. US exchanges themselves require KYC by federal law; trading from your own wallet does not.",
+    kicker: "Federated by default",
+    title: "Collective learning, zero data leaks",
+    body: "Installs exchange only what federated learning allows: hashed subjects and count summaries — never your watchlist, never your notes, never raw content. The aggregated weights come back to every subscriber. The hive gets smarter; your data stays yours.",
   },
   {
-    kicker: "Defense in depth",
-    title: "Risk engine outranks the AI",
-    body: "Stops, targets, time stops and 1% risk-per-trade sizing are enforced by deterministic code the council cannot override. If equity draws down past the kill switch, the desk goes flat and stays flat. The AI proposes; the risk engine disposes.",
+    kicker: "Open source, honestly",
+    title: "You can read every line",
+    body: "The complete engine — agents, fact-checker, red team, memory, twin — is MIT-licensed on GitHub. The AI runs on our infrastructure behind your subscription, so you never manage API keys. What you're paying for is the intelligence pipeline, and you can audit all of it.",
   },
+];
+
+const CYCLE = [
+  ["01", "Ingest", "Candles, fundamentals, headlines, macro — keyless public sources, honest DATA UNAVAILABLE when gated."],
+  ["02", "Model", "Deterministic DCF, reverse-DCF, comps and indicators computed in code with exposed assumptions."],
+  ["03", "Debate", "Six analysts investigate independently — stance, confidence, rationale, all on the record."],
+  ["04", "Verify", "Every numeric claim is extracted and checked against the data. Unsupported numbers are stripped."],
+  ["05", "Attack", "The red team cross-examines the consensus. Thin evidence = REJECT. Fail-closed, always."],
+  ["06", "Remember", "Insights, predictions and outcomes become memory. The twin trains. Federated updates sync."],
 ];
 
 export default function LandingPage() {
@@ -39,47 +50,44 @@ export default function LandingPage() {
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-[-320px] h-[640px] w-[900px] -translate-x-1/2 rounded-full opacity-25 blur-3xl"
-          style={{ background: "radial-gradient(closest-side, #443080, transparent)" }}
+          style={{ background: "radial-gradient(closest-side, #57452f, transparent)" }}
         />
         <div className="relative mx-auto max-w-[1280px]">
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">
-            Autonomous BTC desk · Council of rivals · No KYC
+          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">
+            AI chart intelligence · Council of rivals · Memory included
           </span>
           <h1 className="font-display mt-6 max-w-4xl text-[clamp(2.6rem,6.5vw,5.2rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-bone">
-            Five AIs argue.
+            The market buries signal.
             <br />
-            A red team kills the bad ideas.
-            <br />
-            <span className="text-ember-300">The survivors trade.</span>
+            <span className="text-truffle-400">We dig it up.</span>
           </h1>
           <p className="mt-7 max-w-2xl text-[1.05rem] leading-relaxed text-bone/60">
-            WOLFPIT is an open-source trading desk where rival agents with opposing mandates debate every
-            Bitcoin trade — and an adversarial red team must approve it before execution. Every vote,
-            objection and fill lands in a public ledger. Hedge funds can&apos;t show you their thinking.
-            This one won&apos;t shut up about it.
+            TruffleTrade aims six rival AI analysts, a fact-checker and a red team at any stock chart you point it at —
+            then remembers what it learned. It doesn&apos;t trade for you, and it never will without you. It makes sure
+            you&apos;ve seen every side of the argument before you click the button yourself.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link
-              href="/desk"
-              className="rounded-full bg-ember-500 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-void transition-colors hover:bg-ember-400"
+              href="/buy"
+              className="rounded-full bg-truffle-500 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-void transition-colors hover:bg-truffle-400"
             >
-              Open the live desk
+              Get access — 1,000 sats/mo
             </Link>
             <a
               href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER"
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-pit-300/25 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-bone/75 transition-colors hover:border-pit-300/50 hover:text-bone"
+              className="rounded-full border border-bone/25 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-bone/75 transition-colors hover:border-truffle-400/50 hover:text-bone"
             >
               Read the source
             </a>
           </div>
           <dl className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              ["5+1", "agents incl. red team"],
-              ["100%", "votes on the record"],
-              ["0", "KYC required"],
-              ["1%", "max risk per trade"],
+              ["6+1", "analysts incl. red team"],
+              ["100%", "claims fact-checked"],
+              ["24/7", "memory on your device"],
+              ["1,000", "sats a month"],
             ].map(([n, l]) => (
               <div key={l} className="card px-5 py-4">
                 <dt className="font-display text-[1.7rem] font-semibold text-bone">{n}</dt>
@@ -90,15 +98,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* The pit */}
-      <section className="px-5 py-24 sm:px-8">
+      {/* Council */}
+      <section id="product" className="scroll-mt-20 px-5 py-24 sm:px-8">
         <div className="mx-auto max-w-[1280px]">
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">The pit</span>
+          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">The council</span>
           <h2 className="font-display mt-5 max-w-2xl text-[clamp(1.9rem,4vw,3.1rem)] font-semibold leading-[1.05] text-bone">
             Rivals, not yes-men
           </h2>
+          <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-bone/55">
+            Every analysis is a structured argument, not a chatbot answer. Six specialists with conflicting mandates
+            investigate the same chart independently — then fight it out in front of a hostile referee.
+          </p>
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {AGENTS.map((a) => (
+            {ANALYSTS.map((a) => (
               <article key={a.name} className="card group relative overflow-hidden p-6">
                 <div
                   aria-hidden
@@ -108,17 +120,17 @@ export default function LandingPage() {
                 <h3 className="font-mono text-[0.95rem] font-semibold tracking-[0.14em]" style={{ color: a.color }}>
                   {a.name}
                 </h3>
-                <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.24em] text-bone/40">{a.style}</p>
-                <p className="mt-4 text-[0.92rem] leading-relaxed text-bone/60">{a.creed}</p>
+                <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.24em] text-bone/40">Analyst</p>
+                <p className="mt-4 text-[0.92rem] leading-relaxed text-bone/60">{a.brief}</p>
               </article>
             ))}
-            <article className="card relative overflow-hidden border-ember-400/30 p-6">
-              <div aria-hidden className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-ember-500 opacity-20 blur-2xl" />
-              <h3 className="font-mono text-[0.95rem] font-semibold tracking-[0.14em] text-ember-300">RED TEAM</h3>
+            <article className="card relative overflow-hidden border-blood/30 p-6">
+              <div aria-hidden className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blood opacity-20 blur-2xl" />
+              <h3 className="font-mono text-[0.95rem] font-semibold tracking-[0.14em] text-blood">RED TEAM</h3>
               <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.24em] text-bone/40">Adversary</p>
               <p className="mt-4 text-[0.92rem] leading-relaxed text-bone/60">
-                A hostile risk committee paid to say no. It attacks the weak votes, the regime, the vol —
-                and nothing executes without surviving it. Fail-closed: if it can&apos;t be reached, nothing trades.
+                A hostile risk committee paid to say no. It attacks the weak arguments, the thin evidence, the stale
+                numbers — and if the case doesn&apos;t survive, no analysis is issued at all. Fail-closed.
               </p>
             </article>
           </div>
@@ -130,7 +142,7 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-[1280px] gap-5 md:grid-cols-2">
           {PILLARS.map((p) => (
             <article key={p.title} className="card p-7">
-              <span className="font-mono text-[0.6rem] uppercase tracking-[0.28em] text-ember-300/70">{p.kicker}</span>
+              <span className="font-mono text-[0.6rem] uppercase tracking-[0.28em] text-truffle-300/70">{p.kicker}</span>
               <h3 className="font-display mt-3 text-[1.5rem] font-semibold text-bone">{p.title}</h3>
               <p className="mt-3 text-[0.95rem] leading-relaxed text-bone/55">{p.body}</p>
             </article>
@@ -138,34 +150,71 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it runs */}
+      {/* The cycle */}
       <section className="px-5 pb-28 sm:px-8">
         <div className="mx-auto max-w-[1280px]">
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">The cycle</span>
+          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">The pipeline</span>
           <h2 className="font-display mt-5 max-w-2xl text-[clamp(1.9rem,4vw,3.1rem)] font-semibold leading-[1.05] text-bone">
-            Every {`\u2248`}5 minutes, on repeat
+            From chart to conviction, in six steps
           </h2>
           <ol className="mt-12 grid gap-5 md:grid-cols-3 lg:grid-cols-6">
-            {[
-              ["01", "Ingest", "BTC candles from Kraken (Coinbase fallback), SPY/VIXY/DXY from Yahoo — keyless."],
-              ["02", "Debate", "Five rival agents vote independently with confidence and rationale."],
-              ["03", "Tally", "Conviction-weighted net vote must clear the approval threshold."],
-              ["04", "Attack", "Red team cross-examines. Fail-closed: no approval, no trade."],
-              ["05", "Size", "Risk engine sizes to 1% equity per trade, 2×ATR stop, 3×ATR target."],
-              ["06", "Record", "Fills, P&L, every vote — persisted to the open SQLite ledger."],
-            ].map(([n, t, d]) => (
+            {CYCLE.map(([n, t, d]) => (
               <li key={n} className="card p-5">
-                <span className="font-mono text-[0.7rem] text-ember-300/80">{n}</span>
+                <span className="font-mono text-[0.7rem] text-truffle-300/80">{n}</span>
                 <h3 className="font-display mt-2 text-[1.15rem] font-semibold text-bone">{t}</h3>
                 <p className="mt-2 text-[0.82rem] leading-relaxed text-bone/50">{d}</p>
               </li>
             ))}
           </ol>
-          <p className="mt-10 max-w-3xl rounded-xl border border-ember-400/20 bg-ember-600/5 p-5 text-[0.85rem] leading-relaxed text-bone/55">
-            <strong className="text-ember-200">Honest disclaimer:</strong> this is an MVP desk built for
-            transparency and engineering rigor, not a guaranteed money printer. It defaults to paper mode.
-            If you enable live mode, the exposure cap and kill switch are your seatbelt — wear both.
+          <p className="mt-10 max-w-3xl rounded-xl border border-truffle-400/20 bg-truffle-600/5 p-5 text-[0.85rem] leading-relaxed text-bone/55">
+            <strong className="text-truffle-200">Honest disclaimer:</strong> TruffleTrade produces research and
+            analysis — it does not execute trades and is not investment advice. Forecasts are versioned and audited
+            against reality, including the misses. You make every final decision with your own broker.
           </p>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="scroll-mt-20 px-5 pb-28 sm:px-8">
+        <div className="mx-auto max-w-[1280px]">
+          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/80">Pricing</span>
+          <h2 className="font-display mt-5 max-w-2xl text-[clamp(1.9rem,4vw,3.1rem)] font-semibold leading-[1.05] text-bone">
+            One price. No KYC. Paid in sats.
+          </h2>
+          <div className="mt-12 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+            <article className="card border-truffle-400/30 p-8">
+              <span className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-truffle-300">TruffleTrade</span>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="font-display text-[3.2rem] font-semibold leading-none text-bone">1,000</span>
+                <span className="font-mono text-[0.8rem] uppercase tracking-[0.2em] text-bone/50">sats / 30 days</span>
+              </div>
+              <ul className="mt-6 space-y-3 text-[0.92rem] text-bone/65">
+                {[
+                  "Unlimited chart analyses — any ticker, any time",
+                  "Six-analyst council + fact-checker + red team",
+                  "Local memory system with automatic updates",
+                  "Federated learning from every installation",
+                  "All future engine upgrades while subscribed",
+                  "No KYC — pay from any Lightning wallet",
+                ].map((f) => (
+                  <li key={f} className="flex gap-3">
+                    <span aria-hidden className="text-truffle-400">◆</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/buy"
+                className="mt-8 inline-block rounded-full bg-truffle-500 px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-void transition-colors hover:bg-truffle-400"
+              >
+                Pay with Lightning
+              </Link>
+              <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/35">
+                30-day access · no auto-renew · pay again when you want
+              </p>
+            </article>
+            <BuyPanel />
+          </div>
         </div>
       </section>
     </div>

@@ -1,4 +1,4 @@
-# WOLFPIT AI System
+# TruffleTrade AI System
 
 How the adversarial AI works, what it may claim, and how it is evaluated.
 

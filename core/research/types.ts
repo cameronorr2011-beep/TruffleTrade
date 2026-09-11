@@ -1,4 +1,4 @@
-// WOLFPIT research domain — evidence-first types.
+// TruffleTrade research domain — evidence-first types.
 // Every analytical statement traces to evidence; every number must be verifiable.
 
 export type Stance =

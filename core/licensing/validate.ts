@@ -1,0 +1,65 @@
+// Subscription validation + abuse protection for the gateway.
+// Every gateway call presents an access code; the server checks:
+//   1. checksum (unforgeable)  2. DB record (active, not expired, not revoked)
+//   3. per-code rate limit (in-memory sliding window, per server instance)
+
+import { hashCode, verifyAccessCode } from "./codes";
+import { licensingDb } from "./db";
+
+export interface ValidationResult {
+  ok: boolean;
+  status: number;
+  error?: string;
+  codeHash?: string;
+  expiresTs?: number;
+}
+
+const DEFAULT_RATE_LIMIT = 60; // requests per window per code
+const WINDOW_MS = 60_000;
+
+const buckets = new Map<string, number[]>();
+
+export function rateLimitConfig(): { limit: number; windowMs: number } {
+  return {
+    limit: Number(process.env.GATEWAY_RATE_LIMIT_PER_MIN ?? DEFAULT_RATE_LIMIT),
+    windowMs: WINDOW_MS,
+  };
+}
+
+/** Per-code sliding-window rate limiter (in-memory, resets on redeploy — fine for abuse control). */
+export function checkRateLimit(codeHash: string): { ok: boolean; remaining: number; resetMs: number } {
+  const { limit, windowMs } = rateLimitConfig();
+  const now = Date.now();
+  let hits = buckets.get(codeHash);
+  if (!hits) {
+    hits = [];
+    buckets.set(codeHash, hits);
+  }
+  while (hits.length && now - hits[0] > windowMs) hits.shift();
+  if (hits.length >= limit) {
+    const resetMs = windowMs - (now - hits[0]);
+    return { ok: false, remaining: 0, resetMs: Math.max(100, resetMs) };
+  }
+  hits.push(now);
+  return { ok: true, remaining: limit - hits.length, resetMs: windowMs };
+}
+
+export async function validateAccessCode(raw: string): Promise<ValidationResult> {
+  const code = verifyAccessCode(raw);
+  if (!code) {
+    return { ok: false, status: 401, error: "invalid access code format" };
+  }
+  const hash = hashCode(code);
+  const row = await licensingDb().getCode(hash);
+  if (!row) {
+    return { ok: false, status: 401, error: "unknown access code" };
+  }
+  const now = Date.now();
+  if (row.status !== "active") {
+    return { ok: false, status: 403, error: "access code revoked" };
+  }
+  if (row.expiresTs <= now) {
+    return { ok: false, status: 402, error: "subscription expired — renew at truffletrade.app/buy" };
+  }
+  return { ok: true, status: 200, codeHash: hash, expiresTs: row.expiresTs };
+}

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="TruffleTrade logo — a black truffle with three candlesticks across its circumference">
+  <defs>
+    <radialGradient id="ttSkin" cx="38%" cy="32%" r="80%">
+      <stop offset="0%" stop-color="#4a4038"/>
+      <stop offset="55%" stop-color="#241f1a"/>
+      <stop offset="100%" stop-color="#0a0806"/>
+    </radialGradient>
+    <linearGradient id="ttWax" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5c26b"/>
+      <stop offset="55%" stop-color="#d9903c"/>
+      <stop offset="100%" stop-color="#9c5a1c"/>
+    </linearGradient>
+    <linearGradient id="ttCut" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6b5a4a"/>
+      <stop offset="100%" stop-color="#2e241c"/>
+    </linearGradient>
+    <linearGradient id="ttGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a231d" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0a0806" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- soft truffle-colored ground glow -->
+  <ellipse cx="60" cy="64" rx="46" ry="40" fill="#1a120a" opacity="0.55"/>
+
+  <!-- the truffle body -->
+  <circle cx="60" cy="60" r="44" fill="url(#ttSkin)"/>
+  <!-- warty skin: marbled polygons -->
+  <g fill="url(#ttWax)" opacity="0.9">
+    <path d="M60 22l7 8-9 6-6-9z"/>
+    <path d="M88 44l-9 4 3-10 8 2z"/>
+    <path d="M84 82l-8-3 7-6 4 5z"/>
+    <path d="M34 78l6-7 4 8-7 4z"/>
+    <path d="M30 40l9-2-4 9-7-2z"/>
+    <path d="M62 94l-8-3 6-6 5 4z"/>
+    <path d="M94 62l-8 2 4-8 6 3z"/>
+    <path d="M46 26l7 3-5 7-6-5z"/>
+  </g>
+  <g stroke="url(#ttWax)" stroke-width="1.4" opacity="0.55" fill="none" stroke-linejoin="round">
+    <path d="M28 48l14-10 12 6 14-12 16 8 8 14"/>
+    <path d="M26 66l16 4 10 12 14-6 12 8"/>
+    <path d="M50 30l6 12-2 14 10 12-4 16"/>
+    <path d="M78 32l-6 12 4 10-10 12 6 14"/>
+  </g>
+
+  <!-- inner cut face (marbled gleba) -->
+  <circle cx="60" cy="60" r="26" fill="url(#ttCut)"/>
+  <g stroke="#8a7358" stroke-width="1.1" opacity="0.5" fill="none">
+    <path d="M40 52c8 4 14 12 16 24"/>
+    <path d="M46 42c6 8 12 16 22 20"/>
+    <path d="M60 36c-2 10 0 20 6 30"/>
+    <path d="M74 44c-6 6-12 14-14 26"/>
+  </g>
+
+  <!-- the three candlesticks across the circumference -->
+  <g stroke-linecap="round">
+    <!-- left candle (bearish, ember) -->
+    <line x1="20" y1="42" x2="20" y2="72" stroke="#e2762f" stroke-width="2.4"/>
+    <rect x="15.5" y="49" width="9" height="16" rx="1.5" fill="#e2762f"/>
+    <!-- middle candle (bullish, gold) -->
+    <line x1="60" y1="30" x2="60" y2="64" stroke="#f5c26b" stroke-width="2.4"/>
+    <rect x="55.5" y="38" width="9" height="18" rx="1.5" fill="#f5c26b"/>
+    <!-- right candle (bullish, cream) -->
+    <line x1="100" y1="46" x2="100" y2="78" stroke="#f4efe9" stroke-width="2.4"/>
+    <rect x="95.5" y="54" width="9" height="16" rx="1.5" fill="#f4efe9"/>
+  </g>
+
+  <!-- rim highlight -->
+  <circle cx="60" cy="60" r="43.2" fill="none" stroke="#f5c26b" stroke-opacity="0.28" stroke-width="1.2"/>
+</svg>

@@ -1,6 +1,6 @@
-# WOLFPIT Architecture
+# TruffleTrade Architecture
 
-WOLFPIT is two engines on one stack (Next.js 16 + TypeScript + SQLite + Groq):
+TruffleTrade is two engines on one stack (Next.js 16 + TypeScript + SQLite + Groq):
 
 ```
 UI (server components + small client islands)
@@ -11,7 +11,7 @@ Application services (src/lib)          Research engine (core/research)
         ↓                                        ↓
 Deterministic core (core/)  ←———————— evidence layer (providers → datapack)
         ↓
-SQLite (data/wolfpit.sqlite3)
+SQLite (data/truffletrade.sqlite3)
 ```
 
 ## Two engines, one ledger

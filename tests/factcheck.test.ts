@@ -87,6 +87,27 @@ describe("claim extraction", () => {
     const claims = extractClaims("There are 4 quarters in a year and 7 dwarfs.", makePack({}));
     expect(claims.length).toBe(0);
   });
+
+  it("does not read the 20 in 'SMA20' as a $20 price claim (regression: live NVDA run)", () => {
+    const pack = makePack({});
+    const claims = extractClaims("Price is above SMA20 and SMA50, but below SMA200.", pack);
+    expect(claims.filter((c) => c.metric === "price")).toHaveLength(0);
+    expect(claims.filter((c) => c.metric.startsWith("sma"))).toHaveLength(0);
+  });
+
+  it("does not treat comparative language as a claim (regression: live NVDA run)", () => {
+    const pack = makePack({});
+    // Live bug: 'price 20' was extracted from 'price is above 20-day average ...'
+    const claims = extractClaims("The price is above the 20-day and 50-day averages, a bullish structure.", pack);
+    expect(claims.filter((c) => c.metric === "price" && c.value === 20)).toHaveLength(0);
+  });
+
+  it("extracts a claim stated through connectors ('SMA20 is 220.51')", () => {
+    const pack = makePack({});
+    pack.technicals.sma20 = 220.51;
+    const claims = extractClaims("SMA20 is 220.51, indicating the trend is intact.", pack);
+    expect(claims.some((c) => c.metric === "sma20" && Math.abs(c.value - 220.51) < 0.01)).toBe(true);
+  });
 });
 
 describe("fact checking", () => {
@@ -145,5 +166,15 @@ describe("violation stripping", () => {
     ]);
     expect(out).not.toContain("35");
     expect(out).toContain("[number removed");
+  });
+
+  it("does not mangle identifiers when stripping (regression: live NVDA run)", () => {
+    // Live bug: stripping stated=20 rewrote 'SMA20' → 'SMA[number removed]'.
+    const text = "Price is above SMA20 and holding.";
+    const out = stripViolatedNumbers(text, [
+      { claim: "price: 20", metric: "price", stated: 20, actual: 218.36, reason: "contradicted", detail: "x" },
+    ]);
+    expect(out).toContain("SMA20");
+    expect(out).not.toContain("SMA[number removed");
   });
 });

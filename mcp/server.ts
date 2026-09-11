@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * WOLFPIT MCP server.
+ * TruffleTrade MCP server.
  * Exposes the desk to any MCP client (Claude Desktop, etc.):
  *   - get_desk_status   : account, position, stats
  *   - get_btc_features  : live indicator pack
@@ -18,11 +18,11 @@ import { cycleOnce, makeBroker } from "../core/engine-core";
 import { recentTrades } from "../core/ledger";
 
 const server = new McpServer({
-  name: "wolfpit",
+  name: "truffletrade",
   version: "1.0.0",
 });
 
-server.tool("get_desk_status", "Account equity, cash, position, P&L stats and mode for the WOLFPIT desk", {}, async () => {
+server.tool("get_desk_status", "Account equity, cash, position, P&L stats and mode for the TruffleTrade desk", {}, async () => {
   assertConfig();
   const snap = await deskSnapshot();
   return {
@@ -98,10 +98,10 @@ server.tool(
 
 async function main(): Promise<void> {
   await server.connect(new StdioServerTransport());
-  console.error(`[wolfpit-mcp] ready (mode=${config.brokerMode}, model=${config.groqModel})`);
+  console.error(`[truffletrade-mcp] ready (mode=${config.brokerMode}, model=${config.groqModel})`);
 }
 
 main().catch((err) => {
-  console.error(`[wolfpit-mcp] fatal: ${err.message}`);
+  console.error(`[truffletrade-mcp] fatal: ${err.message}`);
   process.exit(1);
 });

@@ -1,5 +1,7 @@
 // Agent runner: executes the council with evidence extraction and red team.
-// Council runs in parallel; red team runs after and can REJECT the whole run.
+// Council runs sequentially (not parallel) so a run stays under free-tier LLM
+// rate limits; the provider retries transient 429/5xx with backoff as backup.
+// Red team runs after and can REJECT the whole run.
 
 import type { AgentOutput, DataPack, Evidence, NumericClaim, Stance } from "./types";
 import { factCheckAgent, stripViolatedNumbers } from "./factcheck";
@@ -59,8 +61,10 @@ export async function runAgentCouncil(
   pack: DataPack,
   valuationContext: string,
 ): Promise<CouncilResult> {
-  const council = await Promise.all(
-    ALL_AGENT_SPECS.map(async (spec): Promise<AgentOutput> => {
+  const council: AgentOutput[] = [];
+  for (const spec of ALL_AGENT_SPECS) {
+    council.push(
+      await (async (): Promise<AgentOutput> => {
       try {
         const r = await provider.chatJson<RawAgentJson>(
           [
@@ -114,8 +118,9 @@ export async function runAgentCouncil(
           model: "unreachable",
         };
       }
-    }),
-  );
+      })(),
+    );
+  }
 
   // Red team sees the council's raw outputs and attacks (§7).
   const redTeam = await runRedTeam(provider, pack, council);

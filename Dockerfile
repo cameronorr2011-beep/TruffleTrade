@@ -1,4 +1,4 @@
-# WOLFPIT — build the site + run the engine in one container
+# TruffleTrade — build the site + run the engine in one container
 FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./

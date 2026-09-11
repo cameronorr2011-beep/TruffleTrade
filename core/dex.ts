@@ -13,7 +13,7 @@ import { config } from "./config";
 import type { Broker, Fill } from "./broker";
 
 /**
- * WOLFPIT Degen Mode — REAL on-chain trading with NO account and NO KYC.
+ * TruffleTrade Degen Mode — REAL on-chain trading with NO account and NO KYC.
  *
  * Executes USDC <-> cbBTC swaps on Base (Coinbase's L2) through Uniswap V3's
  * SwapRouter02, signed by YOUR OWN private key from YOUR OWN wallet. There is

@@ -18,6 +18,10 @@ const root = process.cwd();
 export const config = {
   groqApiKey: process.env.GROQ_API_KEY?.trim() ?? "",
   groqModel: str("GROQ_MODEL", "openai/gpt-oss-120b"),
+  // Subscriber gateway (AI calls go through the TruffleTrade gateway; no local key)
+  gatewayUrl: str("TT_GATEWAY_URL", ""),
+  accessCode: str("TT_ACCESS_CODE", ""),
+  siteUrl: str("TT_SITE_URL", ""),
   cycleSeconds: num("CYCLE_SECONDS", 300),
   brokerMode: ((): "paper" | "kraken" | "onchain" => {
     const m = str("BROKER_MODE", "paper");
@@ -28,7 +32,7 @@ export const config = {
   paperStartUsd: num("PAPER_START_USD", 10_000),
   paperFeeBps: num("PAPER_FEE_BPS", 60),
   paperSlippageBps: num("PAPER_SLIPPAGE_BPS", 8),
-  sqlitePath: path.resolve(root, str("SQLITE_PATH", "data/wolfpit.sqlite3")),
+  sqlitePath: path.resolve(root, str("SQLITE_PATH", "data/truffletrade.sqlite3")),
   kraken: {
     apiKey: process.env.KRAKEN_API_KEY?.trim() ?? "",
     apiSecret: process.env.KRAKEN_API_SECRET?.trim() ?? "",
@@ -47,8 +51,11 @@ export const config = {
 };
 
 export function assertConfig(): void {
-  if (!config.groqApiKey) {
-    throw new Error("GROQ_API_KEY is required. Copy .env.example to .env and set it.");
+  const hasGateway = Boolean(config.gatewayUrl && config.accessCode);
+  if (!hasGateway && !config.groqApiKey) {
+    throw new Error(
+      "No AI backend configured. Subscribers: set TT_GATEWAY_URL + TT_ACCESS_CODE in .env. Operator: set GROQ_API_KEY.",
+    );
   }
   if (config.brokerMode === "kraken" && (!config.kraken.apiKey || !config.kraken.apiSecret)) {
     throw new Error("BROKER_MODE=kraken requires KRAKEN_API_KEY and KRAKEN_API_SECRET.");
@@ -59,7 +66,7 @@ export function assertConfig(): void {
     }
     if (!config.onchain.privateKey) {
       throw new Error("BROKER_MODE=onchain requires ONCHAIN_PRIVATE_KEY (a dedicated hot wallet key).\n" +
-        "Create one ONLY for WOLFPIT with a small amount of USDC + ETH on Base. Never reuse a wallet that holds savings.");
+        "Create one ONLY for testing with a small amount of USDC + ETH on Base. Never reuse a wallet that holds savings.");
     }
   }
   if (!fs.existsSync(path.dirname(config.sqlitePath))) {

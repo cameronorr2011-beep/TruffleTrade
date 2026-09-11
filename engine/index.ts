@@ -6,7 +6,7 @@ async function main(): Promise<void> {
   const once = process.argv.includes("--once");
   const broker = makeBroker();
   console.log(
-    `[engine] WOLFPIT engine online — mode=${broker.mode}, model=${config.groqModel}, cycle=${config.cycleSeconds}s`,
+    `[engine] TruffleTrade engine online — mode=${broker.mode}, model=${config.groqModel}, cycle=${config.cycleSeconds}s`,
   );
 
   const run = async () => {

@@ -1,4 +1,4 @@
-// WOLFPIT research engine — the full adversarial pipeline for one ticker.
+// TruffleTrade research engine — the full adversarial pipeline for one ticker.
 
 import type {
   AgentOutput,

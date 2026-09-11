@@ -7,7 +7,7 @@ const YAHOO_REST = "https://query1.finance.yahoo.com";
 
 async function getJson<T>(url: string, headers: Record<string, string> = {}): Promise<T> {
   const res = await fetch(url, {
-    headers: { "User-Agent": "WOLFPIT/1.0 (autonomous trading desk)", ...headers },
+    headers: { "User-Agent": "TruffleTrade/1.0 (autonomous trading desk)", ...headers },
     signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${new URL(url).host}`);

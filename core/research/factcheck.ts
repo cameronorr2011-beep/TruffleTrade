@@ -48,19 +48,20 @@ export function metricTable(pack: DataPack): Record<string, number> {
 }
 
 /**
- * Extract numeric claims from text. A claim is a number (with optional unit
- * context) near a recognized metric word. Returns metric, stated value, context.
+ * Extract numeric claims from text. A claim is a number that follows a metric
+ * phrase through connector tokens only ("is", "at", "of", punctuation).
+ * "price is above SMA20" must NOT read 20 as the price — the walk stops at
+ * "above" (a content word), and numbers inside identifiers (SMA20, RSI14)
+ * are never extracted. Under-extraction is acceptable; false flags are not.
  */
 export function extractClaims(text: string, pack: DataPack): NumericClaim[] {
-  const table = metricTable(pack);
-  // Metric name → possible phrases in prose
   const aliases: Record<string, string[]> = {
     price: ["price", "trading at", "trades at", "per share"],
     changePct: ["change", "move", "gain", "loss"],
     rsi14: ["rsi"],
-    sma20: ["20-day", "sma20", "20d average"],
-    sma50: ["50-day", "sma50", "50d average"],
-    sma200: ["200-day", "sma200", "200d average"],
+    sma20: ["sma20", "sma 20", "20d", "20 day"],
+    sma50: ["sma50", "sma 50", "50d", "50 day"],
+    sma200: ["sma200", "sma 200", "200d", "200 day"],
     peTtm: ["p/e", "pe ratio", "price-to-earnings", "trailing p/e"],
     forwardPe: ["forward p/e", "forward pe"],
     epsTtm: ["eps"],
@@ -72,34 +73,48 @@ export function extractClaims(text: string, pack: DataPack): NumericClaim[] {
     relStrengthVsSpy30d: ["relative strength", "outperformance", "underperformance"],
     beta: ["beta"],
   };
+  const CONNECTOR_WORDS = new Set(["is", "was", "at", "of", "about", "around", "near", "roughly", "and", "currently", "now"]);
+  const NUMERIC = /^-?\$?\d[\d,]*(?:\.\d+)?%?$/;
   const claims: NumericClaim[] = [];
-  const numberRe = /-?\$?\d[\d,]*\.?\d*\s*%?/g;
+  const lower = text.toLowerCase();
+
+  const pushClaim = (metric: string, token: string) => {
+    const statedPct = token.includes("%");
+    const isPctMetric = metric.toLowerCase().includes("pct") || metric === "rsi14" || metric === "changePct";
+    // Percent metrics must claim a percent-shaped number; dollar metrics a bare one.
+    if (isPctMetric ? statedPct || metric === "rsi14" : !statedPct) {
+      const value = Number(token.replace(/[$,%]/g, "").replace(/,/g, ""));
+      if (Number.isFinite(value)) claims.push({ metric, value, text: token, evidenceIds: [] });
+    }
+  };
+
   for (const [metric, phrases] of Object.entries(aliases)) {
     for (const phrase of phrases) {
-      let idx = text.toLowerCase().indexOf(phrase);
+      let idx = lower.indexOf(phrase);
       while (idx !== -1) {
-        const window = text.slice(idx, idx + phrase.length + 40);
-        const m = numberRe.exec(window);
-        if (m) {
-          const raw = m[0].replace(/[$,%]/g, "").replace(/,/g, "");
-          const value = Number(raw);
-          if (Number.isFinite(value)) {
-            // Percent phrases must claim a percent-shaped number; dollar metrics a dollar-shaped one.
-            const isPctMetric = metric.toLowerCase().includes("pct") || ["rsi14", "changePct"].includes(metric);
-            const statedPct = m[0].includes("%");
-            const plausible = isPctMetric ? statedPct || metric === "rsi14" : !statedPct;
-            if (plausible) {
-              claims.push({ metric, value, text: m[0], evidenceIds: [] });
-            }
+        let pos = idx + phrase.length;
+        // Walk at most 5 tokens: numbers, connectors, or punctuation.
+        for (let hop = 0; hop < 5; hop++) {
+          while (pos < text.length && /\s/.test(text[pos])) pos++; // skip whitespace first
+          const m = /^\S+/.exec(text.slice(pos));
+          if (!m) break;
+          const token = m[0].replace(/[,;:!?)\]]+$/, ""); // trailing prose punctuation
+          if (!token) break;
+          if (NUMERIC.test(token)) {
+            pushClaim(metric, token);
+            break;
           }
+          const word = token.replace(/[^a-z]/g, "");
+          if (!word || CONNECTOR_WORDS.has(word)) {
+            pos += token.length;
+            continue;
+          }
+          break; // content word — anything numeric here belongs to it, not us
         }
-        const next = text.toLowerCase().indexOf(phrase, idx + phrase.length);
-        idx = next === idx ? -1 : next;
-        numberRe.lastIndex = 0;
+        idx = lower.indexOf(phrase, idx + phrase.length);
       }
     }
   }
-  void table;
   return claims;
 }
 
@@ -159,15 +174,16 @@ export function factCheckAgent(a: AgentOutput, pack: DataPack): { violations: Fa
 export function stripViolatedNumbers(text: string, violations: FactCheckViolation[]): string {
   let out = text;
   for (const v of violations) {
-    if (v.reason === "unsupported-number" || v.reason === "contradicted") {
-      const stated = v.stated;
-      if (stated == null) continue;
-      const patterns = [
-        new RegExp(`\\$?${stated.toLocaleString("en-US")}`, "g"),
-        new RegExp(`\\$?${stated}`, "g"),
-      ];
-      for (const p of patterns) out = out.replace(p, "[number removed: unverified]");
-    }
+    if (v.reason !== "unsupported-number" && v.reason !== "contradicted") continue;
+    if (v.stated == null) continue;
+    // Word boundaries keep \b20\b from matching inside identifiers like SMA20.
+    const esc = String(v.stated).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const patterns = [
+      new RegExp(`\\$?${esc}%`, "g"),
+      new RegExp(`\\$${esc}\\b`, "g"),
+      new RegExp(`\\b${esc}\\b`, "g"),
+    ];
+    for (const p of patterns) out = out.replace(p, "[number removed: unverified]");
   }
   return out;
 }
