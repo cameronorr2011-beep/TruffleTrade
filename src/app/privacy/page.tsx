@@ -15,7 +15,7 @@ const SECTIONS: { heading: string; paras: string[] }[] = [
   {
     heading: "Who we are",
     paras: [
-      "TruffleTrade is an independent software product operated by its author (\"TruffleTrade\", \"we\"). Contact: the GitHub repository's issues page at github.com/cameronorr2011-beep/AI-STOCK-TRADER — support and privacy requests are handled there.",
+      "TruffleTrade is an independent software product operated by its author (\"TruffleTrade\", \"we\"). Contact: the GitHub repository's issues page at github.com/cameronorr2011-beep/TruffleTrade — support and privacy requests are handled there.",
     ],
   },
   {

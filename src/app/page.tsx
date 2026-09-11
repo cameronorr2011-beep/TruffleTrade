@@ -235,7 +235,7 @@ export default function LandingPage() {
               </p>
             </div>
             <a
-              href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER"
+              href="https://github.com/cameronorr2011-beep/TruffleTrade"
               target="_blank"
               rel="noreferrer"
               className="btn-secondary shrink-0"

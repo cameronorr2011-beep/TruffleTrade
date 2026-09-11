@@ -91,7 +91,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Link href="/terms" className="hover:text-ink">Terms</Link>
               <Link href="/blog" className="hover:text-ink">Blog</Link>
               <Link href="/dashboard" className="hover:text-ink">Dashboard</Link>
-              <a href="https://github.com/cameronorr2011-beep/AI-STOCK-TRADER" target="_blank" rel="noreferrer" className="hover:text-ink">
+              <a href="https://github.com/cameronorr2011-beep/TruffleTrade" target="_blank" rel="noreferrer" className="hover:text-ink">
                 Source (MIT)
               </a>
             </div>

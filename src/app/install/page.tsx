@@ -34,7 +34,7 @@ export default function InstallPage() {
           <p className="mt-3 text-[0.92rem] leading-relaxed text-bone-soft">
             You need Node.js 20+. Clone the repository from GitHub:
           </p>
-          <Code>{`git clone https://github.com/cameronorr2011-beep/AI-STOCK-TRADER.git truffletrade
+          <Code>{`git clone https://github.com/cameronorr2011-beep/TruffleTrade.git truffletrade
 cd truffletrade
 npm install`}</Code>
         </section>

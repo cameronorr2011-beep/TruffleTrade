@@ -45,7 +45,7 @@ TruffleTrade points six rival AI analysts, a fact-checker, and a red team at any
 ## Quickstart (subscribers)
 
 ```bash
-git clone https://github.com/cameronorr2011-beep/AI-STOCK-TRADER.git truffletrade
+git clone https://github.com/cameronorr2011-beep/TruffleTrade.git truffletrade
 cd truffletrade && npm install
 cp .env.example .env        # set TT_GATEWAY_URL + TT_ACCESS_CODE
 npm run verify              # checks your subscription against the gateway

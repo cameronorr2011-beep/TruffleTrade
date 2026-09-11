@@ -118,7 +118,7 @@ export default function BuyPanel() {
         <ol className="mt-6 space-y-4 text-[13px] leading-relaxed text-ink/85">
           <li>
             <span className="font-bold text-forest">1 · Get the app</span>
-            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`git clone https://github.com/cameronorr2011-beep/AI-STOCK-TRADER.git truffletrade
+            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`git clone https://github.com/cameronorr2011-beep/TruffleTrade.git truffletrade
 cd truffletrade && npm install`}</pre>
           </li>
           <li>
