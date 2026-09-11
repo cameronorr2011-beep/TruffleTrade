@@ -40,18 +40,23 @@ function serverReady() {
 }
 
 function startServer() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-    server = spawn(npx, ["next", "start", "-p", String(PORT)], {
-      cwd: ROOT,
-      stdio: "ignore",
-      windowsHide: true,
-      env: { ...process.env }, // passes TT_ACCESS_CODE + TT_GATEWAY_URL through
-    });
-    server.on("exit", () => {
-      server = null;
-    });
-    resolve();
+    try {
+      server = spawn(npx, ["next", "start", "-p", String(PORT)], {
+        cwd: ROOT,
+        stdio: "ignore",
+        windowsHide: true,
+        shell: process.platform === "win32", // .cmd shims need a shell on Windows
+        env: { ...process.env }, // passes TT_ACCESS_CODE + TT_GATEWAY_URL through
+      });
+      server.on("exit", () => {
+        server = null;
+      });
+      resolve();
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
@@ -130,7 +135,11 @@ if (!gotLock) {
   });
 
   app.whenReady().then(async () => {
-    await ensureServer();
+    try {
+      await ensureServer();
+    } catch (err) {
+      console.error("[truffletrade] local server failed to start:", err);
+    }
     createWindow();
     createTray();
   });
