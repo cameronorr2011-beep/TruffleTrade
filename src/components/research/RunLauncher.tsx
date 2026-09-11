@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import StanceBadge from "./StanceBadge";
+import { authHeaders, getAccessCode, setAccessCode } from "@/lib/accessCodeClient";
 
 interface RunPayload {
   ok: boolean;
@@ -45,9 +46,19 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
     setStage(0);
     timer.current = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), 6000);
     try {
+      let code = getAccessCode();
+      if (!code) {
+        code = window.prompt("Enter your TruffleTrade access code (get one at /buy)") ?? "";
+        if (!code) {
+          setBusy(false);
+          setError("An active subscription is required to run investigations.");
+          return;
+        }
+        setAccessCode(code);
+      }
       const res = await fetch("/api/research", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           ticker: t,
           peers: peers

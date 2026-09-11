@@ -32,7 +32,7 @@ export async function GET() {
 
 /** POST /api/watchlist — add ticker (guarded). */
 export async function POST(req: Request) {
-  const denied = guard(req);
+  const denied = await guard(req);
   if (denied) return denied;
   let body: unknown;
   try {
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 
 /** DELETE /api/watchlist — remove ticker (guarded). */
 export async function DELETE(req: Request) {
-  const denied = guard(req);
+  const denied = await guard(req);
   if (denied) return denied;
   const url = new URL(req.url);
   const ticker = url.searchParams.get("ticker") ?? "";

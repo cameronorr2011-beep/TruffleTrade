@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { authHeaders, getAccessCode, setAccessCode } from "@/lib/accessCodeClient";
 
 export default function DeskControls({ halted }: { halted: boolean }) {
   const router = useRouter();
@@ -13,7 +14,13 @@ export default function DeskControls({ halted }: { halted: boolean }) {
     setBusy(label);
     setMsg("");
     try {
-      const res = await fetch(path, { method: "POST" });
+      let code = getAccessCode();
+      if (!code) {
+        code = window.prompt("Enter your TruffleTrade access code") ?? "";
+        if (!code) return;
+        setAccessCode(code);
+      }
+      const res = await fetch(path, { method: "POST", headers: authHeaders() });
       const j = (await res.json()) as { ok?: boolean; error?: string; result?: unknown };
       setMsg(j.ok ? `${label}: done` : `${label} failed: ${j.error ?? res.status}`);
       startTransition(() => router.refresh());

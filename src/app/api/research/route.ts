@@ -18,7 +18,7 @@ let running = false;
 
 /** POST /api/research — launch a full council investigation (guarded like /api/cycle). */
 export async function POST(req: Request) {
-  const denied = guard(req);
+  const denied = await guard(req);
   if (denied) return denied;
   if (running) {
     return NextResponse.json({ ok: false, error: "a research run is already in progress" }, { status: 409 });

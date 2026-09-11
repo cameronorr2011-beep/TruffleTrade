@@ -10,7 +10,7 @@ export const maxDuration = 300;
 let running = false;
 
 export async function POST(req: Request) {
-  const denied = guard(req);
+  const denied = await guard(req);
   if (denied) return denied;
   if (running) {
     return NextResponse.json({ ok: false, error: "a cycle is already running" }, { status: 409 });
