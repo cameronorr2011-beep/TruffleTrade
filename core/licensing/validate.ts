@@ -20,10 +20,11 @@ const WINDOW_MS = 60_000;
 const buckets = new Map<string, number[]>();
 
 export function rateLimitConfig(): { limit: number; windowMs: number } {
-  return {
-    limit: Number(process.env.GATEWAY_RATE_LIMIT_PER_MIN ?? DEFAULT_RATE_LIMIT),
-    windowMs: WINDOW_MS,
-  };
+  const raw = process.env.GATEWAY_RATE_LIMIT_PER_MIN?.trim();
+  const parsed = raw ? Number(raw) : NaN;
+  // Empty string, garbage, zero, or negative all fall back to the default.
+  const limit = Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_RATE_LIMIT;
+  return { limit, windowMs: WINDOW_MS };
 }
 
 /** Per-code sliding-window rate limiter (in-memory, resets on redeploy — fine for abuse control). */
@@ -37,8 +38,9 @@ export function checkRateLimit(codeHash: string): { ok: boolean; remaining: numb
   }
   while (hits.length && now - hits[0] > windowMs) hits.shift();
   if (hits.length >= limit) {
-    const resetMs = windowMs - (now - hits[0]);
-    return { ok: false, remaining: 0, resetMs: Math.max(100, resetMs) };
+    const rawReset = hits.length ? windowMs - (now - hits[0]) : windowMs;
+    const resetMs = Number.isFinite(rawReset) && rawReset > 0 ? rawReset : windowMs;
+    return { ok: false, remaining: 0, resetMs: Math.max(100, Math.min(resetMs, windowMs)) };
   }
   hits.push(now);
   return { ok: true, remaining: limit - hits.length, resetMs: windowMs };
