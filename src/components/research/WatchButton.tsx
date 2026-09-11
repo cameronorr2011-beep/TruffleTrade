@@ -45,8 +45,8 @@ export default function WatchButton({ ticker }: { ticker: string }) {
       disabled={state === "loading"}
       className={`rounded-full border px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] transition-colors disabled:opacity-40 ${
         state === "on"
-          ? "border-ember-400/60 bg-ember-500/15 text-ember-200"
-          : "border-pit-300/25 text-bone/60 hover:border-pit-300/50 hover:text-bone"
+          ? "border-truffle-400/60 bg-truffle-500/15 text-truffle-200"
+          : "border-truffle-400/25 text-bone/60 hover:border-truffle-400/50 hover:text-bone"
       }`}
     >
       {state === "on" ? "★ Watching" : "☆ Watch"}

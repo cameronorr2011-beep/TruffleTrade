@@ -23,7 +23,7 @@ export default function ThesisCard({ run }: { run: ResearchRun }) {
               <p className="font-mono text-[0.56rem] uppercase tracking-[0.22em] text-blood">Bear case</p>
               <p className="mt-1.5 text-[0.82rem] leading-relaxed text-bone/70">{t.bearCase}</p>
             </div>
-            <div className="rounded-lg border border-pit-300/20 bg-pit-900/40 p-3.5">
+            <div className="rounded-lg border border-truffle-400/20 bg-soil-900/40 p-3.5">
               <p className="font-mono text-[0.56rem] uppercase tracking-[0.22em] text-bone/50">Extreme bear</p>
               <p className="mt-1.5 text-[0.82rem] leading-relaxed text-bone/60">{t.extremeBear}</p>
             </div>
@@ -39,7 +39,7 @@ export default function ThesisCard({ run }: { run: ResearchRun }) {
           ) : (
             <ul className="mt-2 space-y-2">
               {t.invalidationConditions.map((c, i) => (
-                <li key={i} className="rounded-lg border border-pit-300/15 bg-void/40 p-3">
+                <li key={i} className="rounded-lg border border-truffle-400/15 bg-void/40 p-3">
                   <p className="font-mono text-[0.72rem] text-bone/85">
                     {c.metric} {c.operator} {c.threshold}
                   </p>
@@ -58,12 +58,12 @@ export default function ThesisCard({ run }: { run: ResearchRun }) {
           ) : (
             <div className="mt-2 space-y-2">
               {t.scenarios.map((s, i) => (
-                <div key={i} className="rounded-lg border border-pit-300/15 bg-void/40 p-3">
+                <div key={i} className="rounded-lg border border-truffle-400/15 bg-void/40 p-3">
                   <div className="flex items-center justify-between">
                     <p className="font-mono text-[0.72rem] uppercase tracking-[0.14em] text-bone/85">
                       {SCENARIO_LABEL[s.name] ?? s.name}
                     </p>
-                    <p className="font-mono text-[0.7rem] text-ember-300">{s.probabilityPct}%</p>
+                    <p className="font-mono text-[0.7rem] text-truffle-300">{s.probabilityPct}%</p>
                   </div>
                   {s.drivers.length > 0 && (
                     <p className="mt-1.5 text-[0.74rem] leading-relaxed text-bone/55">

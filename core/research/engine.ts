@@ -57,6 +57,29 @@ export async function runResearch(opts: ResearchOptions): Promise<ResearchRun> {
 
   const status: ResearchRun["status"] = pack.quote.price == null ? "partial" : "complete";
 
+  // Feed the local memory system (best-effort — a memory failure never
+  // degrades the analysis itself; disable with MEMORY_DISABLED=1).
+  if (process.env.MEMORY_DISABLED !== "1") {
+    try {
+      const { ingestRunFacts } = await import("../memory/memory");
+      const redTeamAgent = agents.find((a) => /red\s*team/i.test(a.agent));
+      const objections = [...(redTeamAgent?.weaknesses ?? []), ...(redTeamAgent?.assumptions ?? [])].slice(0, 6);
+      ingestRunFacts({
+        ticker,
+        runId: null, // caller updates this after saveResearchRun assigns the id
+        consensus: { stance: consensus.stance, score: consensus.score },
+        thesisSummary: thesis.summary,
+        redTeamObjections: objections,
+        facts: agents
+          .flatMap((a) => a.strengths.slice(0, 2).map((s) => `${a.agent}: ${s}`))
+          .slice(0, 12),
+        ts: Date.now(),
+      });
+    } catch (err) {
+      errors.push(`memory ingest skipped: ${(err as Error).message}`);
+    }
+  }
+
   return {
     id: -1,
     ticker,

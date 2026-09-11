@@ -2,8 +2,8 @@ const COLORS: Record<string, string> = {
   bullish: "text-jade border-jade/40 bg-jade/10",
   bearish: "text-blood border-blood/40 bg-blood/10",
   caution: "text-gold border-gold/40 bg-gold/10",
-  neutral: "text-bone/70 border-pit-300/30 bg-pit-800/40",
-  "insufficient-evidence": "text-bone/50 border-pit-300/20 bg-pit-900/40",
+  neutral: "text-bone/70 border-truffle-400/30 bg-soil-800/40",
+  "insufficient-evidence": "text-bone/50 border-truffle-400/20 bg-soil-900/40",
 };
 
 export default function StanceBadge({ stance }: { stance: string }) {

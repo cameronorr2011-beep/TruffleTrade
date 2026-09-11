@@ -4,9 +4,9 @@ import StanceBadge from "./StanceBadge";
 export default function AgentCard({ agent }: { agent: AgentOutput }) {
   const isRed = agent.agent === "RedTeam";
   return (
-    <article className={`card p-6 ${isRed ? "border-ember-400/35" : ""}`}>
+    <article className={`card p-6 ${isRed ? "border-truffle-400/35" : ""}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className={`font-mono text-[0.85rem] font-semibold tracking-[0.12em] ${isRed ? "text-ember-300" : "text-bone"}`}>
+        <h3 className={`font-mono text-[0.85rem] font-semibold tracking-[0.12em] ${isRed ? "text-truffle-300" : "text-bone"}`}>
           {agent.agent.toUpperCase()}
         </h3>
         <StanceBadge stance={agent.stance} />
@@ -50,14 +50,14 @@ export default function AgentCard({ agent }: { agent: AgentOutput }) {
       )}
 
       {agent.evidence.length > 0 && (
-        <div className="mt-4 border-t border-pit-300/10 pt-3">
+        <div className="mt-4 border-t border-truffle-400/10 pt-3">
           <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-bone/40">
             Evidence ({agent.evidence.length})
           </p>
           <ul className="mt-2 space-y-1">
             {agent.evidence.slice(0, 6).map((e) => (
               <li key={e.id} className="font-mono text-[0.64rem] text-bone/50">
-                <span className="text-pit-300">{e.sourceType}</span> · {e.claim} · {e.calculation}
+                <span className="text-truffle-400">{e.sourceType}</span> · {e.claim} · {e.calculation}
               </li>
             ))}
           </ul>

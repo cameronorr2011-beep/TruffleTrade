@@ -30,7 +30,7 @@ export default async function WatchlistPage() {
 
   return (
     <div className="mx-auto max-w-[1280px] px-5 pb-24 pt-10 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">
+      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
         Watchlist & audit
       </span>
       <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-bone">
@@ -41,7 +41,7 @@ export default async function WatchlistPage() {
         {rows.length === 0 ? (
           <p className="p-6 font-mono text-[0.75rem] text-bone/45">
             Watchlist empty. Open any{" "}
-            <Link href="/markets" className="ember-underline text-ember-300">
+            <Link href="/markets" className="gold-underline text-truffle-300">
               company dossier
             </Link>{" "}
             and hit ☆ Watch.
@@ -49,7 +49,7 @@ export default async function WatchlistPage() {
         ) : (
           <table className="w-full min-w-[640px] text-left">
             <thead>
-              <tr className="border-b border-pit-300/15 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/40">
+              <tr className="border-b border-truffle-400/15 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/40">
                 <th className="px-5 py-3">Ticker</th>
                 <th className="px-5 py-3">Price</th>
                 <th className="px-5 py-3">Day</th>
@@ -60,9 +60,9 @@ export default async function WatchlistPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.ticker} className="border-b border-pit-300/8 last:border-0 hover:bg-pit-800/30">
+                <tr key={r.ticker} className="border-b border-truffle-400/8 last:border-0 hover:bg-soil-800/30">
                   <td className="px-5 py-3">
-                    <Link href={`/company/${r.ticker}`} className="ember-underline font-mono text-[0.82rem] text-bone">
+                    <Link href={`/company/${r.ticker}`} className="gold-underline font-mono text-[0.82rem] text-bone">
                       {r.ticker}
                     </Link>
                   </td>
@@ -76,7 +76,7 @@ export default async function WatchlistPage() {
                     {r.run ? (
                       <div className="flex items-center gap-2">
                         <StanceBadge stance={r.run.consensus.stance} />
-                        <Link href={`/research/${r.run.id}`} className="font-mono text-[0.62rem] text-ember-300">
+                        <Link href={`/research/${r.run.id}`} className="font-mono text-[0.62rem] text-truffle-300">
                           #{r.run.id}
                         </Link>
                       </div>
@@ -90,7 +90,7 @@ export default async function WatchlistPage() {
                   <td className="px-5 py-3 text-right">
                     <Link
                       href={`/research?ticker=${r.ticker}&autorun=1`}
-                      className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-bone/45 hover:text-ember-300"
+                      className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-bone/45 hover:text-truffle-300"
                     >
                       re-run →
                     </Link>
@@ -114,7 +114,7 @@ export default async function WatchlistPage() {
           </p>
         ) : (
           <div className="mt-4 grid gap-4 sm:grid-cols-4">
-            <div className="rounded-xl border border-pit-300/15 bg-pit-900/40 p-4">
+            <div className="rounded-xl border border-truffle-400/15 bg-soil-900/40 p-4">
               <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-bone/40">Directional accuracy</p>
               <p className="font-display mt-1 text-[1.6rem] font-semibold text-bone">
                 {audit.directionalAccuracy == null ? "—" : `${Math.round(audit.directionalAccuracy * 100)}%`}
@@ -125,7 +125,7 @@ export default async function WatchlistPage() {
               ["Pending", String(audit.pending)],
               ["Total", String(audit.total)],
             ].map(([k, v]) => (
-              <div key={k} className="rounded-xl border border-pit-300/15 bg-pit-900/40 p-4">
+              <div key={k} className="rounded-xl border border-truffle-400/15 bg-soil-900/40 p-4">
                 <p className="font-mono text-[0.56rem] uppercase tracking-[0.2em] text-bone/40">{k}</p>
                 <p className="font-display mt-1 text-[1.6rem] font-semibold text-bone">{v}</p>
               </div>

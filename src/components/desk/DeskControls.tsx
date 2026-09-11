@@ -30,7 +30,7 @@ export default function DeskControls({ halted }: { halted: boolean }) {
         type="button"
         onClick={() => call("/api/cycle", "cycle")}
         disabled={busy !== null || pending}
-        className="rounded-lg bg-ember-500 px-5 py-3 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-ember-400 disabled:opacity-40"
+        className="rounded-lg bg-truffle-500 px-5 py-3 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-truffle-400 disabled:opacity-40"
       >
         {busy === "cycle" ? "Council in session…" : "Run one cycle now"}
       </button>

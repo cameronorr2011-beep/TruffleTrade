@@ -31,7 +31,7 @@ export default function ConfidenceCard({ run }: { run: ResearchRun }) {
       )}
       <dl className="mt-4 space-y-2">
         {rows.map((row) => (
-          <div key={row.label} className="flex items-baseline justify-between gap-4 border-b border-pit-300/8 pb-1.5">
+          <div key={row.label} className="flex items-baseline justify-between gap-4 border-b border-truffle-400/8 pb-1.5">
             <dt className="font-mono text-[0.66rem] uppercase tracking-[0.16em] text-bone/45">{row.label}</dt>
             <dd className="font-mono text-[0.72rem] text-bone/80">{row.value}</dd>
           </div>

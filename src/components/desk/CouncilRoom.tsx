@@ -39,7 +39,7 @@ export default function CouncilRoom({ council }: { council: CouncilSummary | nul
         <span className="font-display text-[1.6rem] font-semibold" style={{ color: SIDE_COLOR[council.side] ?? "#f4efe9" }}>
           {council.side.toUpperCase()}
         </span>
-        <span className="rounded-full border border-pit-300/20 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/60">
+        <span className="rounded-full border border-truffle-400/20 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bone/60">
           conviction {council.conviction.toFixed(2)}
         </span>
         <span className="text-[0.85rem] text-bone/55">{council.rationale}</span>
@@ -47,7 +47,7 @@ export default function CouncilRoom({ council }: { council: CouncilSummary | nul
 
       <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {council.votes.map((v) => (
-          <article key={v.agent} className="rounded-xl border border-pit-300/12 bg-pit-950/60 p-4">
+          <article key={v.agent} className="rounded-xl border border-truffle-400/12 bg-soil-950/60 p-4">
             <div className="flex items-center justify-between gap-2">
               <span className="font-mono text-[0.72rem] font-semibold tracking-[0.12em] text-bone">{v.agent.toUpperCase()}</span>
               <span className="font-mono text-[0.66rem] font-semibold uppercase" style={{ color: SIDE_COLOR[v.side] ?? "#f4efe9" }}>

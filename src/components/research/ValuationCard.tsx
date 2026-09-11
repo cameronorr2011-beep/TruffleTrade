@@ -29,7 +29,7 @@ export default function ValuationCard({ valuation }: { valuation: ValuationModel
                   ["Net debt", usd(dcf.assumptions.netDebt)],
                   ["PV explicit / terminal", `${usd(dcf.pvExplicit)} / ${usd(dcf.pvTerminal)}`],
                 ].map(([k, v]) => (
-                  <tr key={k} className="border-b border-pit-300/8 last:border-0">
+                  <tr key={k} className="border-b border-truffle-400/8 last:border-0">
                     <td className="py-1.5 text-bone/45">{k}</td>
                     <td className="py-1.5 text-right text-bone/85">{v}</td>
                   </tr>
@@ -41,7 +41,7 @@ export default function ValuationCard({ valuation }: { valuation: ValuationModel
             </p>
             <div className="mt-2 grid grid-cols-3 gap-1.5">
               {dcf.sensitivity.map((s, i) => (
-                <div key={i} className="rounded-md border border-pit-300/12 bg-pit-900/50 px-2 py-1.5 text-center">
+                <div key={i} className="rounded-md border border-truffle-400/12 bg-soil-900/50 px-2 py-1.5 text-center">
                   <p className="font-mono text-[0.54rem] text-bone/40">
                     r{(s.discountRate * 100).toFixed(0)}% g{(s.terminalGrowth * 100).toFixed(1)}%
                   </p>
@@ -55,7 +55,7 @@ export default function ValuationCard({ valuation }: { valuation: ValuationModel
             </p>
           </>
         ) : (
-          <p className="mt-4 rounded-lg border border-pit-300/15 bg-pit-900/40 p-4 font-mono text-[0.72rem] leading-relaxed text-bone/55">
+          <p className="mt-4 rounded-lg border border-truffle-400/15 bg-soil-900/40 p-4 font-mono text-[0.72rem] leading-relaxed text-bone/55">
             DATA UNAVAILABLE — {dcfError}
           </p>
         )}
@@ -68,7 +68,7 @@ export default function ValuationCard({ valuation }: { valuation: ValuationModel
         {reverseDcf ? (
           <p className="mt-3 text-[0.86rem] leading-relaxed text-bone/70">
             The current price of <strong className="text-bone">{usd(reverseDcf.price)}</strong> implies{" "}
-            <strong className="text-ember-300">{(reverseDcf.impliedGrowthYears1to5 * 100).toFixed(1)}%</strong>{" "}
+            <strong className="text-truffle-300">{(reverseDcf.impliedGrowthYears1to5 * 100).toFixed(1)}%</strong>{" "}
             annual FCF growth for 5 years. If that exceeds any plausible operating forecast, expectations are
             already rich.
           </p>
@@ -80,7 +80,7 @@ export default function ValuationCard({ valuation }: { valuation: ValuationModel
         {comps.length > 0 ? (
           <table className="mt-5 w-full text-left">
             <thead>
-              <tr className="border-b border-pit-300/15 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-bone/40">
+              <tr className="border-b border-truffle-400/15 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-bone/40">
                 <th className="pb-2">Metric</th>
                 <th className="pb-2 text-right">Company</th>
                 <th className="pb-2 text-right">Peer median</th>
@@ -88,7 +88,7 @@ export default function ValuationCard({ valuation }: { valuation: ValuationModel
             </thead>
             <tbody>
               {comps.map((c) => (
-                <tr key={c.metric} className="border-b border-pit-300/8 last:border-0">
+                <tr key={c.metric} className="border-b border-truffle-400/8 last:border-0">
                   <td className="py-2 text-[0.78rem] text-bone/70">{c.metric}</td>
                   <td className="py-2 text-right font-mono text-[0.72rem] text-bone">
                     {c.value == null ? <span className="text-bone/35">unavailable</span> : c.value.toFixed(1)}

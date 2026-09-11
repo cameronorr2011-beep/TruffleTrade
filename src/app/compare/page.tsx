@@ -51,19 +51,19 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="mx-auto max-w-[1280px] px-5 pb-24 pt-10 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">
+      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
         Comparison engine
       </span>
       <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-bone">Compare</h1>
       <p className="mt-3 max-w-2xl text-[0.9rem] leading-relaxed text-bone/55">
         Structured side-by-side comparison — not prose. Append{" "}
-        <code className="font-mono text-ember-300">?t=NVDA vs AMD</code> to the URL, or use Ctrl+K → Compare.
+        <code className="font-mono text-truffle-300">?t=NVDA vs AMD</code> to the URL, or use Ctrl+K → Compare.
       </p>
 
       {valid.length < 2 ? (
         <p className="card mt-8 p-6 font-mono text-[0.75rem] text-bone/50">
           Enter at least two valid tickers to compare (e.g.{" "}
-          <Link href="/compare?t=NVDA vs AMD" className="ember-underline text-ember-300">
+          <Link href="/compare?t=NVDA vs AMD" className="gold-underline text-truffle-300">
             NVDA vs AMD
           </Link>
           ).
@@ -72,11 +72,11 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         <section className="card mt-8 overflow-x-auto p-0">
           <table className="w-full min-w-[600px] text-left">
             <thead>
-              <tr className="border-b border-pit-300/15">
+              <tr className="border-b border-truffle-400/15">
                 <th className="px-5 py-4 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/40">Metric</th>
                 {valid.map((p) => (
                   <th key={p.ticker} className="px-5 py-4">
-                    <Link href={`/company/${p.ticker}`} className="ember-underline font-display text-[1.1rem] font-semibold text-bone">
+                    <Link href={`/company/${p.ticker}`} className="gold-underline font-display text-[1.1rem] font-semibold text-bone">
                       {p.ticker}
                     </Link>
                     <p className="font-mono text-[0.56rem] uppercase tracking-[0.16em] text-bone/35">
@@ -88,7 +88,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             </thead>
             <tbody>
               {ROWS.map((row) => (
-                <tr key={row.label} className="border-b border-pit-300/8 last:border-0">
+                <tr key={row.label} className="border-b border-truffle-400/8 last:border-0">
                   <td className="px-5 py-3 font-mono text-[0.66rem] uppercase tracking-[0.14em] text-bone/45">
                     {row.label}
                   </td>

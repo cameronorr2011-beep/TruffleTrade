@@ -48,7 +48,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">
+          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
             Company dossier
           </span>
           <h1 className="font-display mt-2 text-[clamp(2.2rem,5vw,3.8rem)] font-semibold text-bone">
@@ -83,13 +83,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
           <div className="flex gap-3">
             <Link
               href={`/research/${lastRun.id}`}
-              className="rounded-full border border-ember-400/40 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-ember-200 hover:bg-ember-500/15"
+              className="rounded-full border border-truffle-400/40 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-truffle-200 hover:bg-truffle-500/15"
             >
               Open dossier
             </Link>
             <Link
               href={`/research?ticker=${ticker}&autorun=1`}
-              className="rounded-full bg-ember-500 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-void hover:bg-ember-400"
+              className="rounded-full bg-truffle-500 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-void hover:bg-truffle-400"
             >
               Re-run investigation
             </Link>
@@ -133,7 +133,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
           ) : (
             <ul className="mt-4 space-y-3">
               {pack.news.slice(0, 8).map((n, i) => (
-                <li key={i} className="border-b border-pit-300/8 pb-3 last:border-0 last:pb-0">
+                <li key={i} className="border-b border-truffle-400/8 pb-3 last:border-0 last:pb-0">
                   <a href={n.link} target="_blank" rel="noreferrer nofollow" className="text-[0.84rem] leading-snug text-bone/75 hover:text-bone">
                     {n.title}
                   </a>
@@ -157,17 +157,17 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
               No theses yet. Run an investigation to start the audit trail.
             </p>
           ) : (
-            <ol className="mt-4 space-y-3 border-l border-pit-300/20 pl-4">
+            <ol className="mt-4 space-y-3 border-l border-truffle-400/20 pl-4">
               {history.map((h) => (
                 <li key={h.id} className="relative">
-                  <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-ember-400" />
+                  <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-truffle-400" />
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`font-mono text-[0.7rem] uppercase tracking-[0.14em] ${STANCE_COLOR[h.stance] ?? "text-bone/60"}`}>
                       {h.stance}
                     </span>
                     <span className="font-mono text-[0.6rem] text-bone/35">
                       {new Date(h.ts).toLocaleDateString("en-US")} ·{" "}
-                      <Link href={`/research/${h.runId}`} className="ember-underline text-ember-300">
+                      <Link href={`/research/${h.runId}`} className="gold-underline text-truffle-300">
                         run #{h.runId}
                       </Link>
                     </span>

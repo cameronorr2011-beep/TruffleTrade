@@ -39,7 +39,7 @@ export default async function MarketsPage() {
     <div className="mx-auto max-w-[1280px] px-5 pb-24 pt-10 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">
+          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
             Market dashboard
           </span>
           <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-bone">Markets</h1>
@@ -72,7 +72,7 @@ export default async function MarketsPage() {
             {sortedSectors.map((s) => (
               <li key={s.symbol} className="flex items-center gap-3">
                 <span className="w-44 shrink-0 font-mono text-[0.7rem] text-bone/65">{s.label}</span>
-                <div className="h-2 flex-1 rounded-full bg-pit-900">
+                <div className="h-2 flex-1 rounded-full bg-soil-900">
                   <div
                     className={`h-2 rounded-full ${(s.changePct ?? 0) >= 0 ? "bg-jade" : "bg-blood"}`}
                     style={{ width: `${Math.min(100, Math.abs(s.changePct ?? 0) * 20 + 4)}%` }}
@@ -91,7 +91,7 @@ export default async function MarketsPage() {
           <table className="mt-4 w-full text-left">
             <tbody>
               {macro.map((m) => (
-                <tr key={m.symbol} className="border-b border-pit-300/8 last:border-0">
+                <tr key={m.symbol} className="border-b border-truffle-400/8 last:border-0">
                   <td className="py-2 font-mono text-[0.72rem] text-bone/65">{m.label}</td>
                   <td className="py-2 text-right font-mono text-[0.72rem] text-bone">{price(m.price)}</td>
                   <td className={`py-2 text-right font-mono text-[0.72rem] ${(m.changePct ?? 0) >= 0 ? "text-jade" : "text-blood"}`}>
@@ -114,7 +114,7 @@ export default async function MarketsPage() {
             <a
               key={m.symbol}
               href={`/company/${m.symbol}`}
-              className="rounded-xl border border-pit-300/12 bg-pit-900/40 px-4 py-3 transition-colors hover:border-ember-400/40"
+              className="rounded-xl border border-truffle-400/12 bg-soil-900/40 px-4 py-3 transition-colors hover:border-truffle-400/40"
             >
               <div className="flex items-baseline justify-between">
                 <span className="font-mono text-[0.78rem] font-semibold text-bone">{m.symbol}</span>

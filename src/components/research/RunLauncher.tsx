@@ -96,7 +96,7 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
             onChange={(e) => setTicker(e.target.value.toUpperCase())}
             placeholder="NVDA"
             maxLength={10}
-            className="mt-2 w-36 rounded-lg border border-pit-300/25 bg-void/60 px-4 py-2.5 font-mono text-[1rem] uppercase text-bone outline-none focus:border-ember-400/60"
+            className="mt-2 w-36 rounded-lg border border-truffle-400/25 bg-void/60 px-4 py-2.5 font-mono text-[1rem] uppercase text-bone outline-none focus:border-truffle-400/60"
           />
         </div>
         <div className="min-w-[240px] flex-1">
@@ -108,13 +108,13 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
             value={peers}
             onChange={(e) => setPeers(e.target.value.toUpperCase())}
             placeholder="AMD AVGO INTC"
-            className="mt-2 w-full rounded-lg border border-pit-300/25 bg-void/60 px-4 py-2.5 font-mono text-[0.9rem] text-bone outline-none focus:border-ember-400/60 placeholder:text-bone/25"
+            className="mt-2 w-full rounded-lg border border-truffle-400/25 bg-void/60 px-4 py-2.5 font-mono text-[0.9rem] text-bone outline-none focus:border-truffle-400/60 placeholder:text-bone/25"
           />
         </div>
         <button
           type="submit"
           disabled={busy || !ticker.trim()}
-          className="rounded-full bg-ember-500 px-6 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-ember-400 disabled:opacity-40"
+          className="rounded-full bg-truffle-500 px-6 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-void transition-colors hover:bg-truffle-400 disabled:opacity-40"
         >
           {busy ? "Investigating…" : "Run investigation"}
         </button>
@@ -126,7 +126,7 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
             <li
               key={s}
               className={`flex items-center gap-3 font-mono text-[0.72rem] ${
-                i < stage ? "text-jade" : i === stage ? "text-ember-300" : "text-bone/30"
+                i < stage ? "text-jade" : i === stage ? "text-truffle-300" : "text-bone/30"
               }`}
             >
               <span>{i < stage ? "✓" : i === stage ? "▸" : "·"}</span>
@@ -155,7 +155,7 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
           <p className="mt-3 text-[0.88rem] leading-relaxed text-bone/75">{result.run.thesis.summary}</p>
           <a
             href={`/research/${result.runId}`}
-            className="mt-4 inline-block rounded-full border border-ember-400/40 px-5 py-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ember-200 hover:bg-ember-500/15"
+            className="mt-4 inline-block rounded-full border border-truffle-400/40 px-5 py-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-truffle-200 hover:bg-truffle-500/15"
           >
             Open full dossier
           </a>

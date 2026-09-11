@@ -91,7 +91,7 @@ export default function CommandPalette() {
               placeholder={pending.argPlaceholder}
               className="w-full bg-transparent px-5 py-4 font-mono text-[0.95rem] text-bone outline-none placeholder:text-bone/30"
             />
-            <div className="border-t border-pit-300/10 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bone/40">
+            <div className="border-t border-truffle-400/10 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bone/40">
               Enter to run · Esc to cancel
             </div>
           </form>
@@ -104,7 +104,7 @@ export default function CommandPalette() {
               placeholder="Type a command… (Ctrl+K)"
               className="w-full bg-transparent px-5 py-4 font-mono text-[0.95rem] text-bone outline-none placeholder:text-bone/30"
             />
-            <ul className="max-h-[50vh] overflow-y-auto border-t border-pit-300/10">
+            <ul className="max-h-[50vh] overflow-y-auto border-t border-truffle-400/10">
               {filtered.map((c) => (
                 <li key={c.id}>
                   <button
@@ -117,7 +117,7 @@ export default function CommandPalette() {
                         setOpen(false);
                       }
                     }}
-                    className="flex w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-pit-800/40"
+                    className="flex w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-soil-800/40"
                   >
                     <span className="text-[0.9rem] text-bone/85">{c.label}</span>
                     <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-bone/35">

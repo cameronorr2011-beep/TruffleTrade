@@ -23,7 +23,7 @@ export default async function ResearchPage({
 
   return (
     <div className="mx-auto max-w-[1280px] px-5 pb-24 pt-10 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">
+      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
         AI research terminal
       </span>
       <h1 className="font-display mt-3 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-bone">
@@ -41,14 +41,14 @@ export default async function ResearchPage({
           Recent investigations
         </h2>
         {runs.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-pit-300/15 bg-pit-900/40 p-5 font-mono text-[0.75rem] text-bone/45">
+          <p className="mt-4 rounded-xl border border-truffle-400/15 bg-soil-900/40 p-5 font-mono text-[0.75rem] text-bone/45">
             No runs yet. Launch the first investigation above.
           </p>
         ) : (
           <div className="card mt-4 overflow-x-auto p-0">
             <table className="w-full min-w-[640px] text-left">
               <thead>
-                <tr className="border-b border-pit-300/15 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/40">
+                <tr className="border-b border-truffle-400/15 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-bone/40">
                   <th className="px-5 py-3">Run</th>
                   <th className="px-5 py-3">Ticker</th>
                   <th className="px-5 py-3">Stance</th>
@@ -60,9 +60,9 @@ export default async function ResearchPage({
               </thead>
               <tbody>
                 {runs.map((r) => (
-                  <tr key={r.id} className="border-b border-pit-300/8 last:border-0 hover:bg-pit-800/30">
+                  <tr key={r.id} className="border-b border-truffle-400/8 last:border-0 hover:bg-soil-800/30">
                     <td className="px-5 py-3 font-mono text-[0.75rem]">
-                      <Link href={`/research/${r.id}`} className="ember-underline text-ember-300">
+                      <Link href={`/research/${r.id}`} className="gold-underline text-truffle-300">
                         #{r.id}
                       </Link>
                     </td>

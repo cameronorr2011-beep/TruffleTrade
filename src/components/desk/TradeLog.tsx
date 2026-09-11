@@ -18,7 +18,7 @@ export default function TradeLog({ trades }: { trades: LedgerTrade[] }) {
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left font-mono text-[0.72rem]">
             <thead>
-              <tr className="border-b border-pit-300/15 text-bone/40">
+              <tr className="border-b border-truffle-400/15 text-bone/40">
                 <th className="py-2 pr-4 font-medium uppercase tracking-[0.16em]">Time</th>
                 <th className="py-2 pr-4 font-medium uppercase tracking-[0.16em]">Side</th>
                 <th className="py-2 pr-4 font-medium uppercase tracking-[0.16em]">Qty BTC</th>
@@ -29,9 +29,9 @@ export default function TradeLog({ trades }: { trades: LedgerTrade[] }) {
             </thead>
             <tbody>
               {trades.map((t) => (
-                <tr key={t.id} className="border-b border-pit-300/8 text-bone/70">
+                <tr key={t.id} className="border-b border-truffle-400/8 text-bone/70">
                   <td className="py-2.5 pr-4 text-bone/45">{when(t.ts)}</td>
-                  <td className={`py-2.5 pr-4 font-semibold uppercase ${t.side === "buy" ? "text-jade" : "text-ember-300"}`}>{t.side}</td>
+                  <td className={`py-2.5 pr-4 font-semibold uppercase ${t.side === "buy" ? "text-jade" : "text-truffle-300"}`}>{t.side}</td>
                   <td className="py-2.5 pr-4">{t.qtyBtc.toFixed(6)}</td>
                   <td className="py-2.5 pr-4">{usd(t.price)}</td>
                   <td className={`py-2.5 pr-4 ${t.realizedPnlUsd == null ? "text-bone/30" : t.realizedPnlUsd >= 0 ? "text-jade" : "text-blood"}`}>

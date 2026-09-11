@@ -34,7 +34,7 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-ember-300/75">
+          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
             Research dossier · run #{run.id}
           </span>
           <h1 className="font-display mt-2 text-[clamp(2rem,4.5vw,3.4rem)] font-semibold text-bone">
@@ -47,7 +47,7 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
         <div className="text-right font-mono text-[0.66rem] text-bone/45">
           <p>{timeAgo(run.ts)}</p>
           <p>{(run.durationMs / 1000).toFixed(1)}s · 7 AI calls</p>
-          <Link href={`/company/${run.ticker}`} className="ember-underline text-ember-300">
+          <Link href={`/company/${run.ticker}`} className="gold-underline text-truffle-300">
             company dossier →
           </Link>
         </div>
@@ -77,7 +77,7 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
           <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone/50">Council verdicts</h2>
           <table className="mt-4 w-full text-left">
             <thead>
-              <tr className="border-b border-pit-300/15 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-bone/40">
+              <tr className="border-b border-truffle-400/15 font-mono text-[0.55rem] uppercase tracking-[0.2em] text-bone/40">
                 <th className="pb-2">Agent</th>
                 <th className="pb-2">Stance</th>
                 <th className="pb-2">Self</th>
@@ -87,25 +87,25 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
             </thead>
             <tbody>
               {councilLines.map((l) => (
-                <tr key={l.agent} className="border-b border-pit-300/8 last:border-0">
+                <tr key={l.agent} className="border-b border-truffle-400/8 last:border-0">
                   <td className="py-2.5 font-mono text-[0.78rem] text-bone">{l.agent}</td>
                   <td className="py-2.5">
                     <StanceBadge stance={l.stance} />
                   </td>
                   <td className="py-2.5 font-mono text-[0.7rem] text-bone/50">{l.selfConfidence.toFixed(2)}</td>
                   <td className="py-2.5 font-mono text-[0.7rem] text-bone/75">{l.verifiedConfidence.toFixed(2)}</td>
-                  <td className="py-2.5 font-mono text-[0.7rem] text-ember-300">{l.weight.toFixed(2)}</td>
+                  <td className="py-2.5 font-mono text-[0.7rem] text-truffle-300">{l.weight.toFixed(2)}</td>
                 </tr>
               ))}
               {redTeamLine && (
-                <tr className="border-t border-ember-400/25">
-                  <td className="py-2.5 font-mono text-[0.78rem] text-ember-300">RedTeam</td>
+                <tr className="border-t border-truffle-400/25">
+                  <td className="py-2.5 font-mono text-[0.78rem] text-truffle-300">RedTeam</td>
                   <td className="py-2.5">
                     <StanceBadge stance={redTeamLine.stance} />
                   </td>
                   <td className="py-2.5 font-mono text-[0.7rem] text-bone/50">{redTeamLine.selfConfidence.toFixed(2)}</td>
                   <td className="py-2.5 font-mono text-[0.7rem] text-bone/75">{redTeamLine.verifiedConfidence.toFixed(2)}</td>
-                  <td className="py-2.5 font-mono text-[0.7rem] text-ember-300">{redTeamLine.weight.toFixed(2)}</td>
+                  <td className="py-2.5 font-mono text-[0.7rem] text-truffle-300">{redTeamLine.weight.toFixed(2)}</td>
                 </tr>
               )}
             </tbody>
