@@ -9,6 +9,9 @@ import { factCheckAgent, stripViolatedNumbers } from "./factcheck";
 import { promptVersion } from "./consensus";
 import { ALL_AGENT_SPECS, RED_TEAM_AGENT, agentUser, redTeamUser } from "./prompts";
 import type { AIProvider } from "./ai";
+import { consumeAiBudget, recordUsage, selectModel } from "./router";
+import crypto from "node:crypto";
+const requestId = () => crypto.randomUUID();
 
 const VALID_STANCES: readonly string[] = ["bullish", "bearish", "neutral", "caution", "insufficient-evidence"];
 
@@ -70,14 +73,30 @@ export async function runAgentCouncil(
       (spec): Promise<AgentOutput> =>
         (async (): Promise<AgentOutput> => {
       try {
+        // Model-router metering (spec §13/§44): hard per-minute AI budget;
+        // exhausted budget → agent marked insufficient-evidence (fail closed).
+        const sel = selectModel(`agent_${spec.key}`);
+        if (!consumeAiBudget()) throw new Error("AI budget exhausted (per-minute cap) — agent skipped");
+        const t0 = Date.now();
         const r = await provider.chatJson<RawAgentJson>(
           [
             { role: "system", content: spec.system },
             { role: "user", content: agentUser(spec.key, pack, valuationContext, backtestCtx) },
           ],
           promptVersion(spec.key),
-          1600,
+          sel.maxTokens,
         );
+        recordUsage({
+          requestId: requestId(),
+          operation: `agent_${spec.key}`,
+          taskClass: sel.taskClass,
+          provider: r.meta.provider,
+          model: r.meta.model,
+          latencyMs: Date.now() - t0,
+          tokensIn: r.meta.tokensIn ?? undefined,
+          tokensOut: r.meta.tokensOut ?? undefined,
+          status: "ok",
+        });
         const d = r.data;
         const stance = clampStance(d.stance);
         const confidence = Math.min(1, Math.max(0, Number(d.confidence) || 0));
@@ -107,6 +126,16 @@ export async function runAgentCouncil(
         draft.evidence = evidenceFromClaims(fc.claims, pack, spec.name);
         return draft;
       } catch (err) {
+        recordUsage({
+          requestId: requestId(),
+          operation: `agent_${spec.key}`,
+          taskClass: selectModel(`agent_${spec.key}`).taskClass,
+          provider: "groq",
+          model: "unreachable",
+          latencyMs: 0,
+          status: "error",
+          failureReason: (err as Error).message,
+        });
         return {
           agent: spec.name,
           promptVersion: promptVersion(spec.key),
@@ -146,14 +175,28 @@ async function runRedTeam(provider: AIProvider, pack: DataPack, council: AgentOu
     })),
   );
   try {
+    const sel = selectModel("red_team");
+    if (!consumeAiBudget()) throw new Error("AI budget exhausted (per-minute cap) — red team skipped");
+    const t0 = Date.now();
     const r = await provider.chatJson<RawAgentJson>(
       [
         { role: "system", content: spec.system },
         { role: "user", content: redTeamUser(pack, agentJson) },
       ],
       promptVersion(spec.key),
-      1800,
+      sel.maxTokens,
     );
+    recordUsage({
+      requestId: requestId(),
+      operation: "red_team",
+      taskClass: sel.taskClass,
+      provider: r.meta.provider,
+      model: r.meta.model,
+      latencyMs: Date.now() - t0,
+      tokensIn: r.meta.tokensIn ?? undefined,
+      tokensOut: r.meta.tokensOut ?? undefined,
+      status: "ok",
+    });
     const d = r.data;
     const rejected = Boolean(d.requiresReject);
     const stance: Stance = rejected ? "insufficient-evidence" : "caution";

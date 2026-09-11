@@ -14,13 +14,21 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm install --include=dev
-      - name: fail on leaked API keys
+      - name: secret scan (broad patterns)
         run: |
-          if grep -rInE "gsk_[A-Za-z0-9]{20,}" --exclude-dir=node_modules --exclude-dir=.next . ; then
-            echo "::error::Groq API key detected in tracked files. Remove it and rotate the key."
+          # Fail on any credential-shaped material in tracked files (spec §60).
+          PATTERNS='gsk_[A-Za-z0-9]{20,}|vcp_[A-Za-z0-9]{20,}|npg_[A-Za-z0-9]{12,}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|xox[baprs]-[A-Za-z0-9-]{10,}|postgres(ql)?://[^\s]+:[^\s]+@'
+          HITS=$(grep -rInE "$PATTERNS" --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.git . || true)
+          if [ -n "$HITS" ]; then
+            echo "::error::Credential-shaped material found in tracked files:"
+            echo "$HITS"
+            echo "Remove it AND rotate the credential before re-running."
             exit 1
           fi
-          echo "no API keys found in tracked files"
+          echo "no credential-shaped material found in tracked files"
+      - name: dependency audit (prod dependencies)
+        run: |
+          npm audit --omit=dev --audit-level=high
       - run: npm run typecheck
       - run: npm test
       - run: npm run build

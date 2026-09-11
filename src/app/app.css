@@ -170,3 +170,39 @@
 /* CandleChart sits comfortably on dark: soften card borders */
 .tt-app .card { background: var(--app-panel); border-color: var(--app-line); }
 .tt-app .live-dot { background: var(--app-pos); }
+
+/* ── Paper trading (SIMULATED) page ─────────────────────────────── */
+.tt-pagehead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.tt-kicker { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--app-ink-faint); }
+.tt-pagehead h1 { font-size: 24px; font-weight: 800; letter-spacing: -1px; color: #eef5ee; margin-top: 2px; }
+.tt-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1100px) { .tt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tt-split { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .tt-split { grid-template-columns: 1fr; } }
+.tt-label { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--app-ink-faint); }
+.tt-big { font-size: 21px; font-weight: 800; letter-spacing: -0.7px; color: #eef5ee; margin-top: 6px; }
+.tt-pos { color: var(--app-pos) !important; }
+.tt-neg { color: var(--app-neg) !important; }
+.tt-pill-warn { background: #2b2410; border-color: #4d3c12; color: var(--app-gold); }
+.tt-pill-ok { background: #14291c; border-color: #235239; color: var(--app-pos); }
+.tt-pill-bad { background: #2b1515; border-color: #52221f; color: #f28b82; }
+.tt-error { border-color: #52221f; background: #1d1211; color: #f2b8b5; font-size: 12.5px; padding: 14px 16px; }
+.tt-warn { border-color: #4d3c12; background: #1d1810; color: #e8d9a8; font-size: 12px; padding: 12px 16px; display: grid; gap: 4px; }
+.tt-empty { font-size: 12px; color: var(--app-ink-faint); padding: 14px 0; }
+.tt-orderform { display: grid; gap: 10px; }
+.tt-orderform h2 { font-size: 15px; font-weight: 800; letter-spacing: -0.4px; color: #eef5ee; }
+.tt-orderform label { display: grid; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--app-ink-faint); }
+.tt-orderform input,
+.tt-orderform select {
+  background: #0f1713; border: 1px solid var(--app-line-strong); border-radius: 8px;
+  color: var(--app-ink); font-size: 13px; font-weight: 600; padding: 9px 12px; outline: none;
+}
+.tt-orderform input:focus,
+.tt-orderform select:focus { border-color: var(--app-accent); }
+.tt-orderform input::placeholder { color: var(--app-ink-faint); font-weight: 500; }
+.tt-hint { font-size: 10.5px; color: var(--app-ink-faint); line-height: 1.5; }
+.tt-flash { font-size: 11.5px; color: var(--app-accent); border: 1px solid var(--app-line-strong); border-radius: 8px; padding: 9px 11px; background: #101c15; }
+.tt-reason { color: var(--app-ink-faint); font-size: 10.5px; }
+.tt-footnote { font-size: 10.5px; color: var(--app-ink-faint); border-top: 1px solid var(--app-line); padding-top: 12px; margin-top: 4px; }
+.tt-card h2 { font-size: 15px; font-weight: 800; letter-spacing: -0.4px; color: #eef5ee; margin-bottom: 10px; }
+.tt-main { display: grid; gap: 16px; }

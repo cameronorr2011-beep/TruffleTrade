@@ -9,6 +9,7 @@ const NAV = [
   { href: "/dashboard", label: "Overview", icon: "▦" },
   { href: "/markets", label: "Markets", icon: "◍" },
   { href: "/desk", label: "Council desk", icon: "✦", badge: "9+1" },
+  { href: "/paper", label: "Paper trading", icon: "◎", badge: "SIM" },
   { href: "/watchlist", label: "Watchlist", icon: "★" },
   { href: "/compare", label: "Compare", icon: "⇄" },
 ];

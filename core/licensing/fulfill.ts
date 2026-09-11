@@ -6,6 +6,7 @@ import crypto from "node:crypto";
 import { hashCode, generateAccessCode } from "./codes";
 import { isChargePaid, PRICE_MSATS } from "./zbd";
 import { licensingDb, type OrderRow } from "./db";
+import { paperStore } from "../paper/db";
 
 export interface FulfillResult {
   orderId: string;
@@ -61,6 +62,7 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
 
   if (!order.paidTs) {
     await db.setOrderPaid(orderId, Date.now());
+    paperStore().audit("payment_verified", "system", { orderId });
   }
 
   // Fulfillment is idempotent: if two callers race, the second sees status issued.
@@ -70,6 +72,8 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
   }
 
   const code = issueCode(orderId);
+  // Append-only audit trail (spec §48): license issuance is a critical event.
+  paperStore().audit("license_issued", hashCode(code), { orderId });
   return { orderId, status: "issued", paid: true, accessCode: code };
 }
 

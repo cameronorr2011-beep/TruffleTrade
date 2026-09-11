@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyAccessCode, generateAccessCode, hashCode } from "@core/licensing/codes";
 import { licensingDb } from "@core/licensing/db";
+import { paperStore } from "@core/paper/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
     const hash = hashCode(code);
     const now = Date.now();
     await db.createCode({ codeHash: hash, orderId: "comped", activatedTs: now, expiresTs: now + 30 * 86_400_000 });
+    paperStore().audit("license_issued", hash, { orderId: "comped", days: 30 });
     return NextResponse.json({ ok: true, code }); // shown once
   }
 
@@ -64,6 +66,7 @@ export async function POST(req: Request) {
   const hash = hashCode(code);
   const row = await db.getCode(hash);
   if (!row) {
+    paperStore().audit("admin_action_failed", "admin", { reason: "unknown_code" });
     return NextResponse.json({ ok: false, error: "unknown code" }, { status: 404 });
   }
 
@@ -72,11 +75,13 @@ export async function POST(req: Request) {
     const base = Math.max(row.expiresTs, Date.now());
     await db.setCodeExpiry(hash, base + days * 86_400_000);
     await db.setCodeStatus(hash, "active");
+    paperStore().audit("license_extended", hash, { days });
     const updated = await db.getCode(hash);
     return NextResponse.json({ ok: true, expiresTs: updated?.expiresTs });
   }
 
   // revoke
   await db.setCodeStatus(hash, "revoked");
+  paperStore().audit("license_revoked", hash, {});
   return NextResponse.json({ ok: true, revoked: true });
 }
