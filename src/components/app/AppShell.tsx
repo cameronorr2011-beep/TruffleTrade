@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import "@/app/app.css";
 
@@ -15,17 +16,52 @@ const NAV = [
 
 const TOOLS = [
   { href: "/research", label: "Research history", icon: "⧗" },
-  { href: "/blog", label: "Field notes", icon: "✉" },
-  { href: "/buy", label: "Subscription", icon: "◇" },];
+];
+
+type Sub = { ok: boolean; daysRemaining?: number };
 
 /**
- * The paid desktop workspace shell. Every product route renders inside it, so
- * the sidebar persists across navigation (active state follows the pathname)
- * instead of collapsing when you leave /dashboard.
+ * The paid desktop workspace shell. Pure product surface: no marketing links,
+ * no purchase CTAs — the web property handles licensing; this is the terminal.
+ * Topbar carries brand, live clock, and subscription status.
  */
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
+  const [clock, setClock] = useState<string>("");
+  const [sub, setSub] = useState<Sub | null>(null);
+
+  useEffect(() => {
+    const tick = () => setClock(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+    tick();
+    const iv = setInterval(tick, 1000);
+    return () => clearInterval(iv);
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/gateway/verify", { cache: "no-store" });
+        const j = (await res.json()) as Sub;
+        if (alive) setSub(j);
+      } catch {
+        if (alive) setSub({ ok: false });
+      }
+    };
+    load();
+    const iv = setInterval(load, 10 * 60_000);
+    return () => {
+      alive = false;
+      clearInterval(iv);
+    };
+  }, []);
+
+  const subChip = sub
+    ? sub.ok
+      ? { text: `SUBSCRIPTION · ${sub.daysRemaining ?? "?"}d`, cls: "tt-pill-ok" }
+      : { text: "SUBSCRIPTION · EXPIRED", cls: "tt-pill-bad" }
+    : { text: "SUBSCRIPTION · …", cls: "" };
 
   return (
     <div className="tt-app">
@@ -38,7 +74,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <strong>
                 truffle<em>trade</em>
               </strong>
-              <small>Desktop terminal</small>
+              <small>Research terminal</small>
             </span>
           </Link>
 
@@ -53,7 +89,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <p className="tt-nav-label">Tools</p>
+          <p className="tt-nav-label">History</p>
           <nav className="tt-nav">
             {TOOLS.map((n) => (
               <Link key={n.href} href={n.href} className={isActive(n.href) ? "is-active" : ""}>
@@ -65,25 +101,29 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
           <div className="tt-promo">
             <h3>Nine minds. One verdict you can argue with.</h3>
-            <p>The council debates; a backtester checks it against history.</p>
+            <p>The council debates; the backtester checks it against history; the twin scores confidence.</p>
             <Link href="/desk">
-              Run an analysis <span aria-hidden>→</span>
+              Open the desk <span aria-hidden>→</span>
             </Link>
           </div>
-          <p className="tt-faint mt-4 flex items-center gap-2 px-2 text-[9px]">
-            <span className="tt-live" style={{ width: 5, height: 5 }} /> live data · memory on this device
+          <p className="tt-faint tt-status-line">
+            <span className="tt-live" style={{ width: 5, height: 5 }} />
+            live data · memory on this device
           </p>
         </aside>
 
         <div className="tt-main">
+          <header className="tt-topbar">
+            <span className="tt-topbar-scrim" aria-hidden />
+            <span className="tt-topbar-title">
+              {NAV.find((n) => isActive(n.href))?.label ?? "TruffleTrade"}
+            </span>
+            <span className="tt-topbar-clock" aria-hidden>
+              {clock}
+            </span>
+            <span className={`tt-pill ${subChip.cls} tt-topbar-sub`}>{subChip.text}</span>
+          </header>
           <div className="tt-content">{children}</div>
-          <nav className="tt-mobile-nav">
-            {[...NAV, ...TOOLS].map((n) => (
-              <Link key={n.href} href={n.href}>
-                {n.icon} {n.label}
-              </Link>
-            ))}
-          </nav>
         </div>
       </div>
     </div>
