@@ -173,6 +173,11 @@ function rowToOrder(r: Record<string, unknown>): OrderRow {
   };
 }
 
+/** JSONB columns arrive as strings (SQLite) or parsed objects (pg) — normalize. */
+function jsonbText(v: unknown): string {
+  return typeof v === "string" ? v : JSON.stringify(v ?? {});
+}
+
 function rowToCode(r: Record<string, unknown>): CodeRow {
   return {
     codeHash: String(r.code_hash),
@@ -334,7 +339,7 @@ class PostgresLicensingDb implements LicensingDb {
       peerHash: String(r.peer_hash),
       tokens: Number(r.tokens),
       epoch: Number(r.epoch),
-      batchJson: String(r.batch_json),
+      batchJson: jsonbText(r.batch_json),
     }));
   }
   async pruneFederation(beforeTs: number): Promise<void> {

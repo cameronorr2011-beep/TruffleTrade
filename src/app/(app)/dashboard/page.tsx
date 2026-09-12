@@ -1,6 +1,7 @@
 import { yahooChart } from "@core/research/providers";
 import LiveQuotes from "@/components/market/LiveQuotes";
 import AlertsPanel from "@/components/app/AlertsPanel";
+import IntelligenceHub from "@/components/app/IntelligenceHub";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Overview · TruffleTrade" };
@@ -47,23 +48,9 @@ export default async function DashboardPage() {
         initialTicker="NVDA"
       />
 
-      <div className="tt-split">
-        <AlertsPanel tickers="NVDA,AAPL,MSFT,TSLA,AMD" />
-        <section className="tt-card tt-card-pad" aria-label="About the alert engine">
-          <h2>How alerts work</h2>
-          <p className="tt-sub">
-            Every alert is a deterministic rule over live data — gaps, volume spikes, RSI extremes, moving-average
-            crosses, MACD flips, volatility regime shifts, and news-flow shocks. The AI never fires alerts; it can
-            only interpret them. When a provider fails, the affected rule reports DATA UNAVAILABLE instead of guessing.
-          </p>
-          <p className="tt-faint" style={{ fontSize: 10.5, marginTop: 10 }}>
-            Upcoming-event signals are mined from headlines and link to their sources — always verify the date there.
-          </p>
-          <a href="/desk" className="tt-btn tt-btn-ghost" style={{ marginTop: 14 }}>
-            Send a ticker to the council →
-          </a>
-        </section>
-      </div>
+      <AlertsPanel tickers="NVDA,AAPL,MSFT,TSLA,AMD,BTC,ETH" />
+
+      <IntelligenceHub initialTicker="NVDA" />
 
       <p className="tt-faint" style={{ fontSize: 10.5 }}>
         Market data is keyless and no-KYC (Yahoo, Stooq, Kraken public endpoints); quotes are delayed per exchange

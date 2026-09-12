@@ -98,7 +98,8 @@ function createWindow() {
     return { action: "deny" };
   });
 
-  win.loadURL(APP_URL);
+  // The product is the workspace, not the marketing site — always open the terminal.
+  win.loadURL(`${APP_URL}/dashboard`);
 }
 
 // ── Tray ──────────────────────────────────────────────────────────────

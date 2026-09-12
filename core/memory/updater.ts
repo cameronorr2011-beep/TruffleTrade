@@ -128,6 +128,11 @@ export function stopMemoryUpdater(): void {
 // ── CLI: `npm run memory:update` ──────────────────────────────────────────
 // Not executed on import — only when invoked as the entry module.
 if (process.argv[1] && process.argv[1].endsWith("updater.ts")) {
+  // CLI entry only: load .env so gatewayUrl/accessCode are present when run
+  // by hand or by schedulers. Never runs on plain import (instrumentation).
+  // Sync require — this file compiles to CJS, so top-level await is unavailable.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require("dotenv").config();
   const gatewayUrl = process.env.TT_GATEWAY_URL?.trim() || undefined;
   const accessCode = process.env.TT_ACCESS_CODE?.trim() || undefined;
   runFullMemoryUpdate({
