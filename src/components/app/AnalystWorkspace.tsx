@@ -32,6 +32,33 @@ const HORIZONS = [
   { days: 90, label: "90D" },
 ] as const;
 
+type DebateVoice = { role: string; argument: string };
+
+type SignalCard = {
+  ticker: string;
+  name: string | null;
+  stance: "bullish" | "bearish" | "NO TRADE";
+  stanceLabel: string;
+  score: number;
+  confidence: number | null;
+  confidenceDamped: boolean;
+  risk: string;
+  horizonLabel: string;
+  expectedReturn20dPct: number | null;
+  costAssumptionPct: number;
+  bandWidthPct: number | null;
+  drivers: { source: string; detail: string; direction: string; contribution: number; weight: number }[];
+  noTradeReason: string | null;
+  unavailable: string[];
+  debate: DebateVoice[];
+  debateStatus: string;
+  verdict: string;
+  aiVeto: boolean;
+  model: string | null;
+  label: string;
+  disclaimer: string;
+};
+
 function fmt(n: number | null | undefined, digits = 2): string {
   if (n == null || !Number.isFinite(n)) return "—";
   return n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
@@ -181,6 +208,10 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
 
   const ticker = picked?.symbol ?? "";
 
+  const [card, setCard] = useState<SignalCard | null>(null);
+  const [cardBusy, setCardBusy] = useState(false);
+  const [cardErr, setCardErr] = useState<string | null>(null);
+
   const runSim = useCallback(async (t: string, d: number) => {
     setSimBusy(true);
     setSimErr(null);
@@ -201,6 +232,25 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
     if (!ticker) return;
     void runSim(ticker, days);
   }, [ticker, days, runSim]);
+
+  useEffect(() => {
+    if (!ticker) return;
+    let alive = true;
+    setCardBusy(true);
+    setCardErr(null);
+    fetch(`/api/signal?ticker=${encodeURIComponent(ticker)}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j: { ok: boolean; card?: SignalCard; error?: string }) => {
+        if (!alive) return;
+        if (!j.ok || !j.card) throw new Error(j.error ?? "signal failed");
+        setCard(j.card);
+      })
+      .catch((e: Error) => alive && (setCard(null), setCardErr(e.message)))
+      .finally(() => alive && setCardBusy(false));
+    return () => {
+      alive = false;
+    };
+  }, [ticker]);
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -241,6 +291,97 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
               <h2>{ticker} · live market</h2>
             </div>
             <CandleChart ticker={ticker} />
+          </section>
+
+          <section className={`tt-card tt-signal ${card?.stance === "NO TRADE" ? "tt-signal-flat" : card ? "tt-signal-live" : ""}`}>
+            <div className="tt-card-head">
+              <h2>Signal card · {ticker}</h2>
+              {card && (
+                <span className={`tt-pill ${card.stance === "NO TRADE" ? "tt-pill-flat" : "tt-pill-ok"}`}>
+                  {card.stance === "NO TRADE" ? "NO TRADE" : card.stanceLabel}
+                </span>
+              )}
+            </div>
+
+            {cardBusy && <p className="tt-faint tt-loading">Gathering evidence from four legs + the debate bench…</p>}
+            {cardErr && <p className="tt-inline-err">Signal unavailable — {cardErr}.</p>}
+
+            {card && !cardBusy && (
+              <div style={{ display: "grid", gap: 12 }}>
+                <div className="tt-signal-grid">
+                  <div className="tt-stat">
+                    <span>Stance</span>
+                    <strong>{card.stance === "NO TRADE" ? "NO TRADE" : `${card.stanceLabel}`}</strong>
+                  </div>
+                  <div className="tt-stat">
+                    <span>Confidence</span>
+                    <strong>
+                      {card.confidence != null ? `${card.confidence}/100` : "—"}
+                      {card.confidenceDamped && card.confidence != null ? " (damped)" : ""}
+                    </strong>
+                  </div>
+                  <div className="tt-stat">
+                    <span>Risk</span>
+                    <strong>{card.risk}</strong>
+                  </div>
+                  <div className="tt-stat">
+                    <span>Horizon</span>
+                    <strong>{card.horizonLabel}</strong>
+                  </div>
+                  <div className="tt-stat">
+                    <span>Expected 20d</span>
+                    <strong>{card.expectedReturn20dPct != null ? pct(card.expectedReturn20dPct) : "—"}</strong>
+                  </div>
+                  <div className="tt-stat">
+                    <span>Cost assumption</span>
+                    <strong>{card.costAssumptionPct.toFixed(1)}%</strong>
+                  </div>
+                </div>
+
+                {card.noTradeReason && (
+                  <p className="tt-flat-note">
+                    <strong>Why no trade:</strong> {card.noTradeReason}
+                  </p>
+                )}
+
+                <div className="tt-driver-list">
+                  {card.drivers.map((d) => (
+                    <div key={d.source} className="tt-driver">
+                      <span className={`tt-driver-dot ${d.direction}`} aria-hidden />
+                      <span className="tt-driver-src">{d.source}</span>
+                      <span className="tt-driver-detail">{d.detail}</span>
+                      <span className="tt-driver-w">w {d.weight.toFixed(2)} · c {d.contribution.toFixed(2)}</span>
+                    </div>
+                  ))}
+                  {card.unavailable.length > 0 && (
+                    <p className="tt-faint" style={{ fontSize: 10.5 }}>Unavailable legs: {card.unavailable.join(" · ")}</p>
+                  )}
+                </div>
+
+                <div className="tt-verdict">
+                  <p className="tt-verdict-text">{card.verdict}</p>
+                  {card.debate.length > 0 && (
+                    <details className="tt-debate">
+                      <summary>Adversarial debate — {card.debate.length} voices{card.aiVeto ? " · red team veto" : ""}</summary>
+                      <div className="tt-debate-body">
+                        {card.debate.map((v, i) => (
+                          <p key={`${v.role}:${i}`}>
+                            <strong>{v.role}</strong> — {v.argument}
+                          </p>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                  {card.debateStatus === "unavailable" && (
+                    <p className="tt-faint" style={{ fontSize: 10.5 }}>Debate unavailable — card downgraded to NO TRADE (fail-closed).</p>
+                  )}
+                </div>
+
+                <p className="tt-model-badge">
+                  <span className="tt-badge tt-badge-model">{card.label}</span> {card.disclaimer}
+                </p>
+              </div>
+            )}
           </section>
 
           <section className="tt-card">

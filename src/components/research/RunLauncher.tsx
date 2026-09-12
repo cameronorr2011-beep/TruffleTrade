@@ -26,6 +26,70 @@ const STAGES = [
   "Synthesizing consensus + thesis",
 ];
 
+/**
+ * In-app access-code dialog. Electron does not support window.prompt(), so
+ * the code is collected here — styled to the dark workspace — and stored via
+ * the same localStorage helper the site uses.
+ */
+function AccessCodeDialog({
+  open,
+  onSubmit,
+  onCancel,
+}: {
+  open: boolean;
+  onSubmit: (code: string) => void;
+  onCancel: () => void;
+}) {
+  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setValue("");
+      // Focus after paint so the dialog is mounted.
+      const t = setTimeout(() => inputRef.current?.focus(), 30);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
+
+  if (!open) return null;
+  return (
+    <div className="tt-modal-scrim" role="dialog" aria-modal="true" aria-label="Access code required">
+      <div className="tt-modal">
+        <h3>Access code required</h3>
+        <p>
+          Investigations run on your subscription. Paste the access code from your purchase email
+          — it stays on this device.
+        </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const v = value.trim().toUpperCase();
+            if (v) onSubmit(v);
+          }}
+        >
+          <input
+            ref={inputRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value.toUpperCase())}
+            placeholder="TT-XXXX-XXXX-XXXX-XXXX"
+            spellCheck={false}
+            aria-label="Access code"
+          />
+          <div className="tt-modal-actions">
+            <button type="button" className="tt-btn tt-btn-ghost" onClick={onCancel}>
+              Cancel
+            </button>
+            <button type="submit" className="tt-btn tt-btn-primary" disabled={!value.trim()}>
+              Save &amp; run
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function RunLauncher({ initialTicker, autorun }: { initialTicker: string; autorun: boolean }) {
   const router = useRouter();
   const [ticker, setTicker] = useState(initialTicker);
@@ -34,50 +98,74 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunPayload | null>(null);
   const [stage, setStage] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const pendingLaunch = useRef(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const started = useRef(false);
 
-  const launch = useCallback(async () => {
-    const t = ticker.trim().toUpperCase();
-    if (!t || busy) return;
-    setBusy(true);
-    setError(null);
-    setResult(null);
-    setStage(0);
-    timer.current = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), 6000);
-    try {
-      let code = getAccessCode();
-      if (!code) {
-        code = window.prompt("Enter your TruffleTrade access code (get one at /buy)") ?? "";
+  const launch = useCallback(
+    async (codeArg?: string) => {
+      const t = ticker.trim().toUpperCase();
+      if (!t || busy) return;
+      setBusy(true);
+      setError(null);
+      setResult(null);
+      setStage(0);
+      timer.current = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), 6000);
+      try {
+        let code = codeArg ?? getAccessCode();
         if (!code) {
+          // No stored code → open the in-app dialog (Electron-safe) and bail;
+          // the dialog re-enters launch() with the collected code.
+          pendingLaunch.current = true;
           setBusy(false);
-          setError("An active subscription is required to run investigations.");
+          setDialogOpen(true);
           return;
         }
-        setAccessCode(code);
+        const res = await fetch("/api/research", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...authHeaders(), ...(codeArg ? { "x-access-code": codeArg } : {}) },
+          body: JSON.stringify({
+            ticker: t,
+            peers: peers
+              .split(/[\s,]+/)
+              .map((p) => p.trim().toUpperCase())
+              .filter(Boolean)
+              .slice(0, 4),
+          }),
+        });
+        const payload = (await res.json()) as RunPayload;
+        if (!payload.ok) {
+          // A rejected code (401/403) must not stay cached — clear and ask again.
+          if (res.status === 401 || res.status === 403) {
+            try { localStorage.removeItem("tt-access-code"); } catch { /* ignore */ }
+            pendingLaunch.current = true;
+            setDialogOpen(true);
+          }
+          setError(payload.error ?? "research run failed");
+        } else {
+          if (codeArg) setAccessCode(codeArg);
+          setResult(payload);
+        }
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        if (timer.current) clearInterval(timer.current);
+        setBusy(false);
       }
-      const res = await fetch("/api/research", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({
-          ticker: t,
-          peers: peers
-            .split(/[\s,]+/)
-            .map((p) => p.trim().toUpperCase())
-            .filter(Boolean)
-            .slice(0, 4),
-        }),
-      });
-      const payload = (await res.json()) as RunPayload;
-      if (!payload.ok) setError(payload.error ?? "research run failed");
-      else setResult(payload);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      if (timer.current) clearInterval(timer.current);
-      setBusy(false);
-    }
-  }, [ticker, peers, busy]);
+    },
+    [ticker, peers, busy],
+  );
+
+  const handleDialogSubmit = useCallback(
+    (code: string) => {
+      setDialogOpen(false);
+      setAccessCode(code);
+      pendingLaunch.current = false;
+      void launch(code);
+    },
+    [launch],
+  );
 
   useEffect(() => {
     if (autorun && initialTicker && !started.current) {
@@ -90,6 +178,15 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
 
   return (
     <section className="card mt-8 p-6">
+      <AccessCodeDialog
+        open={dialogOpen}
+        onSubmit={handleDialogSubmit}
+        onCancel={() => {
+          setDialogOpen(false);
+          pendingLaunch.current = false;
+          setError("An active subscription is required to run investigations.");
+        }}
+      />
       <form
         onSubmit={(e) => {
           e.preventDefault();
