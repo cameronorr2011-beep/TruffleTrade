@@ -401,3 +401,45 @@
 .tt-modal input::placeholder { color: var(--app-ink-faint); font-weight: 500; letter-spacing: .4px; }
 .tt-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 @media (prefers-reduced-motion: reduce) { .tt-modal-scrim { animation: none; } }
+
+/* ── Signal card v2: stages, dial, bars, scale, chips ─────────────────── */
+.tt-stages { display: grid; gap: 7px; padding: 6px 0 2px; }
+.tt-stage { display: flex; align-items: center; gap: 9px; font-size: 11.5px; color: var(--app-ink-faint); transition: color .25s ease; }
+.tt-stage-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--app-line-strong); flex: none; }
+.tt-stage.done { color: var(--app-ink-soft); }
+.tt-stage.done .tt-stage-dot { background: var(--app-accent); box-shadow: 0 0 6px rgba(88,169,123,.5); }
+.tt-stage.active { color: #eef5ee; }
+.tt-stage.active .tt-stage-dot { background: var(--app-gold); animation: tt-stagepulse 1.1s ease-in-out infinite; }
+@keyframes tt-stagepulse { 0%,100% { box-shadow: 0 0 0 0 rgba(232,174,82,.45); } 50% { box-shadow: 0 0 0 6px rgba(232,174,82,0); } }
+.tt-stage-anim { letter-spacing: 2px; color: var(--app-gold); font-weight: 800; }
+.tt-stage-check { color: var(--app-accent); font-weight: 800; }
+.tt-stage-note { font-size: 10px; margin: 8px 0 0; }
+.tt-chart-loading { height: 150px; border-radius: 10px; background: linear-gradient(100deg, #101a14 40%, #16221b 50%, #101a14 60%); background-size: 200% 100%; animation: tt-shimmer 1.4s linear infinite; }
+@keyframes tt-shimmer { to { background-position: -200% 0; } }
+.tt-sigchart { width: 100%; height: auto; display: block; margin-bottom: 14px; }
+.tt-sigchart-axis { fill: var(--app-ink-faint); font-size: 9.5px; letter-spacing: .5px; }
+.tt-signal-body { display: grid; grid-template-columns: 168px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 760px) { .tt-signal-body { grid-template-columns: 1fr; } }
+.tt-signal-dial { display: grid; justify-items: center; gap: 4px; }
+.tt-dial { width: 100%; max-width: 168px; }
+.tt-dial-num { fill: #eef5ee; font-size: 26px; font-weight: 800; letter-spacing: -1px; }
+.tt-dial-sub { fill: var(--app-ink-faint); font-size: 7.5px; letter-spacing: 1.6px; font-weight: 700; }
+.tt-dial-note { margin: 0; font-size: 10.5px; color: var(--app-ink-soft); text-align: center; }
+.tt-signal-mid { display: grid; gap: 12px; min-width: 0; }
+.tt-driverbars { display: grid; gap: 5px; }
+.tt-driverbar-row { display: grid; grid-template-columns: 46px 1fr 44px; gap: 8px; align-items: center; }
+.tt-driverbar-src { font-family: var(--font-mono, monospace); font-size: 9px; letter-spacing: .8px; color: var(--app-ink-soft); }
+.tt-driverbar-svg { width: 100%; height: 16px; display: block; }
+.tt-driverbar-val { font-family: var(--font-mono, monospace); font-size: 10px; text-align: right; }
+.tt-driverbar-val.pos { color: var(--app-pos); }
+.tt-driverbar-val.neg { color: #f87171; }
+.tt-scorescale-svg { width: 100%; height: 30px; display: block; }
+.tt-scorescale-label { fill: var(--app-ink-faint); font-size: 7px; letter-spacing: 1.2px; font-weight: 700; }
+.tt-signal-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.tt-chip { border: 1px solid var(--app-line); background: #0f1713; border-radius: 8px; padding: 5px 10px; font-size: 9.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--app-ink-faint); display: inline-flex; gap: 6px; align-items: baseline; }
+.tt-chip strong { font-size: 11.5px; color: #eef5ee; letter-spacing: 0; text-transform: none; }
+.tt-signal-verdict { grid-column: 1 / -1; }
+.tt-veto-note { margin: 8px 0 0; font-size: 10.5px; color: var(--app-gold); }
+@media (prefers-reduced-motion: reduce) {
+  .tt-stage.active .tt-stage-dot, .tt-chart-loading { animation: none; }
+}
