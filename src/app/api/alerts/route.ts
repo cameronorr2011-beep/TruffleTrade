@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { evaluateTicker, detectCatalysts } from "@core/alerts";
+import { guard } from "@/lib/guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,6 +11,12 @@ const TTL_MS = 60_000;
 const cache = new Map<string, { at: number; data: unknown }>();
 
 export async function GET(req: Request) {
+  // Alerts are part of the paid product (and polling hammers the free
+  // providers) — subscription-gated like the AI routes. The local desktop
+  // app passes automatically via its server-side TT_ACCESS_CODE.
+  const denied = await guard(req);
+  if (denied) return denied;
+
   const url = new URL(req.url);
   const raw = (url.searchParams.get("tickers") ?? "").toUpperCase();
   if (!raw.trim()) {
