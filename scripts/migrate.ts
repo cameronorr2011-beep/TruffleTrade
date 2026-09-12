@@ -1,4 +1,4 @@
-import { getDb } from "../core/ledger";
+import { getDb } from "../core/db";
 
 const db = getDb();
 const tables = db

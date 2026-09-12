@@ -32,7 +32,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <a href="/desk" className="tt-btn tt-btn-primary">Run analysis</a>
+          <a href="/research" className="tt-btn tt-btn-primary">Run analysis</a>
           <a href="/markets" className="tt-btn tt-btn-ghost">Markets</a>
         </div>
       </header>
@@ -46,9 +46,7 @@ export default async function DashboardPage() {
         }))}
         initialMovers={movers}
         initialTicker="NVDA"
-      />
-
-      <AlertsPanel tickers="NVDA,AAPL,MSFT,TSLA,AMD,BTC,ETH" />
+      />        <AlertsPanel tickers="NVDA,AAPL,MSFT,TSLA,AMD" />
 
       <IntelligenceHub initialTicker="NVDA" />
 

@@ -14,12 +14,12 @@ type ApiPayload = {
   error?: string;
 };
 
-const RANGES = ["1D", "5D", "1M", "6M", "1Y", "5Y"] as const;
+const RANGES = ["1D", "1W", "1M", "6M", "1Y", "5Y"] as const;
 type Range = (typeof RANGES)[number];
 
 const REFRESH_MS: Record<Range, number> = {
   "1D": 60_000,
-  "5D": 120_000,
+  "1W": 120_000,
   "1M": 300_000,
   "6M": 600_000,
   "1Y": 600_000,
@@ -48,7 +48,7 @@ function xLabel(t: number, range: Range) {
   switch (range) {
     case "1D":
       return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-    case "5D":
+    case "1W":
       return d.toLocaleDateString("en-US", { weekday: "short" });
     case "1M":
       return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });

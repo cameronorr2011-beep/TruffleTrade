@@ -4,7 +4,7 @@ import { resolveCandles } from "@core/data/plugins";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const RANGES = ["1D", "5D", "1M", "6M", "1Y", "5Y"];
+const RANGES = ["1D", "1W", "1M", "6M", "1Y", "5Y"];
 
 export type CandlePayload = {
   ticker: string;
@@ -21,8 +21,8 @@ export type CandlePayload = {
 // Small process cache so a dashboard of charts doesn't hammer public endpoints.
 const cache = new Map<string, { at: number; data: CandlePayload }>();
 const TTL_MS: Record<string, number> = {
-  "1D": 60_000, // intraday quotes move fast
-  "5D": 120_000,
+  "1D": 60_000, // minute bars move fast
+  "1W": 120_000,
   "1M": 5 * 60_000,
   "6M": 10 * 60_000,
   "1Y": 10 * 60_000,

@@ -65,7 +65,15 @@ export async function yahooChart(
     });
   }
   const price = m.regularMarketPrice ?? candles[candles.length - 1]?.close ?? null;
-  const prevClose = m.previousClose ?? m.chartPreviousClose ?? null;
+  // "Today's change" must be vs the PRIOR SESSION close. Yahoo's
+  // chartPreviousClose is the close before the FETCHED WINDOW — on a 5d/1d
+  // fetch that is 5 sessions ago, which mislabeled 5-day drift as today's
+  // move (e.g. Dow showed -2% on a +1% day). For daily candles the second-
+  // to-last close IS the prior session; otherwise fall back to meta.
+  const prevClose =
+    interval === "1d" && candles.length >= 2
+      ? candles[candles.length - 2].close
+      : m.previousClose ?? m.chartPreviousClose ?? null;
   const quote: Quote = {
     ticker: m.symbol ?? ticker.toUpperCase(),
     name: m.longName ?? m.shortName ?? null,

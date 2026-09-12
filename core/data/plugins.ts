@@ -98,8 +98,8 @@ const KRAKEN_PAIRS: Record<string, string> = {
   AVAX: "AVAXUSD",
 };
 const KRAKEN_INTERVAL_MIN: Record<string, number> = {
-  "1D": 5,
-  "5D": 15,
+  "1D": 1,
+  "1W": 5,
   "1M": 60,
   "6M": 720,
   "1Y": 1440,
@@ -159,10 +159,10 @@ const kraken: DataPlugin = {
 const YAHOO_REST = "https://query1.finance.yahoo.com";
 
 const YAHOO_RANGE: Record<string, { range: string; interval: string }> = {
-  "1D": { range: "1d", interval: "5m" },
-  "5D": { range: "5d", interval: "15m" },
-  "1M": { range: "1mo", interval: "1d" },
-  "6M": { range: "6mo", interval: "1d" },
+  "1D": { range: "1d", interval: "1m" },
+  "1W": { range: "5d", interval: "5m" },
+  "1M": { range: "1mo", interval: "1h" },
+  "6M": { range: "6mo", interval: "1h" },
   "1Y": { range: "1y", interval: "1d" },
   "5Y": { range: "5y", interval: "1wk" },
 };

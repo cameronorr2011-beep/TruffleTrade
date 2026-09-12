@@ -1,122 +1,65 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="TruffleTrade — a black truffle with three candlesticks across its circumference">
   <defs>
-    <!-- primary body shading: off-center light from upper-left -->
-    <radialGradient id="body" cx="36%" cy="30%" r="82%">
-      <stop offset="0%"  stop-color="#5b4a38"/>
-      <stop offset="18%" stop-color="#3d3126"/>
-      <stop offset="45%" stop-color="#221b13"/>
-      <stop offset="78%" stop-color="#100c07"/>
-      <stop offset="100%" stop-color="#050403"/>
-    </radialGradient>
-    <!-- lobes: secondary bumps that break the perfect circle -->
-    <radialGradient id="lobe" cx="40%" cy="35%" r="75%">
-      <stop offset="0%"  stop-color="#4a3b2c"/>
-      <stop offset="55%" stop-color="#1d160f"/>
-      <stop offset="100%" stop-color="#0a0705"/>
-    </radialGradient>
-    <!-- specular sheen -->
-    <radialGradient id="sheen" cx="30%" cy="22%" r="28%">
-      <stop offset="0%"  stop-color="#c9a06a" stop-opacity="0.5"/>
-      <stop offset="45%" stop-color="#8a6a3e" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
-    </radialGradient>
-    <!-- bounce light from below (soft earth reflection) -->
-    <radialGradient id="bounce" cx="62%" cy="92%" r="46%">
-      <stop offset="0%"  stop-color="#7a5a32" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
-    </radialGradient>
-    <!-- ground shadow -->
-    <radialGradient id="shadow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"  stop-color="#000000" stop-opacity="0.75"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"  stop-color="#ffe3a6"/>
-      <stop offset="45%" stop-color="#e8ae52"/>
-      <stop offset="100%" stop-color="#8f5a1d"/>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe9b8"/>
+      <stop offset=".5" stop-color="#e8ae52"/>
+      <stop offset="1" stop-color="#9a611e"/>
     </linearGradient>
     <linearGradient id="goldDim" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"  stop-color="#b98434"/>
-      <stop offset="100%" stop-color="#5f3d13"/>
+      <stop offset="0" stop-color="#c9973f"/>
+      <stop offset="1" stop-color="#6e4514"/>
     </linearGradient>
-    <clipPath id="skin">
-      <path d="M120 18c34-2 66 12 84 38 16 24 18 58 4 86-13 27-40 48-72 54-33 6-68-3-90-25C24 149 15 115 24 86 34 52 66 25 102 19c6-1 12-1 18-1z"/>
+    <radialGradient id="glow" cx=".5" cy=".54" r=".55">
+      <stop offset="0" stop-color="#31443a"/>
+      <stop offset="1" stop-color="#31443a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="body" cx=".36" cy=".28" r=".92">
+      <stop offset="0" stop-color="#6b5843"/>
+      <stop offset=".28" stop-color="#3d3126"/>
+      <stop offset=".62" stop-color="#1a140d"/>
+      <stop offset="1" stop-color="#060403"/>
+    </radialGradient>
+    <radialGradient id="sheen" cx=".3" cy=".2" r=".3">
+      <stop offset="0" stop-color="#d9b078" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#d9b078" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bounce" cx=".6" cy=".95" r=".5">
+      <stop offset="0" stop-color="#7a5a32" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#7a5a32" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="truffleClip">
+      <path d="M120 54c30-3 58 11 71 35 12 22 12 51-1 73-14 24-39 40-70 40s-56-16-70-40c-13-22-13-51-1-73 13-24 41-38 71-35z"/>
     </clipPath>
   </defs>
 
-  <!-- ground shadow -->
-  <ellipse cx="120" cy="216" rx="86" ry="16" fill="url(#shadow)"/>
+  <circle cx="120" cy="120" r="118" fill="#0b110d"/>
+  <circle cx="120" cy="120" r="118" fill="url(#glow)"/>
 
-  <!-- truffle silhouette: irregular lobed body -->
-  <g>
-    <path d="M120 18c34-2 66 12 84 38 16 24 18 58 4 86-13 27-40 48-72 54-33 6-68-3-90-25C24 149 15 115 24 86 34 52 66 25 102 19c6-1 12-1 18-1z" fill="url(#body)"/>
-    <!-- lobes -->
-    <circle cx="70"  cy="66"  r="34" fill="url(#lobe)" opacity="0.85"/>
-    <circle cx="170" cy="60"  r="30" fill="url(#lobe)" opacity="0.8"/>
-    <circle cx="186" cy="140" r="32" fill="url(#lobe)" opacity="0.85"/>
-    <circle cx="76"  cy="158" r="30" fill="url(#lobe)" opacity="0.8"/>
-    <circle cx="126" cy="180" r="26" fill="url(#lobe)" opacity="0.75"/>
+  <path fill="url(#body)" d="M120 54c30-3 58 11 71 35 12 22 12 51-1 73-14 24-39 40-70 40s-56-16-70-40c-13-22-13-51-1-73 13-24 41-38 71-35z"/>
+  <g clip-path="url(#truffleClip)">
+    <g opacity=".8">
+      <circle cx="71" cy="92" r="31" fill="#241b12"/>
+      <circle cx="166" cy="88" r="27" fill="#221910"/>
+      <circle cx="168" cy="164" r="28" fill="#241b12"/>
+      <circle cx="77" cy="168" r="26" fill="#1f170f"/>
+      <circle cx="121" cy="201" r="22" fill="#1d150d"/>
+    </g>
+    <g stroke="#000" stroke-opacity=".4" fill="none" stroke-linecap="round">
+      <path d="M56 125c11 8 17 21 14 35" stroke-width="4"/>
+      <path d="M154 64c-7 10-8 22-5 33" stroke-width="3.5"/>
+      <path d="M189 132c-9 7-15 18-13 31" stroke-width="3.5"/>
+      <path d="M136 196c-9-3-21-2-30 5" stroke-width="3.5"/>
+    </g>
+    <rect width="240" height="240" fill="url(#sheen)"/>
+    <rect width="240" height="240" fill="url(#bounce)"/>
   </g>
 
-  <!-- warty texture, clipped to the skin -->
-  <g clip-path="url(#skin)">
-    <g fill="#000" opacity="0.35">
-      <circle cx="52"  cy="92"  r="9"/><circle cx="64" cy="118" r="7"/>
-      <circle cx="44"  cy="130" r="6"/><circle cx="86" cy="44"  r="7"/>
-      <circle cx="106" cy="34"  r="5"/><circle cx="148" cy="30"  r="6"/>
-      <circle cx="182" cy="52"  r="7"/><circle cx="196" cy="86"  r="8"/>
-      <circle cx="206" cy="116" r="6"/><circle cx="196" cy="150" r="7"/>
-      <circle cx="172" cy="176" r="8"/><circle cx="140" cy="196" r="7"/>
-      <circle cx="106" cy="202" r="6"/><circle cx="66" cy="186"  r="7"/>
-      <circle cx="38"  cy="158" r="6"/><circle cx="30" cy="108"  r="5"/>
-      <circle cx="118" cy="66"  r="6"/><circle cx="152" cy="88"  r="6"/>
-      <circle cx="90"  cy="146" r="6"/><circle cx="150" cy="140" r="7"/>
-    </g>
-    <g fill="#6b543a" opacity="0.4">
-      <circle cx="57"  cy="87"  r="4"/><circle cx="69" cy="113" r="3"/>
-      <circle cx="90"  cy="39"  r="3"/><circle cx="152" cy="25"  r="3"/>
-      <circle cx="187" cy="47"  r="3.4"/><circle cx="201" cy="81"  r="3.6"/>
-      <circle cx="176" cy="171" r="3.4"/><circle cx="144" cy="191" r="3"/>
-      <circle cx="71"  cy="181" r="3"/><circle cx="42" cy="153"  r="2.6"/>
-      <circle cx="122" cy="61"  r="2.6"/><circle cx="155" cy="135" r="3"/>
-    </g>
-    <!-- cracked fissures -->
-    <g stroke="#000" stroke-opacity="0.5" fill="none" stroke-linecap="round">
-      <path d="M40 96c14 10 20 26 18 44" stroke-width="2.4"/>
-      <path d="M96 30c6 16 4 30-4 44" stroke-width="2"/>
-      <path d="M172 40c-8 12-10 26-6 40" stroke-width="2.2"/>
-      <path d="M200 108c-12 8-18 22-16 38" stroke-width="2"/>
-      <path d="M150 186c-12-4-26-2-38 6" stroke-width="2.2"/>
-      <path d="M60 168c10-8 14-20 12-34" stroke-width="1.8"/>
-    </g>
-  </g>
-
-  <!-- specular sheen + under-bounce -->
-  <path d="M120 18c34-2 66 12 84 38 16 24 18 58 4 86-13 27-40 48-72 54-33 6-68-3-90-25C24 149 15 115 24 86 34 52 66 25 102 19c6-1 12-1 18-1z" fill="url(#sheen)"/>
-  <path d="M120 18c34-2 66 12 84 38 16 24 18 58 4 86-13 27-40 48-72 54-33 6-68-3-90-25C24 149 15 115 24 86 34 52 66 25 102 19c6-1 12-1 18-1z" fill="url(#bounce)"/>
-
-  <!-- three candlesticks, embossed across the circumference -->
   <g stroke-linecap="round">
-    <!-- left: bearish -->
-    <g>
-      <line x1="22" y1="88" x2="22" y2="148" stroke="#3a2a16" stroke-width="5.6" opacity="0.85"/>
-      <line x1="21" y1="87" x2="21" y2="147" stroke="url(#goldDim)" stroke-width="4.4"/>
-      <rect x="15" y="99" width="12" height="30" rx="2" fill="#3a2a16" opacity="0.85" transform="translate(1 1)"/>
-      <rect x="15" y="99" width="12" height="30" rx="2" fill="url(#goldDim)"/>
-    </g>
-    <!-- middle: tall bullish -->
-    <g>
-      <line x1="120" y1="34" x2="120" y2="96" stroke="#3a2a16" stroke-width="5.6" opacity="0.85"/>
-      <line x1="119" y1="33" x2="119" y2="95" stroke="url(#gold)" stroke-width="4.4"/>
-      <rect x="113" y="46" width="12" height="34" rx="2" fill="#3a2a16" opacity="0.85" transform="translate(1 1)"/>
-      <rect x="113" y="46" width="12" height="34" rx="2" fill="url(#gold)"/>
-    </g>
-    <!-- right: bullish -->
-    <g>
-      <line x1="218" y1="92" x2="218" y2="152" stroke="#3a2a16" stroke-width="5.6" opacity="0.85"/>
-      <line x1="217" y1="91" x2="217" y2="151" stroke="url(#gold)" stroke-width="4.4"/>
-      <rect x="211" y="104" width="12" height="28" rx="2" fill="#3a2a16" opacity="0.85" transform="translate(1 1)"/>
-      <rect x="211" y="104" width="12" height="28" rx="2" fill="url(#gold)"/>
-    </g>
+    <line x1="68.5" y1="56" x2="68.5" y2="112" stroke="url(#goldDim)" stroke-width="6"/>
+    <rect x="61.5" y="69" width="14" height="30" rx="2.5" fill="url(#goldDim)"/>
+    <line x1="121" y1="24.5" x2="121" y2="88" stroke="url(#gold)" stroke-width="6"/>
+    <rect x="114" y="40" width="14" height="34" rx="2.5" fill="url(#gold)"/>
+    <line x1="173" y1="149" x2="173" y2="205" stroke="url(#gold)" stroke-width="6"/>
+    <rect x="166" y="162.5" width="14" height="29" rx="2.5" fill="url(#gold)"/>
   </g>
 </svg>

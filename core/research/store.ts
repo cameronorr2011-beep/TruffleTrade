@@ -2,7 +2,7 @@
 // Tables: research_runs, theses (history), forecasts (+ resolution), watchlist.
 
 import Database from "better-sqlite3";
-import { getDb } from "../ledger";
+import { getDb } from "../db";
 import type { AgentOutput, ConsensusResult, DataPack, ResearchRun, StoredForecast, Thesis, ValuationModel } from "./types";
 
 function ensureTables(db: Database.Database): void {

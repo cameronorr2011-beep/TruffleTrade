@@ -11,25 +11,22 @@
  *   - get_candles         : live OHLC candles (any range) for chart work
  *   - get_news            : live headlines for a ticker (the council's news diet)
  *   - get_macro           : indices, VIX, yields, dollar, gold, oil
+ *   - get_simulation      : digital-twin forward paths (percentile bands)
+ *   - get_intelligence    : twin confidence + sentiment + cross-referenced prediction
  *   - verify_access       : check the local subscription/license state
- * Desk (legacy BTC desk):
- *   - get_desk_status · get_btc_features · get_trade_log · get_last_council · run_cycle_once
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio";
 import { z } from "zod";
-import { assertConfig, config } from "../core/config";
-import { deskSnapshot, lastCouncil } from "../src/lib/desk";
-import { marketSnapshot } from "../core/market";
-import { cycleOnce, makeBroker } from "../core/engine-core";
-import { recentTrades } from "../core/ledger";
 import { runResearch } from "../core/research/engine";
 import { latestRunForTicker } from "../core/research/store";
 import { googleNews, macroQuotes, yahooChart } from "../core/research/providers";
+import { runSimulation } from "../core/research/simulate";
+import { predictMarket } from "../core/research/marketIntelligence";
 
 const server = new McpServer({
   name: "truffletrade",
-  version: "2.0.0",
+  version: "2.1.0",
 });
 
 // ── Research & markets (the product) ─────────────────────────────────
@@ -79,17 +76,17 @@ server.tool(
 
 server.tool(
   "get_candles",
-  "Live OHLC candles for any ticker (Yahoo, keyless). Ranges: 1D 5m, 5D 15m, 1M/6M/1Y daily, 5Y weekly.",
+  "Live OHLC candles for any ticker (keyless). Ranges: 1D 1-minute, 1W 5-minute, 1M/6M hourly, 1Y daily, 5Y weekly.",
   {
     ticker: z.string().min(1).max(12),
-    range: z.enum(["1D", "5D", "1M", "6M", "1Y", "5Y"]).default("1M"),
+    range: z.enum(["1D", "1W", "1M", "6M", "1Y", "5Y"]).default("1M"),
   },
   async ({ ticker, range }) => {
     const map: Record<string, { range: string; interval: string }> = {
-      "1D": { range: "1d", interval: "5m" },
-      "5D": { range: "5d", interval: "15m" },
-      "1M": { range: "1mo", interval: "1d" },
-      "6M": { range: "6mo", interval: "1d" },
+      "1D": { range: "1d", interval: "1m" },
+      "1W": { range: "5d", interval: "5m" },
+      "1M": { range: "1mo", interval: "1h" },
+      "6M": { range: "6mo", interval: "1h" },
       "1Y": { range: "1y", interval: "1d" },
       "5Y": { range: "5y", interval: "1wk" },
     };
@@ -136,6 +133,29 @@ server.tool(
 );
 
 server.tool(
+  "get_simulation",
+  "Digital-twin forward simulation for a ticker: seeded block-bootstrap paths from the live price, returned as per-day percentile bands with up-probability. MODEL OUTPUT — not investment advice.",
+  {
+    ticker: z.string().min(1).max(12),
+    days: z.number().int().min(5).max(90).default(20),
+  },
+  async ({ ticker, days }) => {
+    const sim = await runSimulation(ticker.toUpperCase(), days);
+    return { content: [{ type: "text", text: JSON.stringify(sim, null, 2) }] };
+  },
+);
+
+server.tool(
+  "get_intelligence",
+  "Cross-referenced market intelligence for a ticker: digital-twin confidence, news sentiment, macro tape, and the combined prediction with labeled drivers.",
+  { ticker: z.string().min(1).max(12) },
+  async ({ ticker }) => {
+    const prediction = await predictMarket(ticker.toUpperCase());
+    return { content: [{ type: "text", text: JSON.stringify(prediction, null, 2) }] };
+  },
+);
+
+server.tool(
   "verify_access",
   "Check the local subscription: valid access code, days remaining.",
   {},
@@ -154,85 +174,9 @@ server.tool(
   },
 );
 
-// ── Desk (legacy BTC desk, unchanged) ────────────────────────────────
-
-server.tool("get_desk_status", "Account equity, cash, position, P&L stats and mode for the TruffleTrade desk", {}, async () => {
-  assertConfig();
-  const snap = await deskSnapshot();
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(
-          {
-            mode: snap.mode,
-            btcPrice: snap.btcPrice,
-            priceSource: snap.priceSource,
-            account: snap.account,
-            stats: snap.stats,
-            cycleSeconds: snap.cycleSeconds,
-          },
-          null,
-          2,
-        ),
-      },
-    ],
-  };
-});
-
-server.tool("get_btc_features", "Live BTC indicator pack: RSI, MACD, ATR, Bollinger, Donchian, returns, macro", {}, async () => {
-  assertConfig();
-  const snap = await marketSnapshot();
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(
-          {
-            ts: snap.ts,
-            price: snap.btcPrice,
-            features: snap.featurePack,
-            realizedVol1hPct: snap.realizedVol1hPct,
-            realizedVol1dPct: snap.realizedVol1dPct,
-            macro: snap.macro,
-            sources: snap.sources,
-          },
-          null,
-          2,
-        ),
-      },
-    ],
-  };
-});
-
-server.tool("get_trade_log", "Recent fills with realized P&L from the ledger", { limit: z.number().int().min(1).max(100).default(20) }, async ({ limit }) => {
-  assertConfig();
-  return { content: [{ type: "text", text: JSON.stringify(recentTrades(limit), null, 2) }] };
-});
-
-server.tool("get_last_council", "Full transcript of the most recent council session: every vote and the red-team verdict", {}, async () => {
-  assertConfig();
-  const c = lastCouncil();
-  return { content: [{ type: "text", text: c ? JSON.stringify(c, null, 2) : "No council session has run yet." }] };
-});
-
-server.tool(
-  "run_cycle_once",
-  "Trigger one full audited council cycle (market snapshot, debate, red team, risk checks, possible execution). This can place real trades if BROKER_MODE=kraken.",
-  { confirm: z.literal("yes").describe('Must be exactly "yes" to run') },
-  async ({ confirm }) => {
-    assertConfig();
-    if (confirm !== "yes") {
-      return { content: [{ type: "text", text: "Refused: pass confirm=\"yes\" to run a cycle." }] };
-    }
-    const result = await cycleOnce(makeBroker());
-    return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
-  },
-);
-
 async function main(): Promise<void> {
   await server.connect(new StdioServerTransport());
-  console.error(`[truffletrade-mcp] ready (mode=${config.brokerMode}, model=${config.groqModel})`);
+  console.error("[truffletrade-mcp] ready (analysis terminal, no broker)");
 }
 
 main().catch((err) => {

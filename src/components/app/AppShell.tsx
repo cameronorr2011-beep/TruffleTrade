@@ -6,10 +6,10 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import "@/app/app.css";
 
-const NAV = [
+const NAV: { href: string; label: string; icon: string; badge?: string }[] = [
   { href: "/dashboard", label: "Overview", icon: "▦" },
   { href: "/markets", label: "Markets", icon: "◍" },
-  { href: "/desk", label: "Council desk", icon: "✦", badge: "9+1" },
+  { href: "/analyst", label: "AI Analyst", icon: "✦" },
   { href: "/watchlist", label: "Watchlist", icon: "★" },
   { href: "/compare", label: "Compare", icon: "⇄" },
 ];
@@ -100,10 +100,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="tt-promo">
-            <h3>Nine minds. One verdict you can argue with.</h3>
-            <p>The council debates; the backtester checks it against history; the twin scores confidence.</p>
-            <Link href="/desk">
-              Open the desk <span aria-hidden>→</span>
+            <h3>Pick any stock. Let the twins argue over it.</h3>
+            <p>Search a symbol, read the candles, and run digital-twin simulations grounded in its own history.</p>
+            <Link href="/analyst">
+              Open AI Analyst <span aria-hidden>→</span>
             </Link>
           </div>
           <p className="tt-faint tt-status-line">
