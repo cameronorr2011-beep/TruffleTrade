@@ -41,6 +41,90 @@ const STAGES = [
   { key: "debate", label: "AI cross-examination" },
 ] as const;
 
+/**
+ * Live working canvas: seeded Monte Carlo paths draw themselves in while the
+ * stage progress advances — the animation mirrors what the engine is really
+ * doing (replaying price paths), not decoration.
+ */
+function WorkingCanvas({ stage }: { stage: number }) {
+  const W = 560;
+  const H = 120;
+  const PATHS = 24;
+  const STEPS = 48;
+  const PATH_MS = 4200;
+  const [tick, setTick] = useState(0);
+  const [done, setDone] = useState<Set<number>>(new Set());
+
+  // Deterministic per-ticker path shapes: seeded brownian-bridge-ish walks.
+  const paths = useMemo(() => {
+    const mk = (seed: number) => {
+      let s = seed >>> 0;
+      const rnd = () => {
+        s = (s * 1664525 + 1013904223) >>> 0;
+        return s / 0xffffffff;
+      };
+      const pts: number[] = [0];
+      let v = 0;
+      for (let i = 1; i <= STEPS; i++) {
+        v += (rnd() - 0.5) * 2.4 - v * 0.02; // slight mean reversion
+        pts.push(v);
+      }
+      // normalize to fit canvas
+      const max = Math.max(...pts.map(Math.abs)) || 1;
+      return pts.map((p) => p / max);
+    };
+    return Array.from({ length: PATHS }, (_, i) => mk(1000 + i * 77));
+  }, []);
+
+  // Path-drawing animation: one path completes every PATH_MS/PATHS ms.
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setTick((t) => t + 1);
+      setDone((prev) => {
+        const n = Math.min(PATHS, prev.size + 1);
+        const s = new Set<number>();
+        for (let i = 0; i < n; i++) s.add(i);
+        return s;
+      });
+    }, PATH_MS / PATHS);
+    return () => clearInterval(iv);
+  }, []);
+
+  const hi = 8;
+  const x = (i: number) => 6 + (i / STEPS) * (W - 12);
+  const y = (v: number) => H / 2 - v * hi * 2.4;
+
+  return (
+    <div className="tt-working">
+      <svg viewBox={`0 0 ${W} ${H}`} className="tt-working-svg" role="img" aria-label="Simulation running">
+        <line x1="0" x2={W} y1={H / 2} y2={H / 2} stroke="#22302a" strokeWidth="1" strokeDasharray="3 4" />
+        {paths.map((pts, pi) => {
+          const frac = Math.min(1, (tick * (PATH_MS / PATHS) + (pi + 1) * (PATH_MS / PATHS)) / PATH_MS);
+          const steps = Math.max(2, Math.floor(frac * STEPS));
+          const d = pts.slice(0, steps + 1).map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p).toFixed(1)}`).join(" ");
+          const col = pts[STEPS] >= 0 ? "#4ade80" : "#f87171";
+          return <path key={pi} d={d} fill="none" stroke={col} strokeWidth={done.has(pi) ? 1.1 : 1.6} opacity={done.has(pi) ? 0.34 : 0.9} />;
+        })}
+      </svg>
+      <div className="tt-working-meta">
+        <span className="tt-working-counter">{done.size}/{PATHS} paths · {STEPS} steps</span>
+      </div>
+    </div>
+  );
+}
+
+/** Elapsed timer — proves the engine is alive. */
+function useElapsed(active: boolean): number {
+  const [sec, setSec] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    setSec(0);
+    const iv = setInterval(() => setSec((s) => s + 1), 1000);
+    return () => clearInterval(iv);
+  }, [active]);
+  return sec;
+}
+
 const SRC_SHORT: Record<string, string> = {
   "digital-twin": "TWIN",
   trend: "TREND",
@@ -229,6 +313,7 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
   const [err, setErr] = useState<string | null>(null);
   const [stage, setStage] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
+  const elapsed = useElapsed(busy);
 
   useEffect(() => {
     if (!ticker) return;
@@ -270,7 +355,13 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
   if (busy) {
     return (
       <section className="tt-card tt-signal tt-signal-flat" aria-live="polite">
-        <div className="tt-card-head"><h2>Signal card · {ticker}</h2></div>
+        <div className="tt-card-head">
+          <h2>Signal card · {ticker}</h2>
+          <span className="tt-pill tt-pill-work">WORKING · {elapsed}s</span>
+        </div>
+
+        <WorkingCanvas stage={stage} />
+
         <div className="tt-stages">
           {STAGES.map((s, i) => (
             <div key={s.key} className={`tt-stage ${i < stage ? "done" : i === stage ? "active" : ""}`}>

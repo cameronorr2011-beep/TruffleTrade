@@ -443,3 +443,10 @@
 @media (prefers-reduced-motion: reduce) {
   .tt-stage.active .tt-stage-dot, .tt-chart-loading { animation: none; }
 }
+
+/* ── Signal Card working animation ────────────────────────────────────── */
+.tt-pill.tt-pill-work { border-color: rgba(232,174,82,.45); color: var(--app-gold); background: rgba(232,174,82,.07); }
+.tt-working { position: relative; border: 1px solid var(--app-line); border-radius: 10px; background: #0c130f; overflow: hidden; }
+.tt-working-svg { width: 100%; height: auto; display: block; }
+.tt-working-meta { position: absolute; right: 10px; top: 8px; }
+.tt-working-counter { font-family: var(--font-mono, monospace); font-size: 9.5px; letter-spacing: .6px; color: var(--app-gold); background: rgba(12,19,15,.8); border: 1px solid rgba(232,174,82,.25); border-radius: 6px; padding: 3px 8px; }
