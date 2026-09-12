@@ -192,3 +192,29 @@ body {
 }
 .candle-tooltip > span { display: block; font-size: 10px; color: #77837a; }
 .candle-tooltip > strong { display: block; font-size: 13px; font-weight: 700; color: var(--color-ink); margin-top: 2px; }
+
+/* ── Site polish: motion & focus (state-communicating only) ── */
+.card, .card-quiet {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.card:hover {
+  border-color: #c9d5c0;
+  box-shadow: 0 10px 30px rgba(38, 53, 45, 0.08);
+  transform: translateY(-1px);
+}
+.btn-primary:active, .btn-secondary:active { transform: translateY(1px); }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-truffle-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}

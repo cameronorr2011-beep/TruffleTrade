@@ -6,8 +6,7 @@ Run: `npm test` (vitest). Typecheck: `npx tsc --noEmit`. Build: `npm run build`.
 
 | File | Covers |
 |---|---|
-| tests/paper-engine.test.ts | Fill pricing (fee/slippage), NaN exclusion, cash checks, limit rules, avg-cost blending, realized P/L, oversell block, mark-to-market with missing marks, all risk gates (position cap, exposure cap, order cap, data-quality, kill-switch w/ de-risk sells, concentration warnings) |
-| tests/paper-store.test.ts | Account idempotency, per-owner isolation, peak ratchet, order/insert/status, cross-account read denial, CHECK constraints, position flat-deletion, append-only audit with hashed actors |
+| tests/alerts.test.ts | Deterministic alert rules (gap, volume spike, RSI extreme, MA cross, MACD flip, vol regime, news shock) with provider stamping; unavailability recorded instead of fabricated; catalyst radar extraction; degraded-provider fallbacks |
 | tests/fulfillment.test.ts | Payment idempotency (single issuance on repeat), unpaid stays pending, unknown order throws; ZBD mocked |
 | tests/licensing.test.ts + licensing-store.test.ts | Code format/HMAC verification, tamper rejection, order/code lifecycle, expiry/revocation |
 | tests/valuation.test.ts | DCF / reverse-DCF / comps determinism |
@@ -27,7 +26,7 @@ Run: `npm test` (vitest). Typecheck: `npx tsc --noEmit`. Build: `npm run build`.
 - Cash accounting consistency: buy cost = notional + fee tested to 1e-6.
 - Duplicate payment cannot create duplicate license (fulfillment idempotency, tested).
 - Unverified claim cannot become VERIFIED without evidence (factcheck tests).
-- Cross-user read denial (paper store isolation tests).
+- Audit trail append-only with hashed actors (core/audit.ts).
 
 ## Not yet automated (honest gaps)
 

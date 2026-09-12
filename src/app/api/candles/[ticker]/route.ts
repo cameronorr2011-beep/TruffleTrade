@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
-import { yahooChart } from "@core/research/providers";
+import { resolveCandles } from "@core/data/plugins";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Interval → Yahoo range params. */
-const RANGES: Record<string, { range: string; interval: string }> = {
-  "1D": { range: "1d", interval: "5m" },
-  "5D": { range: "5d", interval: "15m" },
-  "1M": { range: "1mo", interval: "1d" },
-  "6M": { range: "6mo", interval: "1d" },
-  "1Y": { range: "1y", interval: "1d" },
-  "5Y": { range: "5y", interval: "1wk" },
-};
+const RANGES = ["1D", "5D", "1M", "6M", "1Y", "5Y"];
 
 export type CandlePayload = {
   ticker: string;
@@ -23,9 +15,10 @@ export type CandlePayload = {
   currency: string | null;
   name: string | null;
   exchange: string | null;
+  provider: string;
 };
 
-// Small process cache so a dashboard of charts doesn't hammer Yahoo.
+// Small process cache so a dashboard of charts doesn't hammer public endpoints.
 const cache = new Map<string, { at: number; data: CandlePayload }>();
 const TTL_MS: Record<string, number> = {
   "1D": 60_000, // intraday quotes move fast
@@ -36,10 +29,7 @@ const TTL_MS: Record<string, number> = {
   "5Y": 30 * 60_000,
 };
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ ticker: string }> },
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ ticker: string }> }) {
   const { ticker: rawTicker } = await params;
   const ticker = decodeURIComponent(rawTicker).trim().toUpperCase().slice(0, 12);
   if (!/^[A-Z0-9.\-^=]{1,12}$/.test(ticker)) {
@@ -47,8 +37,7 @@ export async function GET(
   }
 
   const url = new URL(req.url);
-  const range = RANGES[url.searchParams.get("range") ?? ""] ? (url.searchParams.get("range") as string) : "1M";
-  const { range: yRange, interval } = RANGES[range];
+  const range = RANGES.includes(url.searchParams.get("range") ?? "") ? (url.searchParams.get("range") as string) : "1M";
 
   const key = `${ticker}:${range}`;
   const hit = cache.get(key);
@@ -56,27 +45,27 @@ export async function GET(
     return NextResponse.json({ ok: true, cached: true, ...hit.data });
   }
 
-  try {
-    const { quote, candles } = await yahooChart(ticker, yRange, interval);
-    if (candles.length === 0 && quote.price == null) {
-      return NextResponse.json({ ok: false, error: "no data for ticker" }, { status: 404 });
-    }
-    const payload: CandlePayload = {
-      ticker,
-      range,
-      candles: candles.map((c) => ({ t: c.ts, o: c.open, h: c.high, l: c.low, c: c.close, v: c.volume ?? null })),
-      prevClose: quote.prevClose ?? null,
-      asOf: quote.asOf ?? null,
-      currency: quote.currency ?? null,
-      name: quote.name ?? null,
-      exchange: quote.exchange ?? null,
-    };
-    cache.set(key, { at: Date.now(), data: payload });
-    return NextResponse.json({ ok: true, cached: false, ...payload });
-  } catch (e) {
+  const r = await resolveCandles(ticker, range);
+  if (!r.ok || r.candles.length === 0) {
     return NextResponse.json(
-      { ok: false, error: `market data unavailable: ${(e as Error).message}` },
+      { ok: false, error: r.ok ? "no data for ticker" : `market data unavailable (${r.reason})` },
       { status: 502 },
     );
   }
+
+  const last = r.candles[r.candles.length - 1];
+  const prev = r.candles[r.candles.length - 2];
+  const payload: CandlePayload = {
+    ticker,
+    range,
+    candles: r.candles.map((c) => ({ t: c.t, o: c.o, h: c.h, l: c.l, c: c.c, v: c.v ?? null })),
+    prevClose: r.quote.prevClose ?? (prev ? prev.c : null),
+    asOf: last ? last.t : null,
+    currency: r.quote.currency ?? "USD",
+    name: r.quote.name ?? null,
+    exchange: r.quote.exchange ?? null,
+    provider: r.provider,
+  };
+  cache.set(key, { at: Date.now(), data: payload });
+  return NextResponse.json({ ok: true, cached: false, ...payload });
 }

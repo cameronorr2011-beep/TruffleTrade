@@ -171,6 +171,61 @@
 .tt-app .card { background: var(--app-panel); border-color: var(--app-line); }
 .tt-app .live-dot { background: var(--app-pos); }
 
+/* ── Dark token remap ─────────────────────────────────────────
+   Product pages and market components were originally styled with the
+   website's light utility classes (bg-soil-*, text-ink, …). Rather than
+   rewriting every component, the Tailwind color variables are re-declared
+   inside .tt-app: utilities compile to var(--color-*), so this single block
+   re-themes the entire workspace surface to the dark terminal palette. */
+.tt-app {
+  --color-void: #0c1210;
+  --color-ink: #dce7de;
+  --color-soil-950: #101814;
+  --color-soil-900: #141d18;
+  --color-soil-800: #121a16;
+  --color-soil-700: #17221c;
+  --color-soil-600: #22302a;
+  --color-soil-500: #2e4038;
+  --color-truffle-600: #8fd0ab;
+  --color-truffle-500: #58a97b;
+  --color-truffle-400: #58a97b;
+  --color-truffle-300: #7cc39a;
+  --color-truffle-200: #1a2b21;
+  --color-mint: #14251c;
+  --color-surface: #141d18;
+  --color-sidebar: #0a100e;
+  --color-blood: #f07a5a;
+  --color-jade: #4ade80;
+  --color-paper: #141d18;
+  --color-bone: #dce7de;
+  --color-bone-soft: #9db1a3;
+  --color-faint: #66796d;
+}
+.tt-app .candle-tooltip {
+  background: #101713;
+  border-color: var(--app-line-strong);
+}
+.tt-app .candle-tooltip > span { color: var(--app-ink-faint); }
+.tt-app .candle-tooltip > strong { color: var(--app-ink); }
+
+/* ── Workspace motion & focus effects (state-communicating only) ── */
+.tt-card { transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+.tt-card:hover { border-color: var(--app-line-strong); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); }
+.tt-btn:active { transform: translateY(1px); }
+.tt-nav a:active { transform: translateX(1px); }
+.tt-app :focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tt-app *, .tt-app *::before, .tt-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ── Paper trading (SIMULATED) page ─────────────────────────────── */
 .tt-pagehead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .tt-kicker { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--app-ink-faint); }

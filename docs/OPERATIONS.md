@@ -5,7 +5,7 @@
 | | Local (subscriber desktop) | Production (Vercel) |
 |---|---|---|
 | App | `npm run dev` / Electron (`npm run app`) | ai-stock-trader-two.vercel.app |
-| Licensing/paper DB | SQLite (`data/truffletrade.sqlite3`) | Neon Postgres (`DATABASE_URL`) |
+| Licensing/audit DB | SQLite (`data/truffletrade.sqlite3`) | Neon Postgres (`DATABASE_URL`) |
 | Research runs | SQLite (local history) | returned to client; serverless FS is read-only (known limitation, PRODUCTION-AUDIT §3a) |
 | Secrets | `.env` (gitignored) | Vercel encrypted env |
 
@@ -13,7 +13,7 @@
 
 | Var | Required | Purpose |
 |---|---|---|
-| `DATABASE_URL` | prod only | Neon Postgres (licenses, payments, federation, paper trading) |
+| `DATABASE_URL` | prod only | Neon Postgres (licenses, payments, federation, audit) |
 | `LICENSE_HMAC_KEY` | prod | mint/verify access codes |
 | `GROQ_API_KEY` | operator only | server-side AI gateway |
 | `GROQ_MODEL` | optional | council reasoning model override |
@@ -37,7 +37,7 @@ admin API is disabled (401) when `ADMIN_TOKEN` is unset.
 ## Database operations
 
 - Schema is created idempotently on first connection (both SQLite and Postgres)
-  by `core/licensing/db.ts` and `core/paper/db.ts`; `scripts/migrate.ts` prints table state.
+  by `core/licensing/db.ts` and `core/audit.ts`; `scripts/migrate.ts` prints table state.
 - Migrations are additive `CREATE TABLE IF NOT EXISTS` statements — no destructive
   changes exist. Any future destructive change requires a written migration plan first.
 
@@ -62,7 +62,11 @@ admin API is disabled (401) when `ADMIN_TOKEN` is unset.
 
 Vercel → Deployments → previous deployment → "Promote to Production" (instant).
 DB rollback: additive schema means old code runs against new tables; data written
-by newer code (paper tables) is ignored harmlessly by older code.
+by newer code (audit tables) is ignored harmlessly by older code.
+
+> 2026-09-11: the paper-trading module was removed by product decision
+> (TruffleTrade is analysis-only). The `tt_paper_*` tables were dropped from
+> Neon and paper_* audit rows purged.
 
 ## Known operational limits
 

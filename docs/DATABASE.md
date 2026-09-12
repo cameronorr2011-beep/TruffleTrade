@@ -9,7 +9,7 @@
 
 Both store layers implement identical interfaces (`LicensingDb`, `PaperStore`);
 routes never branch on backend. Schema is created idempotently at first
-connection in `core/licensing/db.ts` and `core/paper/db.ts`.
+connection in `core/licensing/db.ts` and `core/audit.ts`.
 
 ## Tables (Postgres names; SQLite mirrors with INTEGER PKs)
 
@@ -19,10 +19,8 @@ Licensing/licensing-adjacent:
 - `tt_federation_updates` — ts, peer_hash, tokens, epoch, batch_json (hashed aggregates only)
 
 Paper trading + audit:
-- `tt_paper_accounts` — owner_code_hash (UNIQUE), cash_usd (CHECK >= 0), start_usd, peak_value_usd, assumptions_json
-- `tt_paper_orders` — account_id FK, ticker, side/type (CHECK), quantity (CHECK > 0), limit_price, status (CHECK), reason
-- `tt_paper_fills` — order_id FK, ticker, side, quantity (CHECK > 0), price_usd (CHECK > 0), fee/slippage/realized_pnl, ts
-- `tt_paper_positions` — (account_id, ticker) PK, quantity (CHECK >= 0), avg_cost_usd (CHECK >= 0)
+- `tt_audit_events` — ts, actor_hash (hashed actors only), event, detail_json (JSONB)
+  *(the former `tt_paper_*` tables were removed with the paper-trading module — 2026-09-11)*
 - `tt_audit_events` — ts, actor_hash, event, detail_json (append-only; no raw codes)
 
 Indexes: orders by (account_id, created_ts DESC), fills by ts, federation/audit by ts DESC.
@@ -50,6 +48,6 @@ Indexes: orders by (account_id, created_ts DESC), fills by ts, federation/audit 
 
 ## Verified
 
-- Schema creation on empty SQLite (tests/paper-store.test.ts, licensing-store.test.ts).
+- Schema creation on empty SQLite (tests/licensing-store.test.ts).
 - CHECK constraint enforcement (negative quantity insert throws).
 - Neon reachable from local + Vercel; health endpoint reports backend kind.

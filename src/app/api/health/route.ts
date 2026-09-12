@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { validateAccessCode } from "@core/licensing/validate";
 import { dbKind } from "@core/licensing/db";
-import { paperStore } from "@core/paper/db";
+import { auditStore } from "@core/audit";
 import { usageStats } from "@core/research/router";
+import { pluginCatalog } from "@core/data/plugins";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const store = paperStore();
+  const store = auditStore();
   let dbOk = false;
   let dbDetail = "unknown";
   try {
@@ -51,14 +52,14 @@ export async function GET(req: Request) {
       uptimeSec: Math.floor((Date.now() - STARTED) / 1000),
     },
     database: { status: dbOk ? "ok" : "error", detail: dbDetail },
+    dataPlugins: pluginCatalog(),
     aiProvider: { configured: groq, gatewayMode: groq ? "server-side" : "unconfigured", usage: usageStats() },
     payments: { configured: zbd, fallback: zbd ? "zbd charges" : "manual wallet-of-satoshi approval" },
     adminApi: { configured: admin },
     featureFlags: {
-      AI_MODEL_ROUTER: false,
+      AI_MODEL_ROUTER: true,
       FEDERATED_SYNC: true,
       DIGITAL_TWIN: true,
-      ADVANCED_PAPER_SIMULATION: false,
     },
   });
 }

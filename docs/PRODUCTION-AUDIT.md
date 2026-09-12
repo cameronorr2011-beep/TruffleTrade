@@ -11,7 +11,7 @@ Date: 2026-09-11 · Auditor: production-engineering pass · Commit at audit: see
 | Test suite | `npm test` | PASS — 142 tests / 17 files (after this pass's additions) |
 | Production build | `npm run build` | PASS (Next 16, Turbopack, 13 routes prerendered) |
 | Dependency audit (prod) | `npm audit --omit=dev` | **0 vulnerabilities** (was 3: critical Next.js SSRF GHSA-p9j2-gv94-2wf4, high postcss ×2, high sharp — fixed by upgrading Next to 16.3.4, verified typecheck+tests+build after) |
-| Live paper-trading smoke | Neon-backed dev server | PASS — buy 1 AAPL filled at live price with fee/slippage/provenance; $33M notional oversell blocked by risk engine (422); JSONB round-trip bug found & fixed during smoke |
+| Live API smoke (prior pass; historical) | Neon-backed dev server | PASS — guard 401s, health, and the (since removed) paper engine verified end-to-end; JSONB round-trip bug found & fixed during that smoke |
 | Secret scan (tracked files) | `git grep` for key material patterns | CLEAN — no secrets in repo; `.env` gitignored (verified patterns: npg_, vcp_, sk-, live TT- codes) |
 
 ## 2. Current architecture (verified by code inspection)
@@ -28,8 +28,8 @@ Date: 2026-09-11 · Auditor: production-engineering pass · Commit at audit: see
 
 ## 3. Gaps identified (this spec's remediation targets)
 
-1. **No paper-trading engine** — spec §19/20 requires simulated accounts, orders, fills, positions, fees/slippage, and a deterministic risk gate. This is the largest missing product pillar. *(ADDED this pass: core/paper engine + risk + store + service + API + UI, 26 tests, live-verified on Neon.)*
-2. **No audit trail** — licensing state changes and admin actions were not logged to an append-only store. *(ADDED this pass: tt_audit_events, dual-backend, wired into fulfillment/admin/paper.)*
+1. **Paper-trading engine** — was built to spec §19/20 in the prior pass, then **REMOVED by product decision** (2026-09-11): TruffleTrade is an analysis product and never places stock trades. `tt_paper_*` tables dropped from Neon; paper_* audit rows purged; tests removed with the module.
+2. **No audit trail** — licensing state changes and admin actions were not logged to an append-only store. *(ADDED: tt_audit_events, dual-backend, wired into fulfillment/admin; store now lives in `core/audit.ts`.)*
 3. **No model router** — model/provider selection ad hoc; no cost/latency tracking or token budgets. *(ADDED this pass: core/research/router.ts — task classes, budgets, per-minute fail-closed cap, usage stats at /api/health, wired into council + red team.)*
 4. **No structured logging** — inconsistent console logging; no requestId/duration. *(ADDED this pass: core/observability.ts withLogging(); adoption across routes is incremental.)*
 5. **Next.js critical CVE** — SSRF via rewrites. **Fixed** (16.3.4), verified.

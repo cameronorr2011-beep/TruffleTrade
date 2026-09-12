@@ -10,15 +10,15 @@
 | Authorization tests | PASS — guard 401s verified live + in code; cross-user isolation unit-tested |
 | Error states / data-provenance | PASS — fail-closed states render explicit unavailability; fills carry source+timestamp |
 | AI-failure tests | PASS — retry/red-team-reject/malformed-JSON tests green |
-| Paper-trading accounting | PASS — invariant tests + live smoke (Neon) |
+| Analysis & alerts invariants | PASS — deterministic alert rules unit-tested (6); plugin registry fail-closed types checked; BTC desk risk tests green |
 | Payment/licensing flows | PASS — idempotency tested; manual WoS fallback verified |
 | Secret scanning | PASS — local scan clean; CI gate added |
 | Dependency review | PASS — `npm audit --omit=dev` = 0 vulnerabilities (Next critical SSRF fixed) |
-| Deployment verified | PASS — Vercel auto-deploys; live smoke: home, dashboard, paper API, health |
+| Deployment verified | PASS — Vercel auto-deploys; live smoke: home, dashboard, alerts API, health |
 | Rollback plan | DOCUMENTED (docs/OPERATIONS.md) |
 | Logging/observability | PARTIAL — structured logger + router usage stats exist; not every route wrapped yet |
 | Backup/restore | DOCUMENTED; restore drill NOT executed (UNVERIFIED) |
-| User data isolation | PASS for paper/portfolio state (hash-scoped, tested); true multi-tenant accounts NOT implemented |
+| User data isolation | PASS for research/memory state (hash-scoped, tested); true multi-tenant accounts NOT implemented |
 | No known critical vulnerabilities | PASS — `npm audit --omit=dev` clean |
 
 **Verdict: NOT YET labeled "production ready" without the UNVERIFIED items below

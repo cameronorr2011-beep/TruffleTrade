@@ -9,7 +9,6 @@ const NAV = [
   { href: "/dashboard", label: "Overview", icon: "▦" },
   { href: "/markets", label: "Markets", icon: "◍" },
   { href: "/desk", label: "Council desk", icon: "✦", badge: "9+1" },
-  { href: "/paper", label: "Paper trading", icon: "◎", badge: "SIM" },
   { href: "/watchlist", label: "Watchlist", icon: "★" },
   { href: "/compare", label: "Compare", icon: "⇄" },
 ];
@@ -17,8 +16,7 @@ const NAV = [
 const TOOLS = [
   { href: "/research", label: "Research history", icon: "⧗" },
   { href: "/blog", label: "Field notes", icon: "✉" },
-  { href: "/buy", label: "Subscription", icon: "◇" },
-];
+  { href: "/buy", label: "Subscription", icon: "◇" },];
 
 /**
  * The paid desktop workspace shell. Every product route renders inside it, so

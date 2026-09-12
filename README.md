@@ -40,7 +40,7 @@ TruffleTrade points six rival AI analysts, a fact-checker, and a red team at any
 - **No identity anywhere.** We never collect name, email, or documents. Codes are stored hashed.
 - **No auto-renew.** 30 days per payment; renewal is a deliberate new payment.
 - **18+, or 13–17 with parental consent and supervision** (see `/terms`).
-- The legacy BTC desk modes are analysis-first too: paper by default; on-chain Degen Mode remains opt-in, double-locked, and capped — from your own wallet, no exchange account.
+- The BTC desk is analysis-first by design: the five-voter council reads live Kraken/Coinbase data and issues a verdict you can argue with. On-chain Degen Mode remains opt-in, double-locked, and capped — from your own wallet, no exchange account. TruffleTrade never places stock trades.
 
 ## Quickstart (subscribers)
 
@@ -88,6 +88,10 @@ core/               domain
     twin.ts             digital-twin trainer (GBM + block-bootstrap, seeded)
     federated.ts        privacy-preserving push/pull sync client
     updater.ts          the 6-hour auto-update loop + CLI
+  data/               THE NO-KYC DATA LAYER
+    plugins.ts          provider registry: kraken · yahoo · stooq · gnews
+                        keyless, provenance-stamped, fail-closed failover
+  alerts.ts           deterministic alert rules + upcoming-event radar
   research/           THE ANALYSIS PLATFORM
     providers.ts        keyless Yahoo + Google News
     datapack.ts         provenance-backed data assembly
