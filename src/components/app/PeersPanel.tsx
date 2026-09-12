@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { authHeaders } from "@/lib/accessCodeClient";
 
 type Peer = {
   ticker: string; name: string | null; price: number | null;
@@ -25,7 +26,7 @@ export default function PeersPanel({ ticker }: { ticker: string }) {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch(`/api/peers?ticker=${encodeURIComponent(ticker)}`);
+      const res = await fetch(`/api/peers?ticker=${encodeURIComponent(ticker)}`, { headers: authHeaders() });
       const j = (await res.json()) as Payload;
       if (!j.ok) throw new Error(j.error ?? "unavailable");
       setData(j.ranking ?? null);

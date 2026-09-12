@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CandleChart from "@/components/market/CandleChart";
 import Link from "next/link";
+import { authHeaders } from "@/lib/accessCodeClient";
 
 type SearchHit = { symbol: string; name: string; exchange: string | null; type: string | null };
 
@@ -216,7 +217,7 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
     setSimBusy(true);
     setSimErr(null);
     try {
-      const res = await fetch(`/api/simulate?ticker=${encodeURIComponent(t)}&days=${d}`, { cache: "no-store" });
+      const res = await fetch(`/api/simulate?ticker=${encodeURIComponent(t)}&days=${d}`, { cache: "no-store", headers: authHeaders() });
       const j = (await res.json()) as { ok: boolean; sim?: Sim; error?: string };
       if (!j.ok || !j.sim) throw new Error(j.error ?? `HTTP ${res.status}`);
       setSim(j.sim);
@@ -238,7 +239,7 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
     let alive = true;
     setCardBusy(true);
     setCardErr(null);
-    fetch(`/api/signal?ticker=${encodeURIComponent(ticker)}`, { cache: "no-store" })
+    fetch(`/api/signal?ticker=${encodeURIComponent(ticker)}`, { cache: "no-store", headers: authHeaders() })
       .then((r) => r.json())
       .then((j: { ok: boolean; card?: SignalCard; error?: string }) => {
         if (!alive) return;

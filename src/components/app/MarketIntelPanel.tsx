@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { authHeaders } from "@/lib/accessCodeClient";
 
 type Twin = {
   ticker: string; direction: "up" | "down" | "flat"; confidencePct: number;
@@ -38,7 +39,7 @@ export default function MarketIntelPanel({ ticker, onTickerChange }: { ticker: s
   const load = useCallback(async (t: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/intelligence?ticker=${encodeURIComponent(t)}`);
+      const res = await fetch(`/api/intelligence?ticker=${encodeURIComponent(t)}`, { headers: authHeaders() });
       const j = (await res.json()) as Payload;
       if (!j.ok) throw new Error(j.error ?? "unavailable");
       setData(j);

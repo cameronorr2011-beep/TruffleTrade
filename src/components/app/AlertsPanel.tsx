@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { authHeaders } from "@/lib/accessCodeClient";
 
 type Alert = { ruleId: string; ticker: string; severity: "info" | "warning" | "critical"; message: string; value: number | null; provider: string | null; ts: number };
 type Catalyst = { ticker: string; label: string; title: string; link: string; source: string; publishedAt: number; note: string };
@@ -33,7 +34,7 @@ export default function AlertsPanel({ tickers }: { tickers: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/alerts?tickers=${encodeURIComponent(tickers)}`);
+      const res = await fetch(`/api/alerts?tickers=${encodeURIComponent(tickers)}`, { headers: authHeaders() });
       const j = (await res.json()) as Payload;
       if (!j.ok) throw new Error(j.error ?? "unavailable");
       setData(j);
