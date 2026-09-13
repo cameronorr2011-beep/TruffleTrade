@@ -125,6 +125,7 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
         const res = await fetch("/api/research", {
           method: "POST",
           headers: { "Content-Type": "application/json", ...authHeaders(), ...(codeArg ? { "x-access-code": codeArg } : {}) },
+          signal: AbortSignal.timeout(6 * 60_000),
           body: JSON.stringify({
             ticker: t,
             peers: peers
@@ -134,7 +135,23 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
               .slice(0, 4),
           }),
         });
-        const payload = (await res.json()) as RunPayload;
+        // The server can answer without a parseable body (crash, proxy error,
+        // stale process). Blind res.json() is what produced the cryptic
+        // "Unexpected end of JSON input" — parse defensively instead.
+        const payload = (await res.json().catch(() => null)) as RunPayload | null;
+        if (!payload) {
+          if (res.status === 401 || res.status === 403) {
+            try { localStorage.removeItem("tt-access-code"); } catch { /* ignore */ }
+            pendingLaunch.current = true;
+            setDialogOpen(true);
+          }
+          setError(
+            res.status === 503
+              ? "The subscription gateway is briefly unavailable — wait a few seconds and run again."
+              : `Investigation service error (HTTP ${res.status || "no response"}). If this persists, restart the app.`,
+          );
+          return;
+        }
         if (!payload.ok) {
           // A rejected code (401/403) must not stay cached — clear and ask again.
           if (res.status === 401 || res.status === 403) {
@@ -148,7 +165,12 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
           setResult(payload);
         }
       } catch (e) {
-        setError((e as Error).message);
+        const err = e as Error;
+        setError(
+          err.name === "TimeoutError" || err.name === "AbortError"
+            ? "The investigation ran too long and was stopped. Data providers may be slow right now — try again."
+            : err.message,
+        );
       } finally {
         if (timer.current) clearInterval(timer.current);
         setBusy(false);

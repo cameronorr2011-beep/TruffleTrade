@@ -7,6 +7,7 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 import { dbKind } from "./licensing/db";
+import { pgQuery } from "./pg";
 
 export interface AuditEventRow {
   id: number;
@@ -46,18 +47,17 @@ CREATE TABLE IF NOT EXISTS tt_audit_events (
 CREATE INDEX IF NOT EXISTS idx_tt_audit_ts ON tt_audit_events(ts DESC);
 `;
 
-type PgClient = { query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> };
-
-/** JSONB columns arrive as strings (SQLite) or parsed objects (pg) — normalize. */
-function jsonbText(v: unknown): string {
-  return typeof v === "string" ? v : JSON.stringify(v ?? {});
-}
-
 declare global {
   // eslint-disable-next-line no-var
-  var __ttAuditPg: PgClient | null | undefined;
-  // eslint-disable-next-line no-var
   var __ttAuditSqlite: Database.Database | undefined;
+}
+
+// Postgres schema is created idempotently once per process via the shared
+// self-healing client (core/pg.ts) — which also owns stale-socket recovery.
+let pgSchemaReady: Promise<void> | null = null;
+function ensurePgSchema(): Promise<void> {
+  pgSchemaReady ??= pgQuery(SCHEMA_PG).then(() => undefined);
+  return pgSchemaReady;
 }
 
 function sqliteHandle(): Database.Database {
@@ -74,6 +74,13 @@ function sqliteHandle(): Database.Database {
   db.exec(SCHEMA_SQLITE);
   globalThis.__ttAuditSqlite = db;
   return db;
+}
+
+// pg parses JSONB columns into JS objects; SQLite stores TEXT. Normalize both
+// to the JSON string the rest of the code expects.
+function jsonbText(v: unknown): string {
+  if (typeof v === "string") return v;
+  return JSON.stringify(v ?? {});
 }
 
 function rowToEvent(r: Record<string, unknown>): AuditEventRow {
@@ -108,17 +115,8 @@ class PostgresAuditStore implements AuditStore {
   readonly kind = "postgres" as const;
 
   private async q(sql: string, params: unknown[] = []): Promise<Record<string, unknown>[]> {
-    const g = globalThis as unknown as { __ttAuditPg?: PgClient | null };
-    if (!g.__ttAuditPg) {
-      const url = process.env.DATABASE_URL?.trim();
-      if (!url) throw new Error("DATABASE_URL is required for the Postgres audit backend.");
-      const { Client } = await import("pg");
-      const client = new Client({ connectionString: url });
-      await client.connect();
-      await client.query(SCHEMA_PG);
-      g.__ttAuditPg = client as unknown as PgClient;
-    }
-    return (await g.__ttAuditPg.query(sql, params)).rows;
+    await ensurePgSchema();
+    return pgQuery(sql, params);
   }
 
   async audit(event: string, actorHash: string, detail: Record<string, unknown>): Promise<void> {

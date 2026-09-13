@@ -17,6 +17,21 @@ import { validateAccessCode, checkRateLimit } from "@core/licensing/validate";
  * stays free by design — only intelligence is metered.
  */
 export async function guard(req: Request): Promise<NextResponse | null> {
+  try {
+    return await checkGuard(req);
+  } catch {
+    // The license/audit store being unreachable (e.g. a stale database socket)
+    // must fail CLOSED with a parseable JSON response — never an unhandled
+    // exception (which Next.js answers with an empty-body 500 that crashes
+    // client res.json()). 503 denies access and tells the client to retry.
+    return NextResponse.json(
+      { ok: false, error: "subscription service temporarily unavailable — retry shortly", code: "GATEWAY_UNAVAILABLE" },
+      { status: 503, headers: { "retry-after": "30" } },
+    );
+  }
+}
+
+async function checkGuard(req: Request): Promise<NextResponse | null> {
   const operatorToken = process.env.DASHBOARD_TOKEN?.trim();
   if (operatorToken) {
     if (req.headers.get("x-desk-token") !== operatorToken) {

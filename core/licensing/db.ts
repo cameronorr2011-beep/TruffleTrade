@@ -6,6 +6,7 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
+import { pgQuery } from "../pg";
 
 export interface OrderRow {
   id: string;
@@ -122,12 +123,15 @@ CREATE TABLE IF NOT EXISTS tt_federation_updates (
 CREATE INDEX IF NOT EXISTS idx_tt_fed_ts ON tt_federation_updates(ts DESC);
 `;
 
-type PgClient = {
-  query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
-};
-
 let cachedSqlite: Database.Database | null = null;
-let cachedPg: PgClient | null = null;
+
+// Postgres schema is created idempotently once per process via the shared
+// self-healing client (core/pg.ts) — which also owns stale-socket recovery.
+let pgSchemaReady: Promise<void> | null = null;
+function ensurePgSchema(): Promise<void> {
+  pgSchemaReady ??= pgQuery(SCHEMA_PG).then(() => undefined);
+  return pgSchemaReady;
+}
 
 function sqliteDb(): Database.Database {
   if (cachedSqlite) return cachedSqlite;
@@ -143,18 +147,6 @@ function sqliteDb(): Database.Database {
   db.exec(SCHEMA_SQLITE);
   cachedSqlite = db;
   return db;
-}
-
-async function pgClient(): Promise<PgClient> {
-  if (cachedPg) return cachedPg;
-  const url = process.env.DATABASE_URL?.trim();
-  if (!url) throw new Error("DATABASE_URL is required for the Postgres licensing backend.");
-  const { Client } = await import("pg");
-  const client = new Client({ connectionString: url });
-  await client.connect();
-  await client.query(SCHEMA_PG);
-  cachedPg = client as unknown as PgClient;
-  return cachedPg;
 }
 
 export function dbKind(): "sqlite" | "postgres" {
@@ -273,9 +265,8 @@ class SqliteLicensingDb implements LicensingDb {
 class PostgresLicensingDb implements LicensingDb {
   readonly kind = "postgres" as const;
   private async q(sql: string, params: unknown[] = []): Promise<Record<string, unknown>[]> {
-    const client = await pgClient();
-    const res = await client.query(sql, params);
-    return res.rows;
+    await ensurePgSchema();
+    return pgQuery(sql, params);
   }
 
   async createOrder(id: string, chargeId: string, ts: number): Promise<void> {
