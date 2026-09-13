@@ -35,6 +35,7 @@ export default function BuyPanel() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<"invoice" | "code" | "address" | null>(null);
   const [manual, setManual] = useState<{ address: string; orderId: string } | null>(null);
+  const [manualQr, setManualQr] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -55,6 +56,11 @@ export default function BuyPanel() {
       if (j.manual && j.lightningAddress) {
         setManual({ address: j.lightningAddress, orderId: j.orderId });
         setPhase("manual");
+        // WoS flow: QR encodes the lightning URI so any phone wallet can scan,
+        // pay the exact 1,000 sats, and reference the order id.
+        QRCode.toDataURL(`lightning:${j.lightningAddress}`, { width: 220, margin: 1, color: { dark: "#14231a", light: "#ffffff" } })
+          .then(setManualQr)
+          .catch(() => setManualQr(null));
       } else {
         if (!j.invoice) throw new Error("no invoice returned");
         setInvoice(j.invoice);
@@ -216,9 +222,19 @@ npm run dev      # → http://localhost:3210`}</pre>
       {phase === "manual" && manual && (
         <div className="mt-5">
           <p className="text-[13px] leading-relaxed text-bone-soft">
-            Send <span className="font-semibold text-ink">1,000 sats</span> to this Lightning address from any wallet
-            (Wallet of Satoshi, Phoenix, Zeus…), then note your order id:
+            Send <span className="font-semibold text-ink">1,000 sats</span> to this Lightning address — scan the QR
+            with any wallet (Wallet of Satoshi, Phoenix, Zeus…) or copy the address:
           </p>
+          <div className="mt-3 flex flex-col items-center">
+            {manualQr ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={manualQr} alt="Lightning address QR code" width={200} height={200} className="rounded-xl border border-soil-500" />
+            ) : (
+              <div className="flex h-[200px] w-[200px] items-center justify-center rounded-xl border border-soil-500 text-[11px] text-faint">
+                generating QR…
+              </div>
+            )}
+          </div>
           <button
             onClick={() => copy(manual.address, "address")}
             className="mt-3 w-full rounded-xl border border-forest/30 bg-mint px-4 py-3.5 text-left text-[14px] font-bold text-forest transition-colors hover:border-forest/60"

@@ -14,12 +14,13 @@ const BodySchema = z.object({
   messages: z
     .array(
       z.object({
-        role: z.enum(["system", "user"]),
+        // "assistant" allowed so conversational clients can send prior turns.
+        role: z.enum(["system", "user", "assistant"]),
         content: z.string().min(1).max(24_000),
       }),
     )
     .min(1)
-    .max(12),
+    .max(24),
   model: z.string().max(80).optional(),
   maxTokens: z.number().int().min(64).max(8_000).optional(),
   promptVersion: z.string().max(40).optional(),

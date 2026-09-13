@@ -41,6 +41,9 @@ const FAQ = [
   },
 ];
 
+const REPO = "https://github.com/cameronorr2011-beep/TruffleTrade";
+const RELEASE = `${REPO}/releases/latest`;
+
 export default function LandingPage() {
   return (
     <div className="relative">
@@ -69,13 +72,16 @@ export default function LandingPage() {
                 the argument before you click the button yourself.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3.5">
-                <Link href="/buy" className="btn-primary !px-7 !py-3.5">
-                  Get access — 1,000 sats/mo
-                </Link>
-                <Link href="/dashboard" className="btn-secondary !px-7 !py-3.5">
-                  See live charts
+                <a href={RELEASE} className="btn-primary !px-7 !py-3.5">
+                  Download TruffleTrade — free
+                </a>
+                <Link href="/buy" className="btn-secondary !px-7 !py-3.5">
+                  Activate TruffleTrade AI — 1,000 sats/mo
                 </Link>
               </div>
+              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.8px] text-faint">
+                Windows installer · app is free · AI requires an activation key
+              </p>
               <dl className="mt-11 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
                   ["9+1", "analysts incl. red team"],
@@ -233,13 +239,7 @@ export default function LandingPage() {
                 The council, the fact-checker, the red team, the memory, the twin — all MIT-licensed on GitHub. A no-KYC
                 product earns trust by being auditable.
               </p>
-            </div>
-            <a
-              href="https://github.com/cameronorr2011-beep/TruffleTrade"
-              target="_blank"
-              rel="noreferrer"
-              className="btn-secondary shrink-0"
-            >
+            </div>              <a href={REPO} target="_blank" rel="noreferrer" className="btn-secondary shrink-0">
               View source
             </a>
           </div>

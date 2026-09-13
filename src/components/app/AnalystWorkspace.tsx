@@ -188,6 +188,12 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
 
   const ticker = picked?.symbol ?? "";
 
+  /** Pick + broadcast so the AI chat panel re-locks its market context. */
+  const pick = useCallback((hit: SearchHit) => {
+    setPicked(hit);
+    window.dispatchEvent(new CustomEvent("tt-ticker", { detail: hit.symbol }));
+  }, []);
+
   const runSim = useCallback(async (t: string, d: number) => {
     setSimBusy(true);
     setSimErr(null);
@@ -212,13 +218,13 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <section className="tt-card tt-analyst-search">
-        <SymbolSearch onPick={setPicked} picked={picked} />
+        <SymbolSearch onPick={pick} picked={picked} />
         <form
           className="tt-manual"
           onSubmit={(e) => {
             e.preventDefault();
             const t = manual.trim().toUpperCase();
-            if (/^[A-Z0-9.\-^=]{1,12}$/.test(t)) setPicked({ symbol: t, name: t, exchange: null, type: null });
+            if (/^[A-Z0-9.\-^=]{1,12}$/.test(t)) pick({ symbol: t, name: t, exchange: null, type: null });
           }}
         >
           <input value={manual} onChange={(e) => setManual(e.target.value)} placeholder="or type a ticker (e.g. NVDA)" aria-label="Ticker" />

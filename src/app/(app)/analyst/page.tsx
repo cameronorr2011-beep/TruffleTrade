@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import AnalystWorkspace from "@/components/app/AnalystWorkspace";
+import AnalystChat from "@/components/app/AnalystChat";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "AI Analyst · TruffleTrade" };
 
 export default async function AnalystPage({ searchParams }: { searchParams: Promise<{ ticker?: string }> }) {
   const params = await searchParams;
+  const ticker = params.ticker?.toUpperCase() ?? "";
   return (
     <div className="tt-stack">
       <header className="tt-pageband">
@@ -18,7 +20,8 @@ export default async function AnalystPage({ searchParams }: { searchParams: Prom
           </p>
         </div>
       </header>
-      <AnalystWorkspace initialTicker={params.ticker} />
+      <AnalystChat ticker={ticker} />
+      <AnalystWorkspace initialTicker={ticker || undefined} />
     </div>
   );
 }

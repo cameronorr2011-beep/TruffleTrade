@@ -1,0 +1,66 @@
+name: desktop-installer
+
+# Builds the real Windows installer (TruffleTrade-Setup.exe) on a runner that
+# has Visual Studio (required to compile better-sqlite3 against Electron's
+# ABI), then attaches it to a GitHub Release the Download button points at.
+# Trigger: manual dispatch, or pushing a v* tag.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to create/attach the installer to (e.g. v1.1.0)"
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          # Build-time placeholder — real values are runtime env on the server.
+          DATABASE_URL: ""
+
+      - name: Build Windows installer
+        run: npx electron-builder --win --publish never
+
+      - name: Resolve release tag
+        id: tag
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.release_tag }}" ]; then
+            echo "tag=${{ github.event.inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create / update release and upload installer
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          gh release create "$TAG" --title "TruffleTrade $TAG" --notes "Windows installer. Download TruffleTrade-Setup.exe, run it, then activate TruffleTrade AI with your key (1,000 sats/month at the /buy page)." --clobber || true
+          gh release upload "$TAG" dist-desktop/*.exe --clobber

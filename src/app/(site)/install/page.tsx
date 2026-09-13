@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const REPO = "https://github.com/cameronorr2011-beep/TruffleTrade";
+const RELEASE = `${REPO}/releases/latest`;
+
 export const metadata: Metadata = {
   title: "Install",
-  description: "Install TruffleTrade from GitHub and connect it to your subscription with your access code.",
+  description: "Download the free TruffleTrade desktop app for Windows, then activate TruffleTrade AI with your key.",
 };
 
 function Code({ children }: { children: string }) {
@@ -22,19 +25,39 @@ export default function InstallPage() {
         Install TruffleTrade
       </h1>
       <p className="mt-4 max-w-2xl text-[0.98rem] leading-relaxed text-bone-soft">
-        The whole product is open source. You install it from GitHub with a single clone, add the access code you got
-        at purchase, and the AI brain runs on our gateway — no API keys of your own, ever.
+        The app is <strong className="text-ink">free</strong>. TruffleTrade AI (the analyst, the council, the digital
+        twin) requires an activation key — 1,000 sats/month. Install, launch, activate, done.
       </p>
+
+      {/* Recommended path: the real installer */}
+      <section className="mt-10 rounded-xl border border-forest/30 bg-mint p-6">
+        <h2 className="font-display text-[1.35rem] font-semibold text-ink">
+          <span className="font-mono text-[0.8rem] text-truffle-300">EASIEST ·</span> Windows installer (recommended)
+        </h2>
+        <p className="mt-3 text-[0.92rem] leading-relaxed text-bone-soft">
+          Download <code className="rounded bg-soil-800 px-1.5 py-0.5 font-mono text-[0.8rem] text-truffle-600">TruffleTrade-Setup.exe</code>,
+          run it, and the app installs like any Windows program — Start Menu entry, desktop shortcut, auto-start of its
+          local research terminal. No Node.js, no command line.
+        </p>
+        <a href={RELEASE} className="btn-primary mt-5 inline-block">
+          Download TruffleTrade-Setup.exe
+        </a>
+        <p className="mt-3 text-[0.8rem] leading-relaxed text-bone-soft">
+          After installing: launch TruffleTrade → open <strong className="text-ink">AI Analyst</strong> → click
+          <strong className="text-ink"> Enter activation key</strong> and paste the TT-… key from your purchase. No key
+          yet? Get one at <Link href="/buy" className="text-forest underline">/buy</Link>.
+        </p>
+      </section>
 
       <div className="mt-12 space-y-10">
         <section>
           <h2 className="font-display text-[1.5rem] font-semibold text-ink">
-            <span className="font-mono text-[0.8rem] text-truffle-300">01 ·</span> Get the code
+            <span className="font-mono text-[0.8rem] text-truffle-300">ALT ·</span> Build from source
           </h2>
           <p className="mt-3 text-[0.92rem] leading-relaxed text-bone-soft">
             You need Node.js 20+. Clone the repository from GitHub:
           </p>
-          <Code>{`git clone https://github.com/cameronorr2011-beep/TruffleTrade.git truffletrade
+          <Code>{`git clone ${REPO}.git truffletrade
 cd truffletrade
 npm install`}</Code>
         </section>
