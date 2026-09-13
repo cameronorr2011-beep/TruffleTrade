@@ -62,5 +62,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.tag.outputs.tag }}"
-          gh release create "$TAG" --title "TruffleTrade $TAG" --notes "Windows installer. Download TruffleTrade-Setup.exe, run it, then activate TruffleTrade AI with your key (1,000 sats/month at the /buy page)." --clobber || true
+          gh release create "$TAG" --title "TruffleTrade $TAG" --notes "Windows installer. Download TruffleTrade-Setup.exe, run it, then activate TruffleTrade AI with your key (1,000 sats/month at the /buy page)." || true
           gh release upload "$TAG" dist-desktop/*.exe --clobber
+          gh release view "$TAG" --json assets -q '.assets[].name'
