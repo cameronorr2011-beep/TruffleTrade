@@ -31,6 +31,7 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
   const [error, setError] = useState<string | null>(null);
   const [subInfo, setSubInfo] = useState<{ daysRemaining?: number } | null>(null);
   const [keyDialog, setKeyDialog] = useState(false);
+  const [confirmOff, setConfirmOff] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -187,14 +188,37 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span className="tt-pill tt-pill-ok">AI ACTIVE</span>
-          <button type="button" className="tt-quick-btn" onClick={deactivate} title="Remove the activation key from this device">
+          <button
+            type="button"
+            className="tt-quick-btn"
+            onClick={() => setConfirmOff(true)}
+            title="Remove the activation key from this device"
+          >
             Deactivate
           </button>
         </div>
       </div>
 
       <div className="tt-chat-scroll" ref={scroller}>
-        {messages.length === 0 && (
+        {confirmOff && (
+          <div className="tt-error" role="alertdialog" aria-label="Confirm deactivation">
+            <strong>Deactivate TruffleTrade AI on this device?</strong>
+            <span style={{ display: "block", marginTop: 6, lineHeight: 1.55 }}>
+              This removes the activation key from this device and locks the AI until you enter it again. Your key
+              stays valid until it expires — retrieve it anytime from your order page or the buy page. If you no longer
+              have the key, deactivate only when you can re-copy it from your purchase.
+            </span>
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button type="button" className="tt-btn tt-btn-primary" onClick={() => { setConfirmOff(false); deactivate(); }}>
+                Yes, deactivate
+              </button>
+              <button type="button" className="tt-btn tt-btn-ghost" onClick={() => setConfirmOff(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        {messages.length === 0 && !confirmOff && (
           <div className="tt-chat-empty">
             <p className="tt-chat-hello">
               Research assistant online{ticker ? ` for ${ticker}` : ""}. I read the live market context server-side — ask me anything about it.
