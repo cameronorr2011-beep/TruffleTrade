@@ -1,7 +1,8 @@
 {
   "name": "truffletrade",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
+  "main": "electron/main.js",
   "description": "TruffleTrade — AI stock-chart intelligence with a memory that trains itself. Six rival analysts, a fact-checker, a red team, digital-twin priors, federated learning. 1,000 sats a month, no KYC.",
   "scripts": {
     "dev": "next dev -p 3210",
