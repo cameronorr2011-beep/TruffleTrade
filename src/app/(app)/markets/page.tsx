@@ -36,13 +36,13 @@ export default async function MarketsPage() {
   const moversSorted = [...movers].sort((a, b) => (b.changePct ?? -999) - (a.changePct ?? -999));
 
   return (
-    <div className="mx-auto max-w-[1280px] px-5 pb-24 pt-10 sm:px-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="mx-auto max-w-[1280px] px-5 pb-16 pt-4 sm:px-8">
+      <div className="tt-pageband">
         <div>
-          <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
-            Market dashboard
-          </span>
-          <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-ink">Markets</h1>
+          <p className="tt-eyebrow">Market dashboard</p>
+          <h1 style={{ margin: 0 }}>
+            <span className="tt-page-title">Markets</span>
+          </h1>
         </div>
         <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-faint">
           keyless · yahoo finance · {new Date().toLocaleDateString("en-US")}

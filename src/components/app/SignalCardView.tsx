@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { authHeaders } from "@/lib/accessCodeClient";
+import AccessCodeDialog from "@/components/research/AccessCodeDialog";
+import { authHeaders, setAccessCode } from "@/lib/accessCodeClient";
 
 type DebateVoice = { role: string; argument: string };
 
@@ -313,6 +314,7 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
   const [busy, setBusy] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [renew, setRenew] = useState(false);
+  const [needCode, setNeedCode] = useState(false);
   const [stage, setStage] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
   const elapsed = useElapsed(busy);
@@ -338,6 +340,13 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
         if (r.status === 402) {
           setRenew(true);
           throw new Error("Subscription expired — renew to reactivate the AI.");
+        }
+        if (r.status === 401 || r.status === 403) {
+          // No/invalid code on this device → ask once, then auto-retry.
+          setNeedCode(true);
+          setBusy(false);
+          clearInterval(stageIv);
+          return;
         }
         if (!j) throw new Error(`signal service error (HTTP ${r.status || "no response"})`);
         if (!j.ok || !j.card) throw new Error(j.error ?? "signal failed");
@@ -365,6 +374,30 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
   }, [ticker, reloadKey]);
 
   if (!ticker) return null;
+
+  const handleCodeSubmit = (code: string) => {
+    setAccessCode(code);
+    setNeedCode(false);
+    setReloadKey((k) => k + 1); // re-runs the effect → auto-retries with the code
+  };
+
+  if (needCode) {
+    return (
+      <section className="tt-card tt-signal tt-signal-flat" aria-live="polite">
+        <div className="tt-card-head"><h2>Signal card · {ticker}</h2></div>
+        <p className="tt-inline-err">AI analysis requires your subscription code.</p>
+        <AccessCodeDialog
+          open
+          onSubmit={handleCodeSubmit}
+          onCancel={() => {
+            setNeedCode(false);
+            setErr("Analysis paused — enter your access code to run the AI.");
+          }}
+          blurb="The Signal Card, digital twin and council all run on your TruffleTrade subscription. Paste the code from your purchase — it stays on this device."
+        />
+      </section>
+    );
+  }
 
   if (busy) {
     return (

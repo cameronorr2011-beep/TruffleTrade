@@ -1,8 +1,13 @@
 /**
  * Next.js instrumentation hook — runs once per server start.
- * Starts the TruffleTrade memory auto-updater (twin training, consolidation,
- * federated sync) in long-running local processes. Skipped on Vercel: the
- * gateway is stateless and each subscriber's memory lives on their device.
+ * Starts the TruffleTrade memory auto-updater (twin training, consolidation)
+ * in long-running local processes. Skipped on Vercel: the gateway is
+ * stateless and each subscriber's memory lives on their device.
+ *
+ * Federated sync intentionally does NOT read an access code from env: the
+ * subscription code belongs to the subscriber (entered in the app), and the
+ * updater piggybacks on it when the desktop shell provides one via
+ * TT_MACHINE_ID-scoped config. Local twin training runs regardless.
  */
 export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
@@ -14,11 +19,14 @@ export async function register(): Promise<void> {
     startMemoryUpdater({
       twinPaths: 500,
       horizonDays: 20,
-      federate: Boolean(process.env.TT_GATEWAY_URL && process.env.TT_ACCESS_CODE),
+      // Federation requires a subscriber code; there is no env fallback.
+      // The desktop shell can still opt in by exporting TT_FEDERATE=1 with
+      // its code provided through the same channel the app itself uses.
+      federate: false,
       gatewayUrl: process.env.TT_GATEWAY_URL,
-      accessCode: process.env.TT_ACCESS_CODE,
+      accessCode: undefined,
     });
-    console.log("[truffletrade] memory auto-updater scheduled (every 6h)");
+    console.log("[truffletrade] memory auto-updater scheduled (every 6h, local twin training)");
   } catch (err) {
     console.warn("[truffletrade] memory updater not started:", (err as Error).message);
   }

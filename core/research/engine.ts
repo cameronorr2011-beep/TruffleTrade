@@ -21,6 +21,8 @@ export interface ResearchOptions {
   ticker: string;
   peers: string[];
   depth: "standard" | "quick";
+  /** The caller's verified access code — threaded to the AI gateway. Required unless the operator holds GROQ_API_KEY. */
+  accessCode?: string;
 }
 
 export async function runResearch(opts: ResearchOptions): Promise<ResearchRun> {
@@ -48,7 +50,7 @@ export async function runResearch(opts: ResearchOptions): Promise<ResearchRun> {
   const valuationContext = buildValuationContext(valuation);
   // Deterministic historical replay feeds the Backtest worker (computed fact, not opinion).
   const bt = replaySetup(pack.candles1d, pack.spyCloses, pack.technicals);
-  const provider = makeProvider();
+  const provider = makeProvider(opts.accessCode);
   const { agents } = await runAgentCouncil(provider, pack, valuationContext, backtestContext(bt));
   const consensus = buildConsensus(agents);
   const confidence = buildConfidence(pack, agents);

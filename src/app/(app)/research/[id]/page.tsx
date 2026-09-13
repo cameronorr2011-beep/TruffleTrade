@@ -7,6 +7,7 @@ import ConfidenceCard from "@/components/research/ConfidenceCard";
 import ValuationCard from "@/components/research/ValuationCard";
 import ThesisCard from "@/components/research/ThesisCard";
 import RunIntegrity from "@/components/research/RunIntegrity";
+import { CouncilBars, OscillatorPanels, PriceChart, ScenarioBars } from "@/components/research/DossierCharts";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +78,19 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
         </p>
       </section>
 
+      {/* Charts: price history + oscillators (from the run's own data pack) */}
+      <section className="card mt-5 p-6">
+        <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">
+          Price &amp; momentum — {run.ticker}
+        </h2>
+        <div className="mt-4">
+          <PriceChart run={run} />
+        </div>
+        <div className="mt-5">
+          <OscillatorPanels run={run} />
+        </div>
+      </section>
+
       {/* Council table */}
       <section className="mt-5 grid gap-5 lg:grid-cols-2">
         <div className="card p-6">
@@ -121,7 +135,13 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
         <ConfidenceCard run={run} />
       </section>
 
-      {/* Thesis */}
+      {/* Council visualization + scenarios */}
+      <section className="mt-5 grid gap-5 lg:grid-cols-2">
+        <CouncilBars run={run} />
+        {!c.redTeamVeto ? <ScenarioBars run={run} /> : <ThesisCard run={run} />}
+      </section>
+
+      {/* Thesis detail */}
       {!c.redTeamVeto && <ThesisCard run={run} />}
 
       {/* Agents */}

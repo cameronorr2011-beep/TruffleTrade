@@ -29,15 +29,17 @@ export default async function WatchlistPage() {
   const audit = forecastAudit();
 
   return (
-    <div className="mx-auto max-w-[1280px] px-5 pb-24 pt-10 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
-        Watchlist & audit
-      </span>
-      <h1 className="font-display mt-2 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-ink">
-        What the pit believes
-      </h1>
+    <div className="mx-auto max-w-[1280px] px-5 pb-16 pt-4 sm:px-8">
+      <div className="tt-pageband">
+        <div>
+          <p className="tt-eyebrow">Watchlist & audit</p>
+          <h1 style={{ margin: 0 }}>
+            <span className="tt-page-title">What the pit believes</span>
+          </h1>
+        </div>
+      </div>
 
-      <section className="card mt-8 overflow-x-auto p-0">
+      <section className="card mt-5 overflow-x-auto p-0">
         {rows.length === 0 ? (
           <p className="p-6 font-mono text-[0.75rem] text-faint">
             Watchlist empty. Open any{" "}

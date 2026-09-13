@@ -13,14 +13,14 @@ const STARTED = Date.now();
 /**
  * GET /api/health — internal diagnostics (spec §30).
  * Authorized callers only: x-admin-token must match ADMIN_TOKEN, or a valid
- * access code must be presented (x-access-code / server-side TT_ACCESS_CODE).
+ * access code must be presented via x-access-code (no env fallback).
  * Reports component status without leaking secrets or connection strings.
  */
 export async function GET(req: Request) {
   const adminToken = process.env.ADMIN_TOKEN?.trim();
   const isAdmin = Boolean(adminToken) && (req.headers.get("x-admin-token") ?? "") === adminToken;
   if (!isAdmin) {
-    const accessCode = req.headers.get("x-access-code") ?? process.env.TT_ACCESS_CODE ?? "";
+    const accessCode = req.headers.get("x-access-code") ?? "";
     const v = await validateAccessCode(accessCode);
     if (!v.ok) {
       return NextResponse.json({ ok: false, error: "unauthorized", code: "UNAUTHORIZED" }, { status: 401 });

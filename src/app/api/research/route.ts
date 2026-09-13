@@ -36,7 +36,12 @@ export async function POST(req: Request) {
   const { ticker, peers } = parsed.data;
   running = true;
   try {
-    const run = await runResearch({ ticker, peers: peers ?? [], depth: "standard" });
+    const run = await runResearch({
+      ticker,
+      peers: peers ?? [],
+      depth: "standard",
+      accessCode: req.headers.get("x-access-code") ?? undefined,
+    });
     const id = saveResearchRun(run);
     const saved: ResearchRun = { ...run, id };
     return NextResponse.json({ ok: true, runId: id, run: saved });
@@ -47,8 +52,10 @@ export async function POST(req: Request) {
   }
 }
 
-/** GET /api/research — recent runs (optionally latest for a ticker). */
+/** GET /api/research — recent runs (optionally latest for a ticker). Paid product output — gated like POST. */
 export async function GET(req: Request) {
+  const denied = await guard(req);
+  if (denied) return denied;
   const url = new URL(req.url);
   const ticker = url.searchParams.get("ticker");
   if (ticker) {

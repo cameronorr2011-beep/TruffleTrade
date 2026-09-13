@@ -15,7 +15,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** GET /api/watchlist — watchlist + forecast audit (§22). */
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = await guard(req);
+  if (denied) return denied;
   const items = watchlistTickers();
   const rows = await Promise.all(
     items.map(async (w) => {

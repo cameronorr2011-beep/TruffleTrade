@@ -167,21 +167,23 @@ export class EchoProvider implements AIProvider {
   }
 }
 
-export function makeProvider(): AIProvider {
+export function makeProvider(accessCode?: string): AIProvider {
   const model = process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-120b";
 
-  // Subscriber path: no local Groq key — everything goes through the gateway.
+  // Subscriber path: no local Groq key — everything goes through the gateway
+  // with the SUBSCRIBER'S OWN code (passed in from the request; never read
+  // from env — a keyless install must behave exactly like a customer's).
   const gatewayUrl = process.env.TT_GATEWAY_URL?.trim();
-  const accessCode = process.env.TT_ACCESS_CODE?.trim();
-  if (gatewayUrl && accessCode) {
-    return new GatewayProvider(gatewayUrl, accessCode, model);
+  const code = accessCode?.trim();
+  if (gatewayUrl && code) {
+    return new GatewayProvider(gatewayUrl, code, model);
   }
 
   // Operator path: you (the operator) hold GROQ_API_KEY directly.
   const key = process.env.GROQ_API_KEY?.trim() ?? "";
   if (!key) {
     throw new Error(
-      "No AI backend configured. Subscribers: set TT_GATEWAY_URL + TT_ACCESS_CODE. Operator: set GROQ_API_KEY.",
+      "No AI backend configured. Subscribers: set TT_GATEWAY_URL and provide your access code in the app. Operator: set GROQ_API_KEY.",
     );
   }
   return new GroqProvider(key, model);

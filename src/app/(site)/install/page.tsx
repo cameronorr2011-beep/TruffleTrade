@@ -44,14 +44,16 @@ npm install`}</Code>
             <span className="font-mono text-[0.8rem] text-truffle-300">02 ·</span> Add your access code
           </h2>
           <p className="mt-3 text-[0.92rem] leading-relaxed text-bone-soft">
-            Copy the environment template and put your access code (from the purchase page) and the gateway URL into{" "}
-            <code className="rounded bg-soil-800 px-1.5 py-0.5 font-mono text-[0.8rem] text-truffle-600">.env</code>:
+            Copy the environment template and set the gateway URL. Your access code is <strong>not</strong> put in files —
+            the app asks for it once and remembers it on this device:
           </p>
           <Code>{`cp .env.example .env
 # then edit .env:
 
 TT_GATEWAY_URL=https://truffletrade.vercel.app
-TT_ACCESS_CODE=TT-XXXX-XXXX-XXXX-XXXX`}</Code>
+
+# run the app; when prompted, paste the code from your purchase:
+#   TT-XXXX-XXXX-XXXX-XXXX`}</Code>
           <p className="mt-3 text-[0.88rem] leading-relaxed text-bone-soft">
             That&apos;s the only configuration a subscriber needs. The gateway validates your subscription, rate-limits
             fairly, and holds the AI credentials on our side — so there is nothing for you to maintain, and nothing for

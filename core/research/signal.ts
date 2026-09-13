@@ -307,7 +307,7 @@ function debateUserPrompt(d: DeterministicSignal, name: string | null): string {
  * unreachable or returns malformed output, the card downgrades to NO TRADE —
  * a confident signal is never published without cross-examination.
  */
-export async function buildSignalCard(ticker: string, useAi = true): Promise<SignalCard> {
+export async function buildSignalCard(ticker: string, useAi = true, accessCode?: string): Promise<SignalCard> {
   const subject = ticker.toUpperCase();
   const [chart, news, macro, street] = await Promise.all([
     yahooChart(subject, "1y", "1d").catch(() => null),
@@ -357,7 +357,7 @@ export async function buildSignalCard(ticker: string, useAi = true): Promise<Sig
   if (!useAi) return card;
 
   try {
-    const provider = makeProvider();
+    const provider = makeProvider(accessCode);
     card.model = provider.model;
     const res = await provider.chatJson<DebateJson>(
       [

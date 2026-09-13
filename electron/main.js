@@ -23,7 +23,17 @@ const { spawn, exec } = require("node:child_process");
 const PORT = process.env.TT_PORT || 3210;
 const APP_URL = `http://localhost:${PORT}`;
 const ROOT = path.join(__dirname, "..");
-const SPLASH = `data:text/html,${encodeURIComponent(`<!doctype html><html><body style="margin:0;background:#0c1210;display:grid;place-items:center;height:100vh;font-family:Segoe UI,sans-serif;color:#9db1a3"><div style="text-align:center"><div style="font-size:34px;font-weight:800;letter-spacing:-1px;color:#dce7de">truffle<span style="color:#e8ae52">trade</span></div><div style="margin-top:10px;font-size:13px">starting the research terminal…</div></div></body></html>`)}`;
+const SPLASH = `data:text/html,${encodeURIComponent(`<!doctype html><html><head><style>
+  body{margin:0;background:radial-gradient(900px 420px at 70% -10%,rgba(88,169,123,.10),transparent 60%),#0c1210;display:grid;place-items:center;height:100vh;font-family:Segoe UI,sans-serif;color:#9db1a3}
+  .brand{font-size:40px;font-weight:800;letter-spacing:-1.5px;color:#dce7de;text-align:center}
+  .brand em{color:#58a97b;font-style:normal}
+  .sub{margin-top:8px;font-size:11px;letter-spacing:3.5px;text-transform:uppercase;color:#66796d;text-align:center}
+  .bar{margin:26px auto 0;width:210px;height:3px;border-radius:3px;background:#1a2620;overflow:hidden;position:relative}
+  .bar i{position:absolute;top:0;left:-40%;width:40%;height:100%;border-radius:3px;background:linear-gradient(90deg,transparent,#58a97b,transparent);animation:sweep 1.1s ease-in-out infinite}
+  @keyframes sweep{to{left:100%}}
+  .pulse{margin:0 auto;width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 10px rgba(74,222,128,.7);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+</style></head><body><div style="text-align:center"><div class="brand">truffle<em>trade</em></div><div class="sub">Research terminal</div><div class="bar"><i></i></div><div style="margin-top:18px;display:flex;justify-content:center"><span class="pulse"></span></div></div></body></html>`)}`;
 
 let win = null;
 let tray = null;

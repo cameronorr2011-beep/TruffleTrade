@@ -7,8 +7,8 @@ export const metadata: Metadata = { title: "AI Analyst · TruffleTrade" };
 export default async function AnalystPage({ searchParams }: { searchParams: Promise<{ ticker?: string }> }) {
   const params = await searchParams;
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <header style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+    <div className="tt-stack">
+      <header className="tt-pageband">
         <div>
           <p className="tt-eyebrow">AI Analyst</p>
           <h1 className="tt-page-title">Your pick. Our machines.</h1>

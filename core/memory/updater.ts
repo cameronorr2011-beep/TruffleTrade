@@ -134,6 +134,8 @@ if (process.argv[1] && process.argv[1].endsWith("updater.ts")) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   require("dotenv").config();
   const gatewayUrl = process.env.TT_GATEWAY_URL?.trim() || undefined;
+  // CLI-only: an operator may pass a code explicitly via TT_ACCESS_CODE when
+  // running this script by hand. The server/app never reads it implicitly.
   const accessCode = process.env.TT_ACCESS_CODE?.trim() || undefined;
   runFullMemoryUpdate({
     twinPaths: 500,

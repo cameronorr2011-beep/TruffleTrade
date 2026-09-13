@@ -1,20 +1,27 @@
 import { NextResponse } from "next/server";
 
-import { validateAccessCode, checkRateLimit } from "@core/licensing/validate";
+import { validateAccessCode, validateWithAbuseTracking, checkRateLimit } from "@core/licensing/validate";
+import { isLockedOut, recordFailure, pruneFailures } from "@core/licensing/abuse";
+import { clientIp } from "@/lib/client-ip";
 
 /**
  * Gate for endpoints that burn paid AI (research runs, cycles, halt).
  *
  * Two modes:
  *  1. DASHBOARD_TOKEN set   → operator mode: requests must carry x-desk-token.
- *  2. Otherwise (default)   → subscription mode: requests must present a valid,
- *     unexpired access code via x-access-code. A server-side TT_ACCESS_CODE
- *     (e.g. a local subscriber's .env) is accepted so the local app works
- *     without headers.
+ *  2. Otherwise (default)   → subscription mode: requests MUST present a
+ *     valid, unexpired access code via the x-access-code header. There is
+ *     deliberately NO server-side env fallback: a keyless local install must
+ *     behave exactly like a customer's machine (the in-app dialog collects
+ *     the code once; it rides on every gated call from localStorage).
  *
  * This closes the free-ride hole: the public deployment must never let
  * anonymous visitors trigger Groq calls. Live market DATA (keyless Yahoo)
  * stays free by design — only intelligence is metered.
+ *
+ * Abuse hardening: repeated invalid codes from one IP are recorded in the
+ * licensing store (Postgres on Vercel) and trip a persistent lockout — see
+ * core/licensing/abuse.ts (threshold + window live there).
  */
 export async function guard(req: Request): Promise<NextResponse | null> {
   try {
@@ -40,12 +47,22 @@ async function checkGuard(req: Request): Promise<NextResponse | null> {
     return null;
   }
 
-  // Subscription mode. Anonymous callers are rejected here.
-  const presented = req.headers.get("x-access-code") ?? process.env.TT_ACCESS_CODE ?? "";
-  const validation = await validateAccessCode(presented);
+  // Subscription mode. Anonymous callers and headerless requests are rejected here.
+  const ip = clientIp(req);
+
+  // Brute-force lockout (persistent across deploys — Postgres/SQLite store).
+  if (await isLockedOut(ip)) {
+    return NextResponse.json(
+      { ok: false, error: "too many failed attempts — access denied temporarily", code: "LOCKED_OUT" },
+      { status: 429, headers: { "retry-after": String(Math.ceil(15 * 60)) } },
+    );
+  }
+
+  const presented = req.headers.get("x-access-code") ?? "";
+  const validation = await validateWithAbuseTracking(presented, ip);
   if (!validation.ok) {
     return NextResponse.json(
-      { ok: false, error: validation.error ?? "subscription required", code: "SUBSCRIPTION_REQUIRED" },
+      { ok: false, error: validation.error ?? "subscription required", code: validation.lockedOut ? "LOCKED_OUT" : "SUBSCRIPTION_REQUIRED" },
       { status: validation.status },
     );
   }
@@ -56,5 +73,6 @@ async function checkGuard(req: Request): Promise<NextResponse | null> {
       { status: 429, headers: { "retry-after": String(Math.ceil(rl.resetMs / 1000)) } },
     );
   }
+  void pruneFailures; // opportunistic cleanup happens via recordFailure paths
   return null;
 }

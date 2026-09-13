@@ -5,6 +5,7 @@
 
 import { hashCode, verifyAccessCode } from "./codes";
 import { licensingDb } from "./db";
+import { recordFailure } from "./abuse";
 
 export interface ValidationResult {
   ok: boolean;
@@ -44,6 +45,43 @@ export function checkRateLimit(codeHash: string): { ok: boolean; remaining: numb
   }
   hits.push(now);
   return { ok: true, remaining: limit - hits.length, resetMs: windowMs };
+}
+
+export interface GuardedValidationResult extends ValidationResult {
+  lockedOut?: boolean;
+}
+
+/**
+ * validateAccessCode + persistent brute-force protection.
+ *
+ * Failures that indicate guessing (malformed or unknown codes) are recorded
+ * per-IP in the abuse store; once an IP crosses the threshold inside the
+ * rolling window, every further attempt from it is denied with 429 until the
+ * window clears — even between deploys (the store is Postgres/SQLite, not
+ * memory). Known-state failures of REAL codes (revoked → 403, expired → 402)
+ * are deliberately NOT counted: the presenter already holds the code, so
+ * punishing those attempts would only lock out subscribers.
+ */
+export async function validateWithAbuseTracking(raw: string, ip: string | null): Promise<GuardedValidationResult> {
+  const result = await validateAccessCode(raw);
+  if (result.ok || !ip) return result;
+  if (result.status === 401) {
+    try {
+      const { locked } = await recordFailure(ip, raw);
+      if (locked) {
+        return {
+          ok: false,
+          status: 429,
+          error: "too many failed attempts — access denied temporarily",
+          lockedOut: true,
+        };
+      }
+    } catch {
+      // Abuse store unreachable — fail open to the plain validation result
+      // rather than locking out everyone on a database hiccup.
+    }
+  }
+  return result;
 }
 
 export async function validateAccessCode(raw: string): Promise<ValidationResult> {

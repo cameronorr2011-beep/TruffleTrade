@@ -13,7 +13,7 @@ const cache = new Map<string, { at: number; data: unknown }>();
 export async function GET(req: Request) {
   // Alerts are part of the paid product (and polling hammers the free
   // providers) — subscription-gated like the AI routes. The local desktop
-  // app passes automatically via its server-side TT_ACCESS_CODE.
+  // app passes the subscriber's stored code via x-access-code.
   const denied = await guard(req);
   if (denied) return denied;
 

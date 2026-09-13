@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { authHeaders } from "@/lib/accessCodeClient";
 
 export default function WatchButton({ ticker }: { ticker: string }) {
   const [state, setState] = useState<"loading" | "on" | "off">("loading");
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/watchlist")
+    fetch("/api/watchlist", { headers: authHeaders() })
       .then((r) => r.json())
       .then((j: { ok: boolean; items?: { ticker: string }[] }) => {
         if (alive && j.ok && j.items?.some((i) => i.ticker === ticker)) setState("on");
@@ -27,11 +28,11 @@ export default function WatchButton({ ticker }: { ticker: string }) {
       if (next === "on") {
         await fetch("/api/watchlist", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...authHeaders() },
           body: JSON.stringify({ ticker }),
         });
       } else {
-        await fetch(`/api/watchlist?ticker=${encodeURIComponent(ticker)}`, { method: "DELETE" });
+        await fetch(`/api/watchlist?ticker=${encodeURIComponent(ticker)}`, { method: "DELETE", headers: authHeaders() });
       }
       setState(next);
     } catch {

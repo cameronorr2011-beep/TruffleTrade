@@ -5,6 +5,8 @@ import CandleChart from "@/components/market/CandleChart";
 import Link from "next/link";
 import { authHeaders } from "@/lib/accessCodeClient";
 import SignalCardView from "@/components/app/SignalCardView";
+import StreetPanel from "@/components/app/StreetPanel";
+import PeersPanel from "@/components/app/PeersPanel";
 
 type SearchHit = { symbol: string; name: string; exchange: string | null; type: string | null };
 
@@ -249,6 +251,10 @@ export default function AnalystWorkspace({ initialTicker }: { initialTicker?: st
           </section>
 
           <SignalCardView ticker={ticker} />
+
+          <StreetPanel ticker={ticker} />
+
+          <PeersPanel ticker={ticker} />
 
           <section className="tt-card">
             <div className="tt-card-head">

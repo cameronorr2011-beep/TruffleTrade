@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { validateAccessCode } from "@core/licensing/validate";
+import { validateWithAbuseTracking } from "@core/licensing/validate";
+import { isLockedOut } from "@core/licensing/abuse";
+import { clientIp } from "@/lib/client-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,12 +37,6 @@ function rateLimited(ip: string): boolean {
   return false;
 }
 
-function clientIp(req: Request): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") ?? "unknown";
-}
-
 export async function GET(req: Request) {
   const ip = clientIp(req);
   if (rateLimited(ip)) {
@@ -49,8 +45,15 @@ export async function GET(req: Request) {
       { status: 429, headers: { "retry-after": "60" } },
     );
   }
+  // Persistent brute-force lockout — survives deploys (Postgres/SQLite store).
+  if (await isLockedOut(ip)) {
+    return NextResponse.json(
+      { ok: false, error: "too many failed attempts — access denied temporarily" },
+      { status: 429, headers: { "retry-after": String(Math.ceil(15 * 60)) } },
+    );
+  }
   const code = req.headers.get("x-access-code") ?? "";
-  const v = await validateAccessCode(code);
+  const v = await validateWithAbuseTracking(code, ip);
   if (!v.ok) {
     return NextResponse.json({ ok: false, error: v.error }, { status: v.status });
   }

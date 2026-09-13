@@ -124,9 +124,11 @@ cd truffletrade && npm install`}</pre>
           <li>
             <span className="font-bold text-forest">2 · Add your code</span>
             <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`cp .env.example .env
-# then set in .env:
+# set in .env (gateway only — your access code is NOT put in files):
 TT_GATEWAY_URL=https://ai-stock-trader-two.vercel.app
-TT_ACCESS_CODE=${accessCode}`}</pre>
+
+# then run the app and paste your code once when prompted:
+#   ${accessCode}`}</pre>
           </li>
           <li>
             <span className="font-bold text-forest">3 · Run it</span>

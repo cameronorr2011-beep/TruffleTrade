@@ -12,6 +12,7 @@ Only the latest `main` branch receives security fixes. The deployed production s
 - **Secrets never reach the client.** `GROQ_API_KEY`, `DATABASE_URL`, `LICENSE_HMAC_KEY`, `ADMIN_TOKEN`, ZBD credentials live in server-side env only. The downloadable app ships with **no keys**; it authenticates with the subscriber's own access code.
 - **Payments** are verified with the provider (ZBD charge status) — client-reported payment status is never trusted. Fulfillment is idempotent: repeated webhooks cannot issue a second code for the same order.
 - **Rate limiting**: per-code sliding window on all gated routes; per-IP window on code verification (brute-force resistance).
+- **Brute-force lockout (persistent)**: every rejected code attempt (malformed or unknown) is recorded per-IP in the licensing store (`tt_auth_failures` — Postgres/Neon in production, SQLite locally). After 10 failures inside a rolling 15-minute window the IP is denied on ALL guarded routes (`LOCKED_OUT`, HTTP 429) until the window clears — it survives redeploys because the counter lives in the database, not memory. Failures of *real* codes (expired/revoked) are deliberately not counted, so subscribers can never lock themselves out.
 
 ## Reporting a vulnerability
 

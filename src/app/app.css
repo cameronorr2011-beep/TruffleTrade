@@ -17,7 +17,11 @@
   --app-neg: #f07a5a;
   --app-radius: 12px;
 
-  background: var(--app-bg);
+  background:
+    radial-gradient(1100px 500px at 85% -10%, rgba(88, 169, 123, 0.07), transparent 60%),
+    radial-gradient(900px 480px at -15% 110%, rgba(232, 174, 82, 0.045), transparent 55%),
+    var(--app-bg);
+  background-attachment: fixed;
   color: var(--app-ink);
   min-height: 100vh;
   font-size: 13.5px;
@@ -33,7 +37,7 @@
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 45;
-  background: #0a100e;
+  background: linear-gradient(180deg, #0b110e 0%, #0a100e 55%, #0c1510 100%);
   border-right: 1px solid var(--app-line);
   padding: 22px 14px 16px;
   display: flex;
@@ -42,18 +46,25 @@
   scrollbar-width: thin;
   scrollbar-color: var(--app-line-strong) transparent;
 }
+.tt-sidebar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(320px 200px at 0% 0%, rgba(88, 169, 123, 0.06), transparent 70%);
+}
 
 .tt-main { margin-left: 232px; flex: 1; min-width: 0; }
-.tt-content { max-width: 1220px; margin: 0 auto; padding: 26px 28px 60px; }
+.tt-content { max-width: 1280px; margin: 0 auto; padding: 18px 24px 36px; }
 
 /* ── Topbar ─────────────────────────────────────────────── */
 .tt-topbar {
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; gap: 16px;
-  padding: 10px 28px;
-  background: rgba(10, 16, 14, 0.78);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  padding: 8px 24px;
+  background: rgba(10, 16, 14, 0.72);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border-bottom: 1px solid var(--app-line);
 }
 .tt-topbar-scrim { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(88, 169, 123, 0.05), transparent 70%); }
@@ -80,10 +91,10 @@
 }
 .tt-nav a:hover { background: #101814; color: var(--app-ink); }
 .tt-nav a.is-active {
-  background: linear-gradient(90deg, #14251c, #101a15);
+  background: linear-gradient(90deg, #16291f, #101a15);
   border-color: var(--app-line-strong);
   color: #eaf5ea; font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--app-accent);
+  box-shadow: inset 2px 0 0 var(--app-accent), 0 0 18px rgba(88, 169, 123, 0.08);
 }
 .tt-nav a .tt-ico { width: 17px; text-align: center; font-size: 13px; opacity: 0.85; }
 .tt-nav a .tt-badge {
@@ -112,13 +123,20 @@
 
 /* ── Cards & panels ─────────────────────────────────────── */
 .tt-card {
-  background: var(--app-panel);
+  background: linear-gradient(180deg, #16211b 0%, var(--app-panel) 34%);
   border: 1px solid var(--app-line);
   border-radius: var(--app-radius);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.025) inset, 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 .tt-card-pad { padding: 18px; }
 
-.tt-page-title { font-size: 24px; font-weight: 800; letter-spacing: -1px; color: #eef5ee; }
+.tt-page-title {
+  font-size: 24px; font-weight: 800; letter-spacing: -1px;
+  background: linear-gradient(92deg, #f2f7f0 20%, #b9d4c1 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 .tt-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--app-ink-faint); }
 .tt-sub { font-size: 12px; color: var(--app-ink-soft); margin-top: 4px; }
 
@@ -154,8 +172,12 @@
   padding: 10px 18px; border: 1px solid transparent; cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
-.tt-btn-primary { background: var(--app-accent-deep); color: #eaf5ea; }
-.tt-btn-primary:hover { background: #3a7d54; }
+.tt-btn-primary {
+  background: linear-gradient(180deg, #3a7d54, var(--app-accent-deep));
+  color: #eaf5ea;
+  box-shadow: 0 2px 10px rgba(47, 107, 71, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.tt-btn-primary:hover { background: linear-gradient(180deg, #458d60, #357350); box-shadow: 0 3px 14px rgba(47, 107, 71, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12); }
 .tt-btn-ghost { background: transparent; border-color: var(--app-line-strong); color: var(--app-ink-soft); }
 .tt-btn-ghost:hover { border-color: var(--app-accent); color: var(--app-ink); }
 .tt-btn-gold { background: #8a5f1d; color: #ffe9b8; }
@@ -244,7 +266,13 @@
 /* ── Paper trading (SIMULATED) page ─────────────────────────────── */
 .tt-pagehead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .tt-kicker { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--app-ink-faint); }
-.tt-pagehead h1 { font-size: 24px; font-weight: 800; letter-spacing: -1px; color: #eef5ee; margin-top: 2px; }
+.tt-pagehead h1 {
+  font-size: 24px; font-weight: 800; letter-spacing: -1px; margin-top: 2px;
+  background: linear-gradient(92deg, #f2f7f0 20%, #b9d4c1 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 .tt-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 1100px) { .tt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .tt-split { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; align-items: start; }
@@ -501,3 +529,39 @@
 .tt-decision-pos { border-color: rgba(88, 169, 123, 0.5); box-shadow: inset 3px 0 0 var(--app-pos); }
 .tt-decision-neg { border-color: rgba(248, 113, 113, 0.4); box-shadow: inset 3px 0 0 #f87171; }
 .tt-decision-flat { box-shadow: inset 3px 0 0 var(--app-gold); }
+
+/* ── Street consensus widget ─────────────────────────────────────────── */
+.tt-street-consensus { margin: 10px 0 8px; font-family: var(--font-mono, monospace); font-size: 12.5px; font-weight: 700; letter-spacing: 1.4px; color: #eef5ee; }
+.tt-street-bars { display: flex; height: 12px; border-radius: 7px; overflow: hidden; background: #0f1713; border: 1px solid var(--app-line); }
+.tt-street-seg { display: block; height: 100%; }
+.tt-street-seg.buy { background: var(--app-pos); }
+.tt-street-seg.hold { background: #8a974f; }
+.tt-street-seg.sell { background: #f87171; }
+.tt-pos { color: var(--app-pos); }
+.tt-neg { color: #f87171; }
+/* Workspace density: two-column on wide screens for the trailing panels */
+@media (min-width: 1100px) {
+  .tt-signal, .tt-signal + .tt-card { scroll-margin-top: 80px; }
+}
+
+/* ── Page header band — grounds the top of every workspace page ────── */
+.tt-pageband {
+  position: relative;
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--app-line);
+  border-radius: 14px;
+  background:
+    radial-gradient(420px 120px at 12% 0%, rgba(88, 169, 123, 0.1), transparent 70%),
+    linear-gradient(180deg, #121b16, #0e1511);
+  overflow: hidden;
+}
+.tt-pageband::after {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 60%, rgba(88, 169, 123, 0.05));
+}
+.tt-pageband .tt-btn { position: relative; z-index: 1; }
+
+/* Section rhythm: consistent, tighter vertical spacing between blocks */
+.tt-stack > * + * { margin-top: 14px; }

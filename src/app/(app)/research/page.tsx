@@ -22,21 +22,23 @@ export default async function ResearchPage({
   const runs = recentRuns(40);
 
   return (
-    <div className="mx-auto max-w-[1280px] px-5 pb-24 pt-10 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300/75">
-        AI research terminal
-      </span>
-      <h1 className="font-display mt-3 text-[clamp(1.9rem,4vw,3rem)] font-semibold text-ink">
-        Run the investment committee
-      </h1>
-      <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-bone-soft">
-        Six independent analysts investigate the same company, a fact-checker strips every number they can&apos;t
-        support, and a red team decides whether the evidence is good enough to issue a thesis at all.
-      </p>
+    <div className="mx-auto max-w-[1280px] px-5 pb-16 pt-4 sm:px-8">
+      <div className="tt-pageband">
+        <div>
+          <p className="tt-eyebrow">AI research terminal</p>
+          <h1 style={{ margin: 0 }}>
+            <span className="tt-page-title">Run the investment committee</span>
+          </h1>
+          <p className="tt-sub" style={{ maxWidth: 620 }}>
+            Six independent analysts investigate the same company, a fact-checker strips every number they can&apos;t
+            support, and a red team decides whether the evidence is good enough to issue a thesis at all.
+          </p>
+        </div>
+      </div>
 
       <RunLauncher initialTicker={params.ticker ?? ""} autorun={params.autorun === "1"} />
 
-      <section className="mt-12">
+      <section className="mt-8">
         <h2 className="font-mono text-[0.62rem] uppercase tracking-[0.28em] text-bone-soft">
           Recent investigations
         </h2>

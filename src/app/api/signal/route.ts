@@ -31,7 +31,9 @@ export async function GET(req: Request) {
   }
 
   try {
-    const card = await buildSignalCard(ticker, ai);
+    // The caller's own code (header-verified by guard) drives the AI call —
+    // no env fallback; a keyless install behaves exactly like a customer's.
+    const card = await buildSignalCard(ticker, ai, req.headers.get("x-access-code") ?? undefined);
     cache.set(key, { at: Date.now(), data: card });
     return NextResponse.json({ ok: true, cached: false, card });
   } catch (e) {

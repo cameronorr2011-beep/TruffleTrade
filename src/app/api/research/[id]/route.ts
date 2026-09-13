@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
+import { guard } from "@/lib/guard";
 import { getResearchRun } from "@core/research/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** GET /api/research/:id — full audit trail for one run. */
-export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+/** GET /api/research/:id — full audit trail for one run. Paid product output — gated. */
+export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const denied = await guard(req);
+  if (denied) return denied;
   const { id } = await ctx.params;
   const numId = Number(id);
   if (!Number.isInteger(numId) || numId <= 0) {

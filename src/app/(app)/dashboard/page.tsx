@@ -22,8 +22,8 @@ export default async function DashboardPage() {
   const [indices, movers] = await Promise.all([Promise.all(INDICES.map(safeQuote)), Promise.all(MOVERS.map(safeQuote))]);
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <header style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+    <div className="tt-stack">
+      <header className="tt-pageband">
         <div>
           <p className="tt-eyebrow">Overview</p>
           <h1 className="tt-page-title">Less noise. More signal.</h1>
@@ -46,7 +46,8 @@ export default async function DashboardPage() {
         }))}
         initialMovers={movers}
         initialTicker="NVDA"
-      />        <AlertsPanel tickers="NVDA,AAPL,MSFT,TSLA,AMD" />
+      />
+      <AlertsPanel tickers="NVDA,AAPL,MSFT,TSLA,AMD" />
 
       <IntelligenceHub initialTicker="NVDA" />
 
