@@ -23,6 +23,15 @@ export function setAccessCode(code: string): void {
   }
 }
 
+/** Remove the stored activation (device deactivation — the gate re-appears). */
+export function clearAccessCode(): void {
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    // storage blocked
+  }
+}
+
 export function authHeaders(): Record<string, string> {
   const code = getAccessCode();
   return code ? { "x-access-code": code } : {};

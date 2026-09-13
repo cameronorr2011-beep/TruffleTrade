@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { authHeaders, getAccessCode, setAccessCode } from "@/lib/accessCodeClient";
+import { authHeaders, getAccessCode, setAccessCode, clearAccessCode } from "@/lib/accessCodeClient";
 import AccessCodeDialog from "@/components/research/AccessCodeDialog";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -47,11 +47,15 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
           setSubInfo({ daysRemaining: j.daysRemaining });
           setPhase("chat");
         } else {
+          // Stored key is invalid/expired/revoked — gate now, keep it stored
+          // so "Enter activation key" can prefill.
           setPhase("need-key");
         }
       } catch {
-        // gateway unreachable — allow the attempt; the API will judge
-        setPhase("chat");
+        // FAIL CLOSED: if entitlement can't be verified (offline, gateway
+        // down), show the gate. The server enforces independently — but the
+        // UI must never presume a subscription it cannot confirm.
+        setPhase("need-key");
       }
     })();
   }, []);
@@ -97,6 +101,14 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
     },
     [messages, busy, ticker],
   );
+
+  /** Device deactivation: wipe the stored key — the gate re-appears. */
+  const deactivate = useCallback(() => {
+    clearAccessCode();
+    setSubInfo(null);
+    setMessages([]);
+    setPhase("need-key");
+  }, []);
 
   const saveKey = useCallback(
     (code: string) => {
@@ -173,7 +185,12 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
             {subInfo?.daysRemaining != null ? ` · ${subInfo.daysRemaining}d remaining` : ""}
           </p>
         </div>
-        <span className="tt-pill tt-pill-ok">AI ACTIVE</span>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <span className="tt-pill tt-pill-ok">AI ACTIVE</span>
+          <button type="button" className="tt-quick-btn" onClick={deactivate} title="Remove the activation key from this device">
+            Deactivate
+          </button>
+        </div>
       </div>
 
       <div className="tt-chat-scroll" ref={scroller}>
