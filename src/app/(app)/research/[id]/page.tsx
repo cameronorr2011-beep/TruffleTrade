@@ -6,6 +6,7 @@ import AgentCard from "@/components/research/AgentCard";
 import ConfidenceCard from "@/components/research/ConfidenceCard";
 import ValuationCard from "@/components/research/ValuationCard";
 import ThesisCard from "@/components/research/ThesisCard";
+import RunIntegrity from "@/components/research/RunIntegrity";
 
 export const dynamic = "force-dynamic";
 
@@ -53,8 +54,13 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
+      {/* Integrity: status header, decision, pipeline, coverage, agent health */}
+      <div className="mt-8">
+        <RunIntegrity run={run} />
+      </div>
+
       {/* Synthesis */}
-      <section className="card mt-8 p-6">
+      <section className="card mt-5 p-6">
         <div className="flex flex-wrap items-center gap-4">
           <StanceBadge stance={c.stance} />
           <span className="font-mono text-[0.72rem] text-bone-soft">
@@ -148,9 +154,16 @@ export default async function RunDossierPage({ params }: { params: Promise<{ id:
           <ul className="mt-4 space-y-2">
             {violations.map((v, i) => (
               <li key={i} className="rounded-lg border border-blood/30 bg-blood/5 p-3 font-mono text-[0.7rem] leading-relaxed">
-                <span className="text-blood">{v.agent}</span> <span className="text-bone-soft">[{v.reason}]</span>{" "}
-                <span className="text-ink">{v.claim}</span>
-                <span className="block text-faint">{v.detail}</span>
+                <p className="text-blood">FACT-CHECK ISSUE · {v.agent} [{v.reason}]</p>
+                <p className="mt-1 text-ink">{v.metric ?? v.claim}</p>
+                <p className="mt-0.5">
+                  <span className="text-bone-soft">Agent stated: {v.stated ?? "—"}</span>
+                  <span className="mx-2 text-faint">·</span>
+                  <span className="text-jade">Verified data: {v.actual ?? "—"}</span>
+                  <span className="mx-2 text-faint">·</span>
+                  <span className="text-blood">Status: CONTRADICTED</span>
+                </p>
+                <span className="mt-1 block text-faint">{v.detail}</span>
               </li>
             ))}
           </ul>

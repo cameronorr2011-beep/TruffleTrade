@@ -33,12 +33,13 @@ type SignalCard = {
 type Candle = { t: number; o: number; h: number; l: number; c: number };
 
 const STAGES = [
-  { key: "market", label: "Market feed" },
-  { key: "twin", label: "Digital-twin replay (800 paths)" },
-  { key: "news", label: "Headline scan" },
-  { key: "macro", label: "Macro tape" },
-  { key: "panel", label: "Evidence panel" },
-  { key: "debate", label: "AI cross-examination" },
+  { key: "market", label: "Market feed — live candles + prior-session baseline" },
+  { key: "twin", label: "Digital-twin replay — 800 Monte Carlo paths" },
+  { key: "news", label: "Headline scan — sentiment + event risk" },
+  { key: "macro", label: "Macro tape — indices, vol, sectors" },
+  { key: "street", label: "Street consensus — analyst counts + targets" },
+  { key: "panel", label: "Evidence panel — weighting + contradiction check" },
+  { key: "debate", label: "AI cross-examination — bull / bear / quant / risk / red team" },
 ] as const;
 
 /**
@@ -324,7 +325,10 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
     setRenew(false);
     setCard(null);
     setStage(0);
-    const stageIv = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 2)), 1400);
+    // Deeper-thinking pacing: the pipeline genuinely takes a few seconds;
+    // the staged reveal spreads across it so progress reads as real work
+    // (per-stage durations are presentation, the wait for the card is real).
+    const stageIv = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 2)), 1900);
     const started = Date.now();
     fetch(`/api/signal?ticker=${encodeURIComponent(ticker)}`, { cache: "no-store", headers: authHeaders() })
       .then(async (r) => {
@@ -337,7 +341,9 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
         }
         if (!j) throw new Error(`signal service error (HTTP ${r.status || "no response"})`);
         if (!j.ok || !j.card) throw new Error(j.error ?? "signal failed");
-        const wait = Math.max(0, 2500 - (Date.now() - started));
+        // Let the stage narrative reach the cross-examination step before the
+        // verdict lands: minimum ~9.5s of visible deliberation.
+        const wait = Math.max(0, 9500 - (Date.now() - started));
         setTimeout(() => {
           if (!alive) return;
           clearInterval(stageIv);
@@ -402,11 +408,28 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
   if (!card) return null;
   const noTrade = card.stance === "NO TRADE";
 
+  // The unambiguous market decision, derived from the final verified state.
+  const decision = noTrade
+    ? { label: "STAND ASIDE", tone: "flat" as const, note: card.noTradeReason?.split("—")[0]?.trim() ?? "no reliable edge" }
+    : card.stance === "bullish"
+      ? { label: "BULLISH — WATCH FOR ENTRY", tone: "pos" as const, note: "survived cross-examination" }
+      : card.stance === "bearish"
+        ? { label: "BEARISH — AVOID / REDUCE", tone: "neg" as const, note: "survived cross-examination" }
+        : { label: "HOLD CURRENT POSITION", tone: "flat" as const, note: "no directional edge" };
+
   return (
     <section className={`tt-card tt-signal ${noTrade ? "tt-signal-flat" : "tt-signal-live"}`}>
       <div className="tt-card-head">
         <h2>Signal card · {card.ticker}{card.name ? ` — ${card.name}` : ""}</h2>
         <span className={`tt-pill ${noTrade ? "tt-pill-flat" : "tt-pill-ok"}`}>{noTrade ? "NO TRADE" : card.stanceLabel}</span>
+      </div>
+
+      {/* Decision banner: the clearest element on the card, placed after the
+          chart but before the fine print — evidence first, verdict second. */}
+      <div className={`tt-decision tt-decision-${decision.tone}`} role="status">
+        <span className="tt-decision-label">Decision</span>
+        <span className="tt-decision-value">{decision.label}</span>
+        <span className="tt-decision-note">{decision.note} · analytical signal, not investment advice</span>
       </div>
 
       <SignalChart ticker={card.ticker} projection={{ expectedPct: card.expectedReturn20dPct, days: 20 }} />

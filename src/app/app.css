@@ -492,3 +492,12 @@
   .tt-skel::after { display: none; }
   .tt-quote-card, .tt-quote-card:hover { transform: none; box-shadow: none; }
 }
+
+/* ── Decision banner (signal card) — the clearest element, never casino ── */
+.tt-decision { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 2px; align-items: baseline; border: 1px solid var(--app-line-strong); border-radius: 12px; padding: 14px 18px; margin-top: 14px; background: #0e1511; }
+.tt-decision-label { font-family: var(--font-mono, monospace); font-size: 9px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--app-ink-faint); grid-row: 1 / span 2; align-self: center; }
+.tt-decision-value { font-size: 19px; font-weight: 700; letter-spacing: -0.2px; color: #eef5ee; }
+.tt-decision-note { font-size: 10.5px; color: var(--app-ink-soft); }
+.tt-decision-pos { border-color: rgba(88, 169, 123, 0.5); box-shadow: inset 3px 0 0 var(--app-pos); }
+.tt-decision-neg { border-color: rgba(248, 113, 113, 0.4); box-shadow: inset 3px 0 0 #f87171; }
+.tt-decision-flat { box-shadow: inset 3px 0 0 var(--app-gold); }
