@@ -159,7 +159,15 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
             pendingLaunch.current = true;
             setDialogOpen(true);
           }
-          setError(payload.error ?? "research run failed");
+          // Expired subscription (402): the code is valid but lapsed. Point the
+          // user at renewal instead of a dead-end error.
+          if (res.status === 402) {
+            setError(
+              "Your subscription has expired — AI analysis is paused until you renew. Tap Renew below; your new code keeps everything (memory, twin, federation) exactly as it was.",
+            );
+          } else {
+            setError(payload.error ?? "research run failed");
+          }
         } else {
           if (codeArg) setAccessCode(codeArg);
           setResult(payload);
@@ -267,9 +275,17 @@ export default function RunLauncher({ initialTicker, autorun }: { initialTicker:
       )}
 
       {error && (
-        <p className="mt-6 rounded-lg border border-blood/30 bg-[#faf1ec] p-4 font-mono text-[0.75rem] text-blood">
-          {error}
-        </p>
+        <div className="mt-6 rounded-lg border border-blood/30 bg-[#faf1ec] p-4">
+          <p className="font-mono text-[0.75rem] text-blood">{error}</p>
+          {error.includes("expired") && (
+            <a
+              href="/buy"
+              className="mt-3 inline-block rounded-full bg-truffle-500 px-5 py-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white hover:bg-truffle-600"
+            >
+              Renew subscription →
+            </a>
+          )}
+        </div>
       )}
 
       {result?.ok && result.run && (

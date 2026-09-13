@@ -134,21 +134,44 @@ const kraken: DataPlugin = {
       v: Number(r[6]),
     }));
     const last = candles[candles.length - 1];
+    // "Today's change" for crypto = vs the prior UTC day's OPENING price
+    // (Kraken has no session-close concept). First candle of each UTC day.
+    let prevDayOpen: number | null = null;
+    if (last) {
+      const dayOpen = new Map<string, number>();
+      for (const c of candles) {
+        const k = new Date(c.t).toISOString().slice(0, 10);
+        if (!dayOpen.has(k)) dayOpen.set(k, c.o);
+      }
+      const days = [...dayOpen.keys()].sort();
+      const ti = days.indexOf(new Date(last.t).toISOString().slice(0, 10));
+      const prevKey = ti > 0 ? days[ti - 1] : days.length >= 2 ? days[days.length - 2] : null;
+      prevDayOpen = (prevKey ? dayOpen.get(prevKey) : undefined) ?? null;
+    }
     return {
       candles,
       quote: last
-        ? { ticker, price: last.c, currency: "USD", name: `${ticker}/USD`, exchange: "Kraken" }
+        ? { ticker, price: last.c, prevClose: prevDayOpen, currency: "USD", name: `${ticker}/USD`, exchange: "Kraken" }
         : { ticker },
     };
   },
   async quote(ticker) {
     const pair = krakenPair(ticker);
     if (!pair) throw new Error(`no Kraken pair for ${ticker}`);
-    type Tick = { result: Record<string, { c: string[] }> };
+    // `o` is the pair's opening price today → honest 24h change baseline.
+    type Tick = { result: Record<string, { c: string[]; o?: string[] }> };
     const j = await getJson<Tick>(`${KRAKEN_REST}/Ticker?pair=${pair}`);
     const row = Object.values(j.result)[0];
     if (!row?.c?.[0]) throw new Error("Kraken: empty ticker");
-    return { ticker, price: Number(row.c[0]), currency: "USD", name: `${ticker}/USD`, exchange: "Kraken" };
+    const prevOpen = row.o?.[0] != null ? Number(row.o[0]) : null;
+    return {
+      ticker,
+      price: Number(row.c[0]),
+      prevClose: prevOpen != null && Number.isFinite(prevOpen) ? prevOpen : null,
+      currency: "USD",
+      name: `${ticker}/USD`,
+      exchange: "Kraken",
+    };
   },
 };
 
@@ -186,6 +209,7 @@ const yahoo: DataPlugin = {
         result: {
           meta: {
             regularMarketPrice: number;
+            previousClose?: number;
             chartPreviousClose: number;
             currency: string;
             shortName?: string;
@@ -214,7 +238,11 @@ const yahoo: DataPlugin = {
       quote: {
         ticker,
         price: res.meta.regularMarketPrice,
-        prevClose: res.meta.chartPreviousClose ?? null,
+        // prior SESSION close, not window-start: chartPreviousClose is the
+        // close before the fetched window, which mislabels multi-day drift as
+        // "today's change" (the Dow −2%-on-a-+1%-day bug). meta.previousClose
+        // is the prior session's official close regardless of range.
+        prevClose: res.meta.previousClose ?? res.meta.chartPreviousClose ?? null,
         currency: res.meta.currency ?? null,
         name: res.meta.shortName ?? null,
         exchange: res.meta.exchangeName ?? null,
@@ -223,7 +251,7 @@ const yahoo: DataPlugin = {
   },
   async quote(ticker) {
     if (!looksLikeCashTicker(ticker)) throw new Error(`no Yahoo symbol for ${ticker}`);
-    type Chart = { chart: { result: { meta: { regularMarketPrice: number; chartPreviousClose: number; currency: string; shortName?: string; exchangeName?: string } }[] } };
+    type Chart = { chart: { result: { meta: { regularMarketPrice: number; previousClose?: number; chartPreviousClose: number; currency: string; shortName?: string; exchangeName?: string } }[] } };
     const j = await getJson<Chart>(
       `${YAHOO_REST}/v8/finance/chart/${encodeURIComponent(ticker)}?range=5d&interval=1d`,
     );
@@ -232,7 +260,8 @@ const yahoo: DataPlugin = {
     return {
       ticker,
       price: meta.regularMarketPrice,
-      prevClose: meta.chartPreviousClose ?? null,
+      // prior session close preferred — see the range-start note in candles().
+      prevClose: meta.previousClose ?? meta.chartPreviousClose ?? null,
       currency: meta.currency ?? null,
       name: meta.shortName ?? null,
       exchange: meta.exchangeName ?? null,

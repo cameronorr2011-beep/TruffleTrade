@@ -45,6 +45,7 @@ function makePack(over: { rsi?: number | null; price?: number; pe?: number | nul
     news: [],
     macro: [],
     spyCloses: [],
+    street: null,
     retrievalTs: Date.now(),
     sources: ["test"],
     availability: {},

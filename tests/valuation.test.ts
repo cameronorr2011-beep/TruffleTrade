@@ -65,6 +65,7 @@ function makePack(over: {
     news: [],
     macro: [],
     spyCloses: [],
+    street: null,
     retrievalTs: Date.now(),
     sources: ["test"],
     availability: {},

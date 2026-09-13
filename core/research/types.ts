@@ -153,9 +153,28 @@ export interface DataPack {
   news: NewsItem[];
   macro: MacroPoint[];
   spyCloses: number[];
+  street: StreetRatings | null; // sell-side consensus; null → unavailable (third-party opinion)
   retrievalTs: number;
   sources: string[];
   availability: Record<string, boolean>; // per-section availability map
+}
+
+/** Sell-side consensus shape (from ./providers). Re-declared structurally to avoid a circular import. */
+export interface StreetRatings {
+  ticker: string;
+  buy: number;
+  overweight: number;
+  hold: number;
+  underweight: number;
+  sell: number;
+  total: number;
+  consensus: "buy" | "overweight" | "hold" | "underweight" | "sell" | "unavailable";
+  targetMean: number | null;
+  targetMedian: number | null;
+  targetHigh: number | null;
+  targetLow: number | null;
+  asOf: number;
+  source: string;
 }
 
 /** Deterministic valuation models — assumptions always exposed. */

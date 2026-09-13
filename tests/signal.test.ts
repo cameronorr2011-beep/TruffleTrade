@@ -44,6 +44,22 @@ function goodInput(overrides: Partial<SignalInputs> = {}): SignalInputs {
     newsLabel: "positive",
     macroScore: 0.3,
     macroLabel: "risk-on",
+    street: {
+      ticker: "TEST",
+      buy: 12,
+      overweight: 12,
+      hold: 6,
+      underweight: 1,
+      sell: 1,
+      total: 19,
+      consensus: "buy",
+      targetMean: closes[closes.length - 1] * 1.15,
+      targetMedian: null,
+      targetHigh: null,
+      targetLow: null,
+      asOf: Date.now(),
+      source: "test:fixture",
+    },
     price: closes[closes.length - 1],
     ...overrides,
   };
@@ -52,12 +68,38 @@ function goodInput(overrides: Partial<SignalInputs> = {}): SignalInputs {
 describe("deterministic signal core", () => {
   it("produces a stance with all four legs agreeing", () => {
     const s = assembleDeterministic("TEST", goodInput());
-    expect(s.drivers).toHaveLength(4);
+    expect(s.drivers).toHaveLength(5); // trend, twin, news, macro, street
     expect(["bullish", "bearish", "NO TRADE"]).toContain(s.stance);
     if (s.stance !== "NO TRADE") {
       expect(s.confidence).toBeGreaterThan(0);
       expect(s.confidence!).toBeLessThanOrEqual(85);
     }
+  });
+
+  it("incorporates street consensus as a bounded driver with provenance", () => {
+    const s = assembleDeterministic("TEST", goodInput());
+    const street = s.drivers.find((d) => d.source === "street");
+    expect(street).toBeDefined();
+    expect(street!.weight).toBeLessThanOrEqual(0.2); // opinion, not evidence
+    expect(street!.detail).toMatch(/buy|sell|hold/i);
+  });
+
+  it("scores sell-heavy street consensus bearish and buy-heavy bullish", () => {
+    const sellHeavy = assembleDeterministic(
+      "TEST",
+      goodInput({ street: { ...goodInput().street!, buy: 2, sell: 14, hold: 8, total: 24, consensus: "underweight" } }),
+    );
+    const buyHeavy = assembleDeterministic("TEST", goodInput());
+    const sell = sellHeavy.drivers.find((d) => d.source === "street")!;
+    const buy = buyHeavy.drivers.find((d) => d.source === "street")!;
+    expect(sell.contribution).toBeLessThan(0);
+    expect(buy.contribution).toBeGreaterThan(sell.contribution);
+  });
+
+  it("treats missing street data as unavailable without inventing a driver", () => {
+    const s = assembleDeterministic("TEST", goodInput({ street: null }));
+    expect(s.drivers.find((d) => d.source === "street")).toBeUndefined();
+    expect(s.unavailable.join(" ")).toMatch(/street/i);
   });
 
   it("is deterministic: identical inputs produce identical output", () => {

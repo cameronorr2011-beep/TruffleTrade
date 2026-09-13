@@ -65,15 +65,19 @@ export async function yahooChart(
     });
   }
   const price = m.regularMarketPrice ?? candles[candles.length - 1]?.close ?? null;
-  // "Today's change" must be vs the PRIOR SESSION close. Yahoo's
-  // chartPreviousClose is the close before the FETCHED WINDOW — on a 5d/1d
-  // fetch that is 5 sessions ago, which mislabeled 5-day drift as today's
-  // move (e.g. Dow showed -2% on a +1% day). For daily candles the second-
-  // to-last close IS the prior session; otherwise fall back to meta.
+  // "Today's change" must be vs the PRIOR SESSION close — never the close
+  // before the fetched window. chartPreviousClose is window-start (5 sessions
+  // ago on a 5d fetch), which mislabeled multi-day drift as today's move
+  // (e.g. Dow showed -2% on a +1% day). For daily bars the second-to-last
+  // close IS the prior session; intraday bars use meta.previousClose (prior
+  // session's official close) when Yahoo provides it.
   const prevClose =
     interval === "1d" && candles.length >= 2
       ? candles[candles.length - 2].close
-      : m.previousClose ?? m.chartPreviousClose ?? null;
+      : m.previousClose ??
+        (interval !== "1d" && candles.length >= 2 ? candles[candles.length - 2].close : null) ??
+        m.chartPreviousClose ??
+        null;
   const quote: Quote = {
     ticker: m.symbol ?? ticker.toUpperCase(),
     name: m.longName ?? m.shortName ?? null,
@@ -230,6 +234,109 @@ export async function yahooSummary(ticker: string): Promise<SummaryData | null> 
     businessSummary: r.assetProfile?.longBusinessSummary ?? null,
     marketCap: val(sd.marketCap),
     targetMeanPrice: val(fd.targetMeanPrice),
+  };
+}
+
+// ── StreetRatingsProvider ────────────────────────────────────────────
+
+export interface StreetRatings {
+  ticker: string;
+  buy: number;
+  overweight: number;
+  hold: number;
+  underweight: number;
+  sell: number;
+  total: number;
+  consensus: "buy" | "overweight" | "hold" | "underweight" | "sell" | "unavailable";
+  targetMean: number | null;
+  targetMedian: number | null;
+  targetHigh: number | null;
+  targetLow: number | null;
+  asOf: number;
+  source: string;
+}
+
+interface TrendRow { period?: string; strongBuy?: number; buy?: number; hold?: number; sell?: number; strongSell?: number }
+interface TrendModule {
+  quoteSummary?: {
+    error?: { description: string } | null;
+    result?: { recommendationTrend?: { trend?: TrendRow[] } }[];
+  };
+}
+
+/**
+ * Sell-side consensus (buy/sell/hold counts + price targets) from Yahoo's
+ * public recommendationTrend module — keyless, same cookie+crumb route as
+ * quoteSummary. This is THIRD-PARTY OPINION data: labeled and weighted as
+ * such wherever it feeds the signal. Explicit unavailable on failure.
+ */
+export async function streetRatings(ticker: string): Promise<StreetRatings | null> {
+  const t = ticker.toUpperCase().trim();
+  const fetchTrend = async (): Promise<TrendModule | null> => {
+    try {
+      const { cookie, crumb } = await yahooCrumb();
+      const url = `${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(t)}?modules=recommendationTrend,financialData&crumb=${encodeURIComponent(crumb)}`;
+      const res = await fetch(url, {
+        headers: { "User-Agent": UA, Cookie: cookie, Accept: "application/json" },
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.status === 401 || res.status === 403) {
+        crumbCache = null; // stale crumb — one refresh
+        const fresh = await yahooCrumb();
+        const retry = await fetch(`${YAHOO}/v10/finance/quoteSummary/${encodeURIComponent(t)}?modules=recommendationTrend,financialData&crumb=${encodeURIComponent(fresh.crumb)}`, {
+          headers: { "User-Agent": UA, Cookie: fresh.cookie, Accept: "application/json" },
+          signal: AbortSignal.timeout(15_000),
+        });
+        if (!retry.ok) return null;
+        return (await retry.json()) as TrendModule;
+      }
+      if (!res.ok) return null;
+      return (await res.json()) as TrendModule;
+    } catch {
+      return null;
+    }
+  };
+
+  const j = await fetchTrend();
+  const r = j?.quoteSummary?.result?.[0];
+  if (j?.quoteSummary?.error || !r) return null;
+
+  // Rows are month buckets ("0m" = current, "-1m" = previous, …). Prefer 0m,
+  // fall back to -1m rather than returning nothing.
+  const rows = r.recommendationTrend?.trend ?? [];
+  const row = rows.find((x) => x.period === "0m") ?? rows.find((x) => x.period === "-1m");
+  const buy = Math.max(0, row?.strongBuy ?? 0) + Math.max(0, row?.buy ?? 0);
+  const sell = Math.max(0, row?.strongSell ?? 0) + Math.max(0, row?.sell ?? 0);
+  const hold = Math.max(0, row?.hold ?? 0);
+  const overweight = buy; // Yahoo's buy bucket collapses strong+regular buy
+  const underweight = sell;
+  const total = buy + hold + sell;
+  if (total <= 0) return null;
+
+  // Consensus label from the majority stance.
+  const consensus: StreetRatings["consensus"] =
+    buy / total >= 0.6 ? "buy" : buy / total >= 0.45 ? "overweight" : sell / total >= 0.3 ? "underweight" : sell / total >= 0.2 ? "sell" : "hold";
+
+  // Price targets come from financialData (same module call).
+  interface TargetShape { quoteSummary?: { result?: { financialData?: { targetMeanPrice?: { raw?: number }; targetMedianPrice?: { raw?: number }; targetHighPrice?: { raw?: number }; targetLowPrice?: { raw?: number } } }[] } }
+  const fd = (j as TargetShape)?.quoteSummary?.result?.[0]?.financialData;
+  const num = (x?: { raw?: number }) => (x && typeof x.raw === "number" && Number.isFinite(x.raw) ? x.raw : null);
+
+  return {
+    ticker: t,
+    buy,
+    overweight,
+    hold,
+    underweight,
+    sell,
+    total,
+    consensus,
+    targetMean: num(fd?.targetMeanPrice),
+    targetMedian: num(fd?.targetMedianPrice),
+    targetHigh: num(fd?.targetHighPrice),
+    targetLow: num(fd?.targetLowPrice),
+    asOf: Date.now(),
+    source: "yahoo:recommendationTrend",
   };
 }
 

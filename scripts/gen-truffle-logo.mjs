@@ -1,32 +1,39 @@
-// Generates the TruffleTrade master marks: a photoreal black truffle
-// (Tuber melanosporum) built from a lobed silhouette covered in ~140
-// individually-shaded pyramidal warts, with three gold candlesticks set into
-// the circumference. Deterministic (seeded) — regenerate any time:
+// Generates the TruffleTrade master marks: a highly detailed FLAT 2D truffle
+// in a woodcut/engraving style — lobed silhouette, skin covered in a sunflower
+// (phyllotaxis) spiral of crisp pentagonal warts with thin cream outlines,
+// subtle interior veining, and three gold candlesticks set into the rim.
+// No fake-3D gradients: flat fills only, so it reads as intentional design at
+// 16px and as intricate detail at 512px. Deterministic (seeded) — regenerate:
 //   node scripts/gen-truffle-logo.mjs
 // Emits: electron/icons/icon.svg (app tile), src/app/icon.svg (favicon),
 //        public/logo.svg (site mark, circular tile).
 
 import { writeFileSync } from "node:fs";
 
-// ── deterministic PRNG (mulberry32) ───────────────────────────────────────
 function mulberry32(a) {
   return function () {
     a |= 0;
     a = (a + 0x6d2b79f5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    return ((t ^ (t >>> 14)) >>> 0) / 0xffffffff;
   };
 }
+const rng = mulberry32(20260912);
 
-const rng = mulberry32(20260911);
+// ── Palette: warm charcoal body, cream engraving lines, truffle gold ──────
+const INK = "#241a12"; // deepest crevice
+const BODY = "#3a2a1c"; // base skin
+const BODY_WARM = "#4a3524"; // warm facets
+const BODY_DARK = "#2e2116"; // cool facets
+const CREAM = "#e8d9b8"; // wart outlines (truffle veining is cream on black)
+const CREAM_DIM = "rgba(232,217,184,0.55)";
+const GOLD = "#e8ae52";
+const GOLD_DIM = "#a97e33";
 
-/**
- * Lobed truffle silhouette as a smooth closed path through N angular points.
- * Radius wobbles with layered sine harmonics + per-point noise → organic lump.
- */
+// ── Lobed organic silhouette (same proven construction as v3) ────────────
 function trufflePath(cx, cy, R, points = 26) {
-  const h1 = 0.075 + rng() * 0.05; // harmonic amplitudes
+  const h1 = 0.075 + rng() * 0.05;
   const h2 = 0.05 + rng() * 0.04;
   const h3 = 0.03 + rng() * 0.025;
   const p1 = rng() * Math.PI * 2;
@@ -41,9 +48,8 @@ function trufflePath(cx, cy, R, points = 26) {
       h2 * Math.sin(3 * a + p2) +
       h3 * Math.sin(5 * a + p3) +
       (rng() - 0.5) * 0.03;
-    pts.push([cx + Math.cos(a) * R * wob, cy + Math.sin(a) * R * wob * 0.94]); // slightly squashed
+    pts.push([cx + Math.cos(a) * R * wob, cy + Math.sin(a) * R * wob * 0.94]);
   }
-  // Catmull-Rom → cubic Bézier for smooth organic closure
   let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
   for (let i = 0; i < points; i++) {
     const p0 = pts[(i - 1 + points) % points];
@@ -57,112 +63,103 @@ function trufflePath(cx, cy, R, points = 26) {
   return d + "Z";
 }
 
-/** Sample points across the disc, rejecting those outside the silhouette. */
+/**
+ * Phyllotaxis (sunflower) layout — the real arrangement pattern of truffle
+ * warts. Each wart is a crisp pentagon whose fill tone alternates across a
+ * fixed palette (woodcut = flat inks, no gradient blends) and whose cream
+ * outline is what reads as "detail" at every size.
+ */
 function wartPositions(cx, cy, R, count) {
+  const golden = Math.PI * (3 - Math.sqrt(5)); // ~2.39996 rad
   const out = [];
-  let guard = 0;
-  while (out.length < count && guard++ < count * 40) {
-    const a = rng() * Math.PI * 2;
-    const r = Math.sqrt(rng()) * R * 0.93;
+  for (let i = 0; i < count; i++) {
+    const r = R * 0.96 * Math.sqrt((i + 0.5) / count);
+    const a = i * golden;
     const x = cx + Math.cos(a) * r;
     const y = cy + Math.sin(a) * r * 0.94;
-    const shade = 0.5 - 0.45 * (y - cy) / R; // top warts catch light, bottom in shadow
-    out.push({ x, y, r: 0.055 * R * (0.7 + rng() * 0.7), rot: rng() * 360, shade: Math.max(0.05, Math.min(0.95, shade + (rng() - 0.5) * 0.2)) });
+    const tone = i % 3 === 0 ? BODY_WARM : i % 3 === 1 ? BODY : BODY_DARK;
+    const sizeK = 0.62 + 0.5 * Math.sqrt((i + 0.5) / count); // outer warts slightly larger
+    out.push({ x, y, r: 0.058 * R * sizeK, rot: (a * 180) / Math.PI + 12, tone });
   }
   return out;
 }
 
-/**
- * One pyramidal wart: three stacked polygons (base shadow → body → lit facet)
- * rotated to position. The variation in tone is what sells "real truffle".
- */
-function wart({ x, y, r, rot, shade }) {
-  const g = Math.round(38 + shade * 88); // grey-brown body value 38..126
-  const dark = Math.max(4, Math.round(g * 0.3));
-  const lit = Math.min(205, Math.round(g * 1.8 + 34));
-  const body = `rgb(${Math.round(g * 0.82)},${Math.round(g * 0.74)},${Math.round(g * 0.6)})`;
-  const dk = `rgb(${dark},${dark},${Math.round(dark * 1.15)})`;
-  const lt = `rgb(${lit},${Math.round(lit * 0.9)},${Math.round(lit * 0.72)})`;
-  const t = (a, rad) => {
-    const radr = (a * Math.PI) / 180;
-    return `${(x + Math.cos(radr) * rad).toFixed(1)} ${(y + Math.sin(radr) * rad).toFixed(1)}`;
-  };
+/** One pentagonal wart: flat fill + thin cream outline + tiny ink core. */
+function wart({ x, y, r, rot, tone }, detail) {
+  const pts = [];
+  for (let k = 0; k < 5; k++) {
+    const a = ((-90 + k * 72) * Math.PI) / 180;
+    pts.push([x + Math.cos(a) * r, y + Math.sin(a) * r]);
+  }
+  const poly = pts.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  const core =
+    detail &&
+    `<polygon points="${pts
+      .map((p) => `${(x + (p[0] - x) * 0.34).toFixed(1)},${(y + (p[1] - y) * 0.34).toFixed(1)}`)
+      .join(" ")}" fill="${INK}"/>`;
   return (
     `<g transform="rotate(${rot.toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})">` +
-    `<polygon points="${t(0, r * 1.5)} ${t(120, r * 1.5)} ${t(240, r * 1.5)}" fill="${dk}" opacity=".9"/>` +
-    `<polygon points="${t(10, r * 1.18)} ${t(130, r * 1.18)} ${t(250, r * 1.18)}" fill="${body}"/>` +
-    `<polygon points="${t(20, r * 0.72)} ${t(140, r * 0.72)} ${t(260, r * 0.72)}" fill="${lt}" opacity=".85"/>` +
-    `</g>`
+    `<polygon points="${poly}" fill="${tone}" stroke="${CREAM}" stroke-width="${(r * 0.34).toFixed(2)}" stroke-linejoin="round"/>` +
+    `</g>` +
+    (core ?? "")
   );
 }
 
-function candle(x, y1, y2, w, bodyY, bodyH, fill, op = 1) {
+/** Faint cream veins between wart rows — the marbling real truffles show. */
+function veins(cx, cy, R) {
+  let out = "";
+  for (let v = 0; v < 7; v++) {
+    const a0 = rng() * Math.PI * 2;
+    let d = "";
+    for (let s = 0; s <= 6; s++) {
+      const t = s / 6;
+      const r = R * (0.12 + 0.78 * t);
+      const a = a0 + Math.sin(t * 4.2 + v) * 0.34;
+      const x = cx + Math.cos(a) * r;
+      const y = cy + Math.sin(a) * r * 0.94;
+      d += `${s === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+    }
+    out += `<path d="${d}" fill="none" stroke="${v % 2 ? CREAM_DIM : CREAM}" stroke-width="${(R * 0.008).toFixed(2)}" stroke-linecap="round"/>`;
+  }
+  return out;
+}
+
+function candle(x, y1, y2, w, bodyY, bodyH, fill) {
   return (
-    `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${fill}" stroke-width="${w * 0.42}" stroke-linecap="round"${op < 1 ? ` opacity="${op}"` : ""}/>` +
-    `<rect x="${x - w / 2}" y="${bodyY}" width="${w}" height="${bodyH}" rx="${w * 0.18}" fill="${fill}"${op < 1 ? ` opacity="${op}"` : ""}/>`
+    `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="${fill}" stroke-width="${w * 0.42}" stroke-linecap="round"/>` +
+    `<rect x="${x - w / 2}" y="${bodyY}" width="${w}" height="${bodyH}" rx="${w * 0.18}" fill="${fill}"/>`
   );
 }
 
 /** Build one full mark. size = viewBox, tile = background shape fn. */
-function buildMark({ size, tile, pad, showRim }) {
+function buildMark({ size, tile, pad, showRim, detail }) {
   const cx = size / 2;
   const cy = size / 2 + size * 0.03;
   const R = size / 2 - pad;
-  const warts = wartPositions(cx, cy, R, 140);
+  const sil = trufflePath(cx, cy, R);
+  const warts = wartPositions(cx, cy, R, detail ? 150 : 34);
 
   // candlesticks: left-upper rim (bearish, dim), top (tall bull), right-lower rim (bull)
-  const gold = "url(#gold)";
-  const goldDim = "url(#goldDim)";
   const cs = showRim
     ? [
-        candle(size * 0.155, cy - R * 0.62, cy - R * 0.1, size * 0.055, cy - R * 0.5, R * 0.26, goldDim),
-        candle(cx, size * 0.055, cy - R * 0.52, size * 0.055, size * 0.1, R * 0.34, gold),
-        candle(size * 0.845, cy + R * 0.16, cy + R * 0.78, size * 0.055, cy + R * 0.28, R * 0.26, gold),
+        candle(size * 0.155, cy - R * 0.62, cy - R * 0.1, size * 0.055, cy - R * 0.5, R * 0.26, GOLD_DIM),
+        candle(cx, size * 0.055, cy - R * 0.52, size * 0.055, size * 0.1, R * 0.34, GOLD),
+        candle(size * 0.845, cy + R * 0.16, cy + R * 0.78, size * 0.055, cy + R * 0.28, R * 0.26, GOLD),
       ].join("")
     : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="TruffleTrade">
-<defs>
-<linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#ffe9b8"/><stop offset=".5" stop-color="#e8ae52"/><stop offset="1" stop-color="#9a611e"/>
-</linearGradient>
-<linearGradient id="goldDim" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="#c9973f"/><stop offset="1" stop-color="#6e4514"/>
-</linearGradient>
-<radialGradient id="glow" cx=".5" cy=".52" r=".6">
-<stop offset="0" stop-color="#28382f"/><stop offset="1" stop-color="#28382f" stop-opacity="0"/>
-</radialGradient>
-<radialGradient id="keylight" cx=".3" cy=".2" r=".72">
-<stop offset="0" stop-color="#a08a66" stop-opacity=".62"/>
-<stop offset=".4" stop-color="#6b5940" stop-opacity=".28"/>
-<stop offset="1" stop-color="#000" stop-opacity="0"/>
-</radialGradient>
-<radialGradient id="core" cx=".54" cy=".66" r=".66">
-<stop offset="0" stop-color="#000" stop-opacity=".48"/>
-<stop offset=".7" stop-color="#000" stop-opacity=".1"/>
-<stop offset="1" stop-color="#000" stop-opacity="0"/>
-</radialGradient>
-<radialGradient id="bounce" cx=".62" cy=".96" r=".55">
-<stop offset="0" stop-color="#7a5a32" stop-opacity=".3"/>
-<stop offset="1" stop-color="#7a5a32" stop-opacity="0"/>
-</radialGradient>
-<radialGradient id="floorshadow" cx=".5" cy=".5" r=".5">
-<stop offset="0" stop-color="#000" stop-opacity=".55"/>
-<stop offset="1" stop-color="#000" stop-opacity="0"/>
-</radialGradient>
-<clipPath id="sil"><path d="${trufflePath(cx, cy, R)}"/></clipPath>
-</defs>
 ${tile}
-<ellipse cx="${cx}" cy="${cy + R * 0.98}" rx="${R * 0.86}" ry="${R * 0.16}" fill="url(#floorshadow)"/>
-<path d="${trufflePath(cx, cy, R)}" fill="#0d0906"/>
+<g>
+<path d="${sil}" fill="${BODY}"/>
 <g clip-path="url(#sil)">
-<rect width="${size}" height="${size}" fill="url(#keylight)"/>
-${warts.map(wart).join("")}
-<rect width="${size}" height="${size}" fill="url(#core)"/>
-<rect width="${size}" height="${size}" fill="url(#bounce)"/>
-<path d="${trufflePath(cx, cy, R)}" fill="none" stroke="#000" stroke-opacity=".65" stroke-width="${size * 0.012}"/>
+${veins(cx, cy, R)}
+${warts.map((w) => wart(w, detail)).join("")}
+</g>
+<path d="${sil}" fill="none" stroke="${INK}" stroke-opacity=".8" stroke-width="${(size * 0.011).toFixed(2)}"/>
 </g>
 ${cs}
+<defs><clipPath id="sil"><path d="${sil}"/></clipPath></defs>
 </svg>
 `;
 }
@@ -171,13 +168,15 @@ const icon = buildMark({
   size: 512,
   pad: 118,
   showRim: true,
-  tile: `<rect width="512" height="512" rx="112" fill="#0b110d"/><rect width="512" height="512" rx="112" fill="url(#glow)"/>`,
+  detail: true,
+  tile: `<rect width="512" height="512" rx="112" fill="#0b110d"/>`,
 });
 
 const favicon = buildMark({
   size: 64,
   pad: 14.5,
   showRim: true,
+  detail: false, // 16–32px: 34 chunky warts stay legible; 150 would mush
   tile: `<rect width="64" height="64" rx="14" fill="#0b110d"/>`,
 });
 
@@ -185,7 +184,8 @@ const logo = buildMark({
   size: 240,
   pad: 4,
   showRim: true,
-  tile: `<circle cx="120" cy="120" r="118" fill="#0b110d"/><circle cx="120" cy="120" r="118" fill="url(#glow)"/>`,
+  detail: true,
+  tile: `<circle cx="120" cy="120" r="118" fill="#0b110d"/>`,
 });
 
 writeFileSync("electron/icons/icon.svg", icon);

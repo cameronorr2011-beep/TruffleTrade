@@ -15,13 +15,13 @@
 // Every number traces to a driver. The card is labeled MODEL OUTPUT and never
 // states probability of profit.
 
-import { yahooChart, googleNews } from "./providers";
+import { yahooChart, googleNews, streetRatings, type StreetRatings } from "./providers";
 import { sma, trendRegime, realizedVolPct, atr } from "./indicators";
 import { twinConfidence, newsSentiment, macroSentiment, type TwinConfidence } from "./marketIntelligence";
 import { makeProvider } from "./ai";
 
 export interface SignalDriver {
-  source: "digital-twin" | "trend" | "news-sentiment" | "macro";
+  source: "digital-twin" | "trend" | "news-sentiment" | "macro" | "street";
   detail: string;
   direction: "bullish" | "bearish" | "neutral";
   contribution: number; // -1..1
@@ -101,6 +101,7 @@ export interface SignalInputs {
   newsLabel: string | null;
   macroScore: number | null; // -1..1
   macroLabel: string | null;
+  street: StreetRatings | null; // sell-side consensus (third-party opinion)
   price: number | null;
 }
 
@@ -191,6 +192,27 @@ export function assembleDeterministic(ticker: string, input: SignalInputs): Dete
     invalidations.push("macro tape flips risk-off (SPY down hard / vol bid)");
   } else {
     unavailable.push("macro: index providers unreachable");
+  }
+
+  // ── Street leg (sell-side consensus — third-party opinion, modest weight) ─
+  // Buys outweighing sells is consensus, not evidence; it earns a bounded
+  // weight and its own invalidation path (downgrade clusters).
+  if (input.street && input.street.total > 0) {
+    const s = input.street;
+    const netPct = (s.buy - s.sell) / s.total; // -1..1 net positioning
+    const upsidePct =
+      s.targetMean != null && input.price ? ((s.targetMean - input.price) / input.price) * 100 : null;
+    const contribution = Math.max(-1, Math.min(1, netPct * 0.7 + (upsidePct != null ? Math.max(-0.3, Math.min(0.3, upsidePct / 40)) : 0)));
+    drivers.push({
+      source: "street",
+      detail: `${s.consensus} consensus — ${s.buy} buy / ${s.hold} hold / ${s.sell} sell across ${s.total} analysts${upsidePct != null ? `, mean target ${s.targetMean!.toFixed(0)} (${upsidePct >= 0 ? "+" : ""}${upsidePct.toFixed(0)}% vs spot)` : ""}`,
+      direction: contribution > 0.15 ? "bullish" : contribution < -0.15 ? "bearish" : "neutral",
+      contribution: Math.round(contribution * 100) / 100,
+      weight: 0.15,
+    });
+    invalidations.push("a cluster of analyst downgrades lands (buy count falls ≥20% month-over-month)");
+  } else {
+    unavailable.push("street: analyst consensus unavailable");
   }
 
   const totalW = drivers.reduce((s, d) => s + d.weight, 0) || 1;
@@ -287,10 +309,11 @@ function debateUserPrompt(d: DeterministicSignal, name: string | null): string {
  */
 export async function buildSignalCard(ticker: string, useAi = true): Promise<SignalCard> {
   const subject = ticker.toUpperCase();
-  const [chart, news, macro] = await Promise.all([
+  const [chart, news, macro, street] = await Promise.all([
     yahooChart(subject, "1y", "1d").catch(() => null),
     newsSentiment(subject).catch(() => null),
     macroSentiment().catch(() => null),
+    streetRatings(subject).catch(() => null),
   ]);
 
   const closes = chart && chart.candles.length >= 60 ? chart.candles.map((c) => c.close) : null;
@@ -309,6 +332,7 @@ export async function buildSignalCard(ticker: string, useAi = true): Promise<Sig
     newsLabel: news ? news.label : null,
     macroScore: macro ? macro.score : null,
     macroLabel: macro ? macro.label : null,
+    street: street ?? null,
     price: chart?.quote.price ?? null,
   });
 

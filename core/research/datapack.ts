@@ -6,6 +6,7 @@ import {
   googleNews,
   macroQuotes,
   spyCloses,
+  streetRatings,
   yahooChart,
   yahooSummary,
 } from "./providers";
@@ -27,17 +28,19 @@ export async function buildDataPack(ticker: string): Promise<DataPack> {
   const summary = await yahooSummary(t).catch(() => null);
   if (summary) sources.push("yahoo:quoteSummary");
 
-  // News + macro in parallel — failures tolerated.
-  const [newsRaw, macro, spy] = await Promise.all([
+  // News + macro + street consensus in parallel — failures tolerated.
+  const [newsRaw, macro, spy, street] = await Promise.all([
     googleNews(t, 12).catch((e: Error) => {
       errors.push(`news: ${e.message}`);
       return [] as { title: string; link: string; source: string; publishedTs: number | null }[];
     }),
     macroQuotes().catch(() => []),
     spyCloses(260).catch(() => [] as number[]),
+    streetRatings(t).catch(() => null),
   ]);
   if (newsRaw.length) sources.push("googlenews:rss");
   if (macro.length) sources.push("yahoo:macro");
+  if (street) sources.push("yahoo:recommendationTrend");
 
   const news: NewsItem[] = newsRaw.map((n) => ({
     title: n.title,
@@ -74,6 +77,7 @@ export async function buildDataPack(ticker: string): Promise<DataPack> {
     news: news.length > 0,
     macro: macro.some((m) => m.changePct != null),
     relativeStrength: technicals.relStrengthVsSpy30d != null,
+    street: street != null,
   };
 
   return {
@@ -86,6 +90,7 @@ export async function buildDataPack(ticker: string): Promise<DataPack> {
     news,
     macro,
     spyCloses: spy,
+    street,
     retrievalTs: Date.now(),
     sources,
     availability,

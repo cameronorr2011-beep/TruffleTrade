@@ -450,3 +450,45 @@
 .tt-working-svg { width: 100%; height: auto; display: block; }
 .tt-working-meta { position: absolute; right: 10px; top: 8px; }
 .tt-working-counter { font-family: var(--font-mono, monospace); font-size: 9.5px; letter-spacing: .6px; color: var(--app-gold); background: rgba(12,19,15,.8); border: 1px solid rgba(232,174,82,.25); border-radius: 6px; padding: 3px 8px; }
+
+/* ── Motion tokens + premium motion system (Bloomberg × Linear, not casino) ─ */
+.tt-app {
+  --motion-fast: 150ms;
+  --motion-normal: 240ms;
+  --motion-slow: 380ms;
+  --ease-standard: cubic-bezier(.2, 0, .2, 1);
+  --ease-emphasized: cubic-bezier(.3, 0, .1, 1);
+}
+/* Number interpolation + price flash (layout-stable; font-variant keeps width) */
+.tt-num { font-variant-numeric: tabular-nums; transition: color var(--motion-fast) var(--ease-standard); }
+.tt-flash-up { animation: tt-flash-up 480ms var(--ease-standard); }
+.tt-flash-down { animation: tt-flash-down 480ms var(--ease-standard); }
+@keyframes tt-flash-up { 0% { color: var(--app-pos); text-shadow: 0 0 12px rgba(74, 222, 128, .35); } 100% { } }
+@keyframes tt-flash-down { 0% { color: #f87171; text-shadow: 0 0 12px rgba(248, 113, 113, .3); } 100% { } }
+/* Stock card hover: physical, tiny, responsive */
+.tt-quote-card { transition: transform var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-normal) var(--ease-standard); }
+.tt-quote-card:hover { transform: translateY(-2px); border-color: var(--app-line-strong); box-shadow: 0 8px 22px rgba(0, 0, 0, .3); }
+/* Market pulse dot */
+.tt-market-pulse { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--app-ink-soft); }
+.tt-market-pulse .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--app-pos); animation: tt-pulse 3.2s var(--ease-standard) infinite; }
+.tt-market-pulse.closed .dot { background: var(--app-ink-faint); animation: none; }
+@keyframes tt-pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74, 222, 128, .35); } 50% { opacity: .6; box-shadow: 0 0 0 5px rgba(74, 222, 128, 0); } }
+/* Skeleton system: shared shimmer, geometry preserved */
+.tt-skel { position: relative; overflow: hidden; background: rgba(255, 255, 255, .05); border-radius: 6px; }
+.tt-skel::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .06), transparent); animation: tt-shimmer 1.6s infinite; }
+@keyframes tt-shimmer { 100% { transform: translateX(100%); } }
+.tt-skel-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--app-line); }
+.tt-skel-text { height: 10px; border-radius: 4px; }
+.tt-skel-price { width: 64px; height: 16px; border-radius: 4px; }
+.tt-skel-chip { width: 52px; height: 12px; border-radius: 4px; }
+.tt-skel-spark { width: 72px; height: 22px; border-radius: 4px; }
+.tt-skel-card { border: 1px solid var(--app-line); border-radius: 12px; background: var(--app-panel); padding: 16px; }
+.tt-skel-big { width: 130px; height: 26px; border-radius: 6px; }
+.tt-skel-chart { width: 100%; height: 180px; border-radius: 8px; }
+.tt-skel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+/* Respect reduced motion everywhere at once */
+@media (prefers-reduced-motion: reduce) {
+  .tt-skel::after, .tt-market-pulse .dot, .tt-flash-up, .tt-flash-down { animation: none; }
+  .tt-skel::after { display: none; }
+  .tt-quote-card, .tt-quote-card:hover { transform: none; box-shadow: none; }
+}

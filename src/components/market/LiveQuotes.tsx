@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import CandleChart from "./CandleChart";
 import NewsPanel from "./NewsPanel";
+import AnimatedNumber from "@/components/app/AnimatedNumber";
+import MarketPulse from "@/components/app/MarketPulse";
+import { SkeletonRows } from "@/components/app/Skeletons";
 
 type Quote = { ticker: string; name: string | null; price: number | null; changePct: number | null };
 type MarketsPayload = {
@@ -120,7 +123,9 @@ export default function LiveQuotes({
                 <h2 className="text-[11px] font-bold text-bone-soft">{INDEX_LABELS[idx.ticker] ?? idx.ticker}</h2>
                 <span className="ml-auto text-[8px] uppercase tracking-[0.6px] text-faint">{idx.ticker}</span>
               </div>
-              <p className="mt-2 text-[21px] font-bold tracking-[-0.8px] text-ink">{fmt(idx.price)}</p>
+              <p className="mt-2 text-[21px] font-bold tracking-[-0.8px] text-ink">
+                <AnimatedNumber value={idx.price} />
+              </p>
               <div className="mt-0.5 flex items-center gap-2">
                 <span className="text-[11px] font-semibold" style={{ color: pctColor(idx.changePct) }}>
                   {up ? "▲" : "▼"} {idx.changePct != null ? `${idx.changePct >= 0 ? "+" : ""}${idx.changePct.toFixed(2)}%` : "—"}
@@ -156,9 +161,10 @@ export default function LiveQuotes({
       {/* Movers table */}
       <section className="card mt-5 overflow-hidden">
         <div className="flex items-center justify-between gap-3 px-5 pb-3.5 pt-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <h2 className="text-[13px] font-bold text-ink">Today&apos;s movers</h2>
             <span aria-hidden className="live-dot" style={{ width: 5, height: 5 }} />
+            <MarketPulse />
           </div>
           <span className="text-[10px] text-faint">
             {updatedAt ? `updated ${updatedAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}` : "loading…"}
@@ -175,20 +181,29 @@ export default function LiveQuotes({
               </tr>
             </thead>
             <tbody>
-              {movers.map((m) => (
-                <tr key={m.ticker} className="border-b border-soil-600/70 last:border-0 hover:bg-soil-950/50">
-                  <td className="px-5 py-3">
-                    <button onClick={() => setTicker(m.ticker)} className="text-left">
-                      <span className="block font-bold text-ink">{m.ticker}</span>
-                      <span className="block max-w-[200px] truncate text-[10px] text-faint">{m.name ?? "—"}</span>
-                    </button>
+              {movers.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-5 py-4">
+                    <SkeletonRows rows={4} />
                   </td>
-                  <td className="px-3 py-3 font-semibold text-ink">{fmt(m.price)}</td>
-                  <td className="px-3 py-3">
-                    <span className="text-[11px] font-semibold" style={{ color: pctColor(m.changePct) }}>
-                      {m.changePct != null ? `${m.changePct >= 0 ? "+" : ""}${m.changePct.toFixed(2)}%` : "—"}
-                    </span>
-                  </td>
+                </tr>
+              ) : (
+                movers.map((m) => (
+                  <tr key={m.ticker} className="border-b border-soil-600/70 last:border-0 hover:bg-soil-950/50">
+                    <td className="px-5 py-3">
+                      <button onClick={() => setTicker(m.ticker)} className="text-left">
+                        <span className="block font-bold text-ink">{m.ticker}</span>
+                        <span className="block max-w-[200px] truncate text-[10px] text-faint">{m.name ?? "—"}</span>
+                      </button>
+                    </td>
+                    <td className="px-3 py-3 font-semibold text-ink">
+                      <AnimatedNumber value={m.price} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <span className="text-[11px] font-semibold" style={{ color: pctColor(m.changePct) }}>
+                        {m.changePct != null ? `${m.changePct >= 0 ? "+" : ""}${m.changePct.toFixed(2)}%` : "—"}
+                      </span>
+                    </td>
                   <td className="px-3 py-3">
                     <button
                       onClick={() => setTicker(m.ticker)}
@@ -202,7 +217,8 @@ export default function LiveQuotes({
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>

@@ -311,6 +311,7 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
   const [card, setCard] = useState<SignalCard | null>(null);
   const [busy, setBusy] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [renew, setRenew] = useState(false);
   const [stage, setStage] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
   const elapsed = useElapsed(busy);
@@ -320,14 +321,21 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
     let alive = true;
     setBusy(true);
     setErr(null);
+    setRenew(false);
     setCard(null);
     setStage(0);
     const stageIv = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 2)), 1400);
     const started = Date.now();
     fetch(`/api/signal?ticker=${encodeURIComponent(ticker)}`, { cache: "no-store", headers: authHeaders() })
-      .then((r) => r.json())
-      .then((j: { ok: boolean; card?: SignalCard; error?: string }) => {
+      .then(async (r) => {
+        // Defensive parse: gateway/proxy failures can return an empty body.
+        const j = (await r.json().catch(() => null)) as { ok: boolean; card?: SignalCard; error?: string } | null;
         if (!alive) return;
+        if (r.status === 402) {
+          setRenew(true);
+          throw new Error("Subscription expired — renew to reactivate the AI.");
+        }
+        if (!j) throw new Error(`signal service error (HTTP ${r.status || "no response"})`);
         if (!j.ok || !j.card) throw new Error(j.error ?? "signal failed");
         const wait = Math.max(0, 2500 - (Date.now() - started));
         setTimeout(() => {
@@ -382,7 +390,11 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
       <section className="tt-card tt-signal tt-signal-flat">
         <div className="tt-card-head"><h2>Signal card · {ticker}</h2></div>
         <p className="tt-inline-err">Signal unavailable — {err}.</p>
-        <button type="button" className="tt-btn tt-btn-ghost" onClick={() => setReloadKey((k) => k + 1)}>Retry</button>
+        {renew ? (
+          <a href="/buy" className="tt-btn tt-btn-primary" target="_blank" rel="noreferrer">Renew subscription →</a>
+        ) : (
+          <button type="button" className="tt-btn tt-btn-ghost" onClick={() => setReloadKey((k) => k + 1)}>Retry</button>
+        )}
       </section>
     );
   }
