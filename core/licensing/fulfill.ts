@@ -6,6 +6,7 @@ import crypto from "node:crypto";
 import { hashCode, generateAccessCode } from "./codes";
 import { isChargePaid, PRICE_MSATS } from "./zbd";
 import { licensingDb, type OrderRow } from "./db";
+import { settleOrder } from "./settle";
 import { auditEvent } from "../audit";
 
 export interface FulfillResult {
@@ -74,6 +75,15 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
   const code = issueCode(orderId);
   // Append-only audit trail (spec §48): license issuance is a critical event.
   auditEvent("license_issued", hashCode(code), { orderId });
+
+  // Money moves to the operator wallet right after issuance. Awaited here so
+  // the webhook path settles reliably; a settlement failure NEVER affects the
+  // buyer — the sweep (cron / admin retry) picks it up.
+  try {
+    await settleOrder(orderId);
+  } catch {
+    // recorded inside settleOrder; retried by the sweep
+  }
   return { orderId, status: "issued", paid: true, accessCode: code };
 }
 
@@ -122,6 +132,9 @@ export async function orderStatus(orderId: string): Promise<{
   if (charge.status === "completed" && charge.amount === PRICE_MSATS) {
     const r = await verifyAndFulfillOrder(orderId);
     if (r.status === "issued") {
+      // Poll path: don't make the buyer's status check wait on settlement —
+      // fire it and let the sweep retry if the function freezes first.
+      void settleOrder(orderId).catch(() => undefined);
       const code = await db.getOrderPlainCode(orderId);
       const codeRow = order.codeHash ? await db.getCode(order.codeHash) : null;
       return { status: "issued", paid: true, accessCode: code ?? undefined, expiresTs: codeRow?.expiresTs };

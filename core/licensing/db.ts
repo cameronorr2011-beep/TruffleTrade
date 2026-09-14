@@ -19,6 +19,12 @@ export interface OrderRow {
    *  from the status endpoint after payment. Codes are hashed in tt_codes;
    *  the plaintext lives only here, tied to this one order. */
   codePlain: string | null;
+  /** Settlement of the received sats to the operator wallet:
+   *  pending -> sent | failed. Null = pre-settlement (legacy) rows. */
+  payoutStatus: "pending" | "sent" | "failed" | null;
+  payoutRef: string | null; // ZBD payment id when sent
+  payoutError: string | null;
+  payoutTs: number | null;
 }
 
 export interface CodeRow {
@@ -44,6 +50,8 @@ export interface LicensingDb {
   setOrderIssuedPlain(id: string, codeHash: string, codePlain: string): Awaitable<void>;
   getOrderPlainCode(orderId: string): Awaitable<string | null>;
   setOrderStatus(id: string, status: OrderRow["status"]): Awaitable<void>;
+  setOrderPayout(orderId: string, patch: { status: NonNullable<OrderRow["payoutStatus"]>; ref?: string | null; error?: string | null; ts?: number }): Awaitable<void>;
+  ordersPendingPayout(limit: number): Awaitable<OrderRow[]>;
   createCode(row: { codeHash: string; orderId: string; activatedTs: number; expiresTs: number }): Awaitable<void>;
   getCode(codeHash: string): Awaitable<CodeRow | null>;
   touchCode(codeHash: string, ts: number): Awaitable<void>;
@@ -55,6 +63,14 @@ export interface LicensingDb {
   pruneFederation(beforeTs: number): Awaitable<void>;
   recentOrders(limit: number): Awaitable<OrderRow[]>;
 }
+
+// Run one-by-one so an already-applied migration never skips later ones.
+const SQLITE_MIGRATIONS = [
+  `ALTER TABLE tt_orders ADD COLUMN payout_status TEXT`,
+  `ALTER TABLE tt_orders ADD COLUMN payout_ref TEXT`,
+  `ALTER TABLE tt_orders ADD COLUMN payout_error TEXT`,
+  `ALTER TABLE tt_orders ADD COLUMN payout_ts INTEGER`,
+];
 
 const SCHEMA_SQLITE = `
 CREATE TABLE IF NOT EXISTS tt_orders (
@@ -101,6 +117,10 @@ CREATE TABLE IF NOT EXISTS tt_orders (
   code_plain TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_tt_orders_charge ON tt_orders(charge_id);
+ALTER TABLE tt_orders ADD COLUMN IF NOT EXISTS payout_status TEXT;
+ALTER TABLE tt_orders ADD COLUMN IF NOT EXISTS payout_ref TEXT;
+ALTER TABLE tt_orders ADD COLUMN IF NOT EXISTS payout_error TEXT;
+ALTER TABLE tt_orders ADD COLUMN IF NOT EXISTS payout_ts BIGINT;
 
 CREATE TABLE IF NOT EXISTS tt_codes (
   code_hash TEXT PRIMARY KEY,
@@ -145,6 +165,13 @@ function sqliteDb(): Database.Database {
   const db = new Database(resolved);
   db.pragma("journal_mode = WAL");
   db.exec(SCHEMA_SQLITE);
+  for (const m of SQLITE_MIGRATIONS) {
+    try {
+      db.exec(m);
+    } catch {
+      // duplicate column — already applied
+    }
+  }
   cachedSqlite = db;
   return db;
 }
@@ -162,6 +189,10 @@ function rowToOrder(r: Record<string, unknown>): OrderRow {
     paidTs: r.paid_ts == null ? null : Number(r.paid_ts),
     codeHash: r.code_hash == null ? null : String(r.code_hash),
     codePlain: r.code_plain == null ? null : String(r.code_plain),
+    payoutStatus: r.payout_status == null ? null : (String(r.payout_status) as OrderRow["payoutStatus"]),
+    payoutRef: r.payout_ref == null ? null : String(r.payout_ref),
+    payoutError: r.payout_error == null ? null : String(r.payout_error),
+    payoutTs: r.payout_ts == null ? null : Number(r.payout_ts),
   };
 }
 
@@ -212,6 +243,18 @@ class SqliteLicensingDb implements LicensingDb {
   }
   setOrderStatus(id: string, status: OrderRow["status"]): void {
     this.db.prepare(`UPDATE tt_orders SET status = ? WHERE id = ?`).run(status, id);
+  }
+  setOrderPayout(orderId: string, patch: { status: NonNullable<OrderRow["payoutStatus"]>; ref?: string | null; error?: string | null; ts?: number }): void {
+    this.db
+      .prepare(`UPDATE tt_orders SET payout_status = ?, payout_ref = COALESCE(?, payout_ref), payout_error = COALESCE(?, payout_error), payout_ts = COALESCE(?, payout_ts) WHERE id = ?`)
+      .run(patch.status, patch.ref ?? null, patch.error ?? null, patch.ts ?? null, orderId);
+  }
+  ordersPendingPayout(limit: number): OrderRow[] {
+    return (
+      this.db
+        .prepare(`SELECT * FROM tt_orders WHERE status = 'issued' AND (payout_status IS NULL OR payout_status = 'failed') ORDER BY created_ts DESC LIMIT ?`)
+        .all(limit) as Record<string, unknown>[]
+    ).map(rowToOrder);
   }
   createCode(row: { codeHash: string; orderId: string; activatedTs: number; expiresTs: number }): void {
     this.db
@@ -295,6 +338,19 @@ class PostgresLicensingDb implements LicensingDb {
   }
   async setOrderStatus(id: string, status: OrderRow["status"]): Promise<void> {
     await this.q(`UPDATE tt_orders SET status = $2 WHERE id = $1`, [id, status]);
+  }
+  async setOrderPayout(orderId: string, patch: { status: NonNullable<OrderRow["payoutStatus"]>; ref?: string | null; error?: string | null; ts?: number }): Promise<void> {
+    await this.q(
+      `UPDATE tt_orders SET payout_status = $2, payout_ref = COALESCE($3, payout_ref), payout_error = COALESCE($4, payout_error), payout_ts = COALESCE($5, payout_ts) WHERE id = $1`,
+      [orderId, patch.status, patch.ref ?? null, patch.error ?? null, patch.ts ?? null],
+    );
+  }
+  async ordersPendingPayout(limit: number): Promise<OrderRow[]> {
+    const rows = await this.q(
+      `SELECT * FROM tt_orders WHERE status = 'issued' AND (payout_status IS NULL OR payout_status = 'failed') ORDER BY created_ts DESC LIMIT $1`,
+      [limit],
+    );
+    return rows.map(rowToOrder);
   }
   async createCode(row: { codeHash: string; orderId: string; activatedTs: number; expiresTs: number }): Promise<void> {
     await this.q(

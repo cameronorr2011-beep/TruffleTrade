@@ -124,25 +124,28 @@ export default function BuyPanel() {
         <ol className="mt-6 space-y-4 text-[13px] leading-relaxed text-ink/85">
           <li>
             <span className="font-bold text-forest">1 · Get the app</span>
-            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`git clone https://github.com/cameronorr2011-beep/TruffleTrade.git truffletrade
-cd truffletrade && npm install`}</pre>
+            <a href="/api/download/desktop" className="btn-primary mt-2 inline-block !py-2.5">
+              ⬇ Download for Windows — instant
+            </a>
           </li>
           <li>
-            <span className="font-bold text-forest">2 · Add your code</span>
-            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`cp .env.example .env
-# set in .env (gateway only — your access code is NOT put in files):
-TT_GATEWAY_URL=https://ai-stock-trader-two.vercel.app
-
-# then run the app and paste your code once when prompted:
-#   ${accessCode}`}</pre>
+            <span className="font-bold text-forest">2 · Install &amp; launch</span>
+            <p className="mt-1">Run <code className="code-block px-1.5 py-0.5 text-[11px]">TruffleTrade-Setup.exe</code> — Start Menu entry, desktop shortcut, done. No Node.js, no command line.</p>
           </li>
           <li>
-            <span className="font-bold text-forest">3 · Run it</span>
-            <pre className="code-block mt-2 overflow-x-auto p-3 text-[11px] leading-relaxed">{`npm run verify   # ✓ access active
-npm run dev      # → http://localhost:3210`}</pre>
+            <span className="font-bold text-forest">3 · Activate TruffleTrade AI</span>
+            <p className="mt-1">In the app open <strong className="text-ink">AI Analyst</strong> → <strong className="text-ink">Enter activation key</strong> and paste:</p>
+            <button
+              onClick={() => copy(accessCode, "code")}
+              className="code-block mt-2 w-full px-3 py-2.5 text-[13px] font-semibold tracking-[0.08em] transition-colors hover:border-[#3a5a44]"
+              title="Click to copy"
+            >
+              {accessCode}
+              <span className="ml-3 text-[10px] uppercase tracking-[0.2em] text-[#8aa88f]">{copied === "code" ? "copied ✓" : "copy"}</span>
+            </button>
           </li>
         </ol>
-        <a href="/install" className="btn-primary mt-6 inline-block">
+        <a href="/install" className="btn-secondary mt-6 inline-block">
           Full install guide
         </a>
         <p className="mt-3 text-[12px] leading-relaxed text-bone-soft">

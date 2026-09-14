@@ -83,3 +83,51 @@ export async function isChargePaid(chargeId: string): Promise<boolean> {
   const c = await getCharge(chargeId);
   return c.status === "completed" && c.amount === PRICE_MSATS;
 }
+
+// ---------------------------------------------------------------- payouts --
+
+interface ZbdPayment {
+  id: string;
+  fee: string; // msats
+  amount: string; // msats
+  invoice: string;
+  preimage: string;
+  status: "completed" | "error" | "pending";
+  internalId: string | null;
+  processedAt: string | null;
+  confirmedAt: string | null;
+}
+
+/**
+ * Pay a BOLT11 invoice from the ZBD account balance (payout).
+ * POST /v0/payments — sends Lightning from our wallet to any invoice.
+ * Returns the payment record with preimage when completed.
+ */
+export async function sendPayment(input: {
+  invoice: string;
+  amountMsats: string;
+  internalId: string;
+  description?: string;
+}): Promise<ZbdPayment> {
+  return zbdFetch("/payments", {
+    method: "POST",
+    body: JSON.stringify({
+      invoice: input.invoice,
+      amount: input.amountMsats,
+      internalId: input.internalId,
+      description: input.description ?? "TruffleTrade settlement",
+    }),
+  }) as unknown as ZbdPayment;
+}
+
+interface ZbdBalance {
+  balance: string; // msats
+  unit: string;
+}
+
+/** Current ZBD account balance in msats (for payout pre-checks / dashboards). */
+export async function getWalletBalance(): Promise<{ msats: number }> {
+  const j = await zbdFetch("/wallet-balance", { method: "GET" });
+  const b = j as unknown as ZbdBalance;
+  return { msats: Number(b.balance) || 0 };
+}

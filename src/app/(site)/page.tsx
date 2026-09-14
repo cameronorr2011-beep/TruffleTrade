@@ -25,7 +25,7 @@ const FAQ = [
   },
   {
     q: "What exactly do I get when I pay?",
-    a: "Instantly: an access code that unlocks the full app for 30 days. The app itself is open source — you install it from GitHub in about two minutes with the steps shown right after payment.",
+    a: "Instantly: an access code that unlocks the full app for 30 days. The Windows installer downloads right on this site — install, launch, paste your key. No cloning, no build tools.",
   },
   {
     q: "What is the memory system?",
@@ -42,7 +42,7 @@ const FAQ = [
 ];
 
 const REPO = "https://github.com/cameronorr2011-beep/TruffleTrade";
-const RELEASE = `${REPO}/releases/latest`;
+const DOWNLOAD = "/api/download/desktop";
 
 export default function LandingPage() {
   return (
@@ -72,7 +72,7 @@ export default function LandingPage() {
                 the argument before you click the button yourself.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3.5">
-                <a href={RELEASE} className="btn-primary !px-7 !py-3.5">
+                <a href={DOWNLOAD} className="btn-primary !px-7 !py-3.5">
                   Download TruffleTrade — free
                 </a>
                 <Link href="/buy" className="btn-secondary !px-7 !py-3.5">
