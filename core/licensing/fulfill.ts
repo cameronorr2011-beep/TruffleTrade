@@ -4,7 +4,8 @@
 
 import crypto from "node:crypto";
 import { hashCode, generateAccessCode } from "./codes";
-import { isChargePaid, PRICE_MSATS } from "./zbd";
+import { isChargePaid, PRICE_MSATS as ZBD_PRICE_MSATS } from "./zbd";
+import { isInvoicePaid, PRICE_SATS as BLINK_PRICE_SATS } from "./blink";
 import { licensingDb, type OrderRow } from "./db";
 import { settleOrder } from "./settle";
 import { auditEvent } from "../audit";
@@ -15,6 +16,11 @@ export interface FulfillResult {
   accessCode?: string; // only present the first time (plaintext, shown once)
   alreadyIssued?: boolean;
   paid: boolean;
+}
+
+/** Blink orders store the invoice's payment hash in charge_id. */
+export function chargeIdIsBlink(chargeId: string): boolean {
+  return /^[a-f0-9]{64}$/.test(chargeId);
 }
 
 function issueCode(orderId: string): string {
@@ -52,7 +58,11 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
     return { orderId, status: "issued", paid: true, alreadyIssued: true };
   }
 
-  const paid = await isChargePaid(order.chargeId);
+  // Blink payment hash -> authoritative Blink check. ZBD charge ids are ZBD's
+  // own opaque ids, so a 64-char hex value uniquely identifies a Blink order.
+  const paid = chargeIdIsBlink(order.chargeId)
+    ? await isInvoicePaid(order.chargeId)
+    : await isChargePaid(order.chargeId);
   if (!paid) {
     if (order.status === "pending") {
       // keep pending; expiration is handled elsewhere
@@ -76,13 +86,15 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
   // Append-only audit trail (spec §48): license issuance is a critical event.
   auditEvent("license_issued", hashCode(code), { orderId });
 
-  // Money moves to the operator wallet right after issuance. Awaited here so
-  // the webhook path settles reliably; a settlement failure NEVER affects the
-  // buyer — the sweep (cron / admin retry) picks it up.
-  try {
-    await settleOrder(orderId);
-  } catch {
-    // recorded inside settleOrder; retried by the sweep
+  // Blink invoices settle directly on the operator's own Blink wallet — no
+  // settlement/payout leg exists (that's the point of the Blink integration).
+  // ZBD orders still route received sats to the operator's Wallet of Satoshi.
+  if (!chargeIdIsBlink(order.chargeId)) {
+    try {
+      await settleOrder(orderId);
+    } catch {
+      // recorded inside settleOrder; retried by the sweep
+    }
   }
   return { orderId, status: "issued", paid: true, accessCode: code };
 }
@@ -126,10 +138,23 @@ export async function orderStatus(orderId: string): Promise<{
       expiresTs: codeRow?.expiresTs,
     };
   }
+  // Blink orders: verify against Blink by payment hash. On PAID, opportunistically
+  // fulfill (the webhook may not be configured yet — polling keeps this reliable).
+  if (chargeIdIsBlink(order.chargeId)) {
+    const paid = await isInvoicePaid(order.chargeId);
+    if (!paid) return { status: order.status, paid: false, chargeStatus: "blink-pending" };
+    const r = await verifyAndFulfillOrder(orderId);
+    if (r.status === "issued") {
+      const code = await db.getOrderPlainCode(orderId);
+      const codeRow = order.codeHash ? await db.getCode(order.codeHash) : null;
+      return { status: "issued", paid: true, accessCode: code ?? undefined, expiresTs: codeRow?.expiresTs };
+    }
+    return { status: r.status, paid: r.paid, chargeStatus: "blink-paid" };
+  }
   const { getCharge } = await import("./zbd");
   const charge = await getCharge(order.chargeId);
   // Opportunistically fulfill if ZBD says paid but the webhook hasn't arrived.
-  if (charge.status === "completed" && charge.amount === PRICE_MSATS) {
+  if (charge.status === "completed" && charge.amount === ZBD_PRICE_MSATS) {
     const r = await verifyAndFulfillOrder(orderId);
     if (r.status === "issued") {
       // Poll path: don't make the buyer's status check wait on settlement —
