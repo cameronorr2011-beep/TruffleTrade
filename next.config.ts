@@ -27,9 +27,11 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               // Next.js requires inline bootstrap/hydration scripts.
               "script-src 'self' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline'",
+              // Google Fonts: layout.tsx loads Manrope/JetBrains Mono from
+              // fonts.googleapis.com (CSS) + fonts.gstatic.com (woff2 files).
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob:",
-              "font-src 'self' data:",
+              "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self'",
               "frame-ancestors 'none'",
               "base-uri 'self'",
