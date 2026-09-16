@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authHeaders, getAccessCode, setAccessCode, clearAccessCode } from "@/lib/accessCodeClient";
+import { BUY_URL } from "@/lib/site-url";
 import AccessCodeDialog from "@/components/research/AccessCodeDialog";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -152,7 +153,7 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
         <h2>Activate the AI analyst</h2>
         <p className="tt-sub">
           The desktop app is free. The AI is your 1,000 sats/month subscription — enter the activation key from your{" "}
-          <a href="/buy" target="_blank" rel="noreferrer">
+          <a href={BUY_URL} target="_blank" rel="noreferrer">
             purchase
           </a>{" "}
           to unlock the conversational analyst, the council, and the digital twin.
@@ -161,7 +162,7 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
           <button type="button" className="tt-btn tt-btn-primary" onClick={() => setKeyDialog(true)}>
             Enter activation key
           </button>
-          <a className="tt-btn tt-btn-ghost" href="/buy" target="_blank" rel="noreferrer">
+          <a className="tt-btn tt-btn-ghost" href={BUY_URL} target="_blank" rel="noreferrer">
             Get a key — 1,000 sats/mo
           </a>
         </div>

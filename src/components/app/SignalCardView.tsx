@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import AccessCodeDialog from "@/components/research/AccessCodeDialog";
 import { authHeaders, setAccessCode } from "@/lib/accessCodeClient";
+import { BUY_URL } from "@/lib/site-url";
 
 type DebateVoice = { role: string; argument: string };
 
@@ -430,7 +431,7 @@ export default function SignalCardView({ ticker }: { ticker: string }) {
         <div className="tt-card-head"><h2>Signal card · {ticker}</h2></div>
         <p className="tt-inline-err">Signal unavailable — {err}.</p>
         {renew ? (
-          <a href="/buy" className="tt-btn tt-btn-primary" target="_blank" rel="noreferrer">Renew subscription →</a>
+          <a href={BUY_URL} className="tt-btn tt-btn-primary" target="_blank" rel="noreferrer">Renew subscription →</a>
         ) : (
           <button type="button" className="tt-btn tt-btn-ghost" onClick={() => setReloadKey((k) => k + 1)}>Retry</button>
         )}

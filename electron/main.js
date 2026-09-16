@@ -14,7 +14,8 @@
  * The window also shows a splash immediately and swaps in the dashboard as
  * soon as /api/status proves healthy, so a slow boot is never a blank frame.
  */
-const { app, BrowserWindow, Tray, Menu, shell, nativeImage } = require("electron");
+const { app, BrowserWindow, Tray, Menu, shell, nativeImage, dialog } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -212,6 +213,39 @@ function startWatchdog() {
   }, 12_000);
 }
 
+// ── Auto-update: releases come from GitHub (app-update.yml) ───────────
+// Checks in the background, downloads silently, applies on next quit — with
+// an opt-in "Restart now" prompt so an update never interrupts a session.
+// Dev builds skip this (no packaged app-update.yml).
+let updatePromptShown = false;
+function startAutoUpdate() {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on("update-downloaded", async () => {
+    if (updatePromptShown) return;
+    updatePromptShown = true;
+    try {
+      const r = await dialog.showMessageBox(win, {
+        type: "info",
+        title: "TruffleTrade update ready",
+        message: "A new version of TruffleTrade has been downloaded.",
+        detail: "Restart now to apply it, or keep working — it installs automatically the next time you close the app.",
+        buttons: ["Restart now", "Later"],
+        defaultId: 0,
+        cancelId: 1,
+      });
+      if (r.response === 0) autoUpdater.quitAndInstall();
+    } catch {
+      // window gone — update applies on quit
+    }
+  });
+  autoUpdater.on("error", (e) => console.error("[truffletrade] updater:", (e && e.message) || e));
+  const check = () => autoUpdater.checkForUpdates().catch(() => undefined); // offline/rate-limited → silent
+  check();
+  setInterval(check, 6 * 60 * 60 * 1000);
+}
+
 // ── Tray ──────────────────────────────────────────────────────────────
 function createTray() {
   const img = nativeImage.createFromPath(path.join(__dirname, "icons", "truffle.png"));
@@ -222,6 +256,7 @@ function createTray() {
       { label: "Open TruffleTrade", click: () => (win ? win.focus() : createWindow()) },
       { label: "Markets", click: () => (win ? (win.show(), win.loadURL(`${APP_URL}/markets`)) : createWindow()) },
       { type: "separator" },
+      { label: "Check for updates", click: () => (app.isPackaged ? autoUpdater.checkForUpdates().catch(() => undefined) : null) },
       {
         label: "Quit",
         click: () => {
@@ -249,6 +284,7 @@ if (!gotLock) {
     createWindow(); // window first (splash), server boot inside it
     createTray();
     startWatchdog();
+    startAutoUpdate();
   });
 
   app.on("window-all-closed", () => {
