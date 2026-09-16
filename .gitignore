@@ -28,3 +28,7 @@ research-run.json
 
 .vercel
 .env*
+
+# desktop packaging output + local QA scripts
+/dist-desktop/
+/.qa/

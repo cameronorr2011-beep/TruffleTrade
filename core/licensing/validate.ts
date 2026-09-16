@@ -64,7 +64,11 @@ export interface GuardedValidationResult extends ValidationResult {
  */
 export async function validateWithAbuseTracking(raw: string, ip: string | null): Promise<GuardedValidationResult> {
   const result = await validateAccessCode(raw);
-  if (result.ok || !ip) return result;
+  // An ABSENT code is not brute force — it's a logged-out user (the desktop
+  // app probes /verify before activation on every gated page, all from
+  // 127.0.0.1). Recording those failures locked single-user installs out of
+  // their own gateway. Only a PRESENTED-but-wrong code counts as guessing.
+  if (result.ok || !ip || !raw.trim()) return result;
   if (result.status === 401) {
     try {
       const { locked } = await recordFailure(ip, raw);

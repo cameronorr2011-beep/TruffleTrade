@@ -111,6 +111,31 @@ describe("validateWithAbuseTracking", () => {
     expect(v.ok).toBe(false);
     expect(v.status).toBe(401);
   });
+
+  it("does NOT count ABSENT codes (logged-out desktop probes) toward lockout", async () => {
+    // The desktop app hits /verify with no code on every gated page before
+    // activation — all from 127.0.0.1. Recording those as abuse failures
+    // locked single-user installs out of their own gateway (429 even for a
+    // VALID key afterwards).
+    await clearFailures();
+    const ip = "10.0.0.4";
+    for (let i = 0; i < ABUSE_THRESHOLD + 5; i++) {
+      const v = await validateWithAbuseTracking("", ip);
+      expect(v.ok).toBe(false);
+      expect(v.status).toBe(401);
+      expect(v.lockedOut).toBeUndefined();
+    }
+    expect(await failureCount(ip)).toBe(0);
+    expect(await isLockedOut(ip)).toBe(false);
+
+    // A real guessing attack still works: a PRESENTED wrong code now locks out.
+    for (let i = 0; i < ABUSE_THRESHOLD; i++) {
+      await validateWithAbuseTracking("TT-BAD0-CODE0-BAD0-0000", ip);
+    }
+    const locked = await validateWithAbuseTracking("TT-BAD0-CODE0-BAD0-0000", ip);
+    expect(locked.status).toBe(429);
+    expect(locked.lockedOut).toBe(true);
+  });
 });
 
 afterAll(() => {

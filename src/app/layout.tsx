@@ -47,7 +47,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="relative min-h-screen bg-void antialiased">
         {children}
-        <Analytics />
+        {/* Vercel Analytics ships only with Vercel builds — in the packaged
+            desktop app /_vercel/insights/script.js doesn't exist, so mounting
+            it there logged a 404 + console error on every route. */}
+        {process.env.VERCEL === "1" ? <Analytics /> : null}
       </body>
     </html>
   );
