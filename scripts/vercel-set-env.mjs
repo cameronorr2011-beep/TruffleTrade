@@ -51,7 +51,7 @@ const desired = {
   GROQ_MODEL: env.GROQ_MODEL || "openai/gpt-oss-120b",
   LICENSE_HMAC_KEY,
   ADMIN_TOKEN,
-  TT_SITE_URL: env.TT_SITE_URL || `https://truffletrade.vercel.app`,
+  TT_SITE_URL: env.TT_SITE_URL || `https://truffletrade-orr5.vercel.app`,
 };
 // Payment-provider keys sync only when present in .env (adding one to .env and
 // re-running this script is all it takes to enable that provider in production).
