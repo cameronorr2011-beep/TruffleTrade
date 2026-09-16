@@ -6,7 +6,7 @@
   "description": "TruffleTrade — AI stock-chart intelligence with a memory that trains itself. Six rival analysts, a fact-checker, a red team, digital-twin priors, federated learning. 1,000 sats a month, no KYC.",
   "scripts": {
     "dev": "next dev -p 3210",
-    "build": "next build",
+    "build": "next build && node scripts/flatten-next-externals.mjs",
     "start": "next start -p 3210",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -66,8 +66,7 @@
       "electron/**",
       ".next/**",
       "public/**",
-      "package.json",
-      "node_modules/**"
+      "package.json"
     ],
     "win": {
       "target": [
@@ -85,6 +84,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "shortcutName": "TruffleTrade"
-    }
+    },
+    "asar": false
   }
 }
