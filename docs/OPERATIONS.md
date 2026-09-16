@@ -18,7 +18,9 @@
 | `GROQ_API_KEY` | operator only | server-side AI gateway |
 | `GROQ_MODEL` | optional | council reasoning model override |
 | `ADMIN_TOKEN` | recommended | enables `/api/admin` |
-| `ZBD_API_KEY` | optional | automated Lightning checkout; manual WoS fallback when absent |
+| `BLOCKONOMICS_API_KEY` | optional | on-chain BTC checkout (funds land in your own wallet); manual WoS fallback when absent |
+| `BLOCKONOMICS_CALLBACK_SECRET` | optional | dedicated secret for the Blockonomics callback URL (falls back to the API key) |
+| `ZBD_API_KEY` | optional | automated Lightning checkout (Blockonomics > Blink > ZBD by default) |
 | `TT_SITE_URL` | prod | absolute URL for webhooks/callbacks |
 | `TT_GATEWAY_URL` | subscriber install | points the local app at the hosted gateway |
 | `TT_ACCESS_CODE` | subscriber install | the subscriber's paid access code |
@@ -32,7 +34,20 @@ admin API is disabled (401) when `ADMIN_TOKEN` is unset.
    secret scan, npm audit) gates PRs; `main` deploys after the same checks run locally.
 2. Env vars are set in the Vercel dashboard or via `scripts/vercel-set-env.mjs`
    (`VT=<token> node scripts/vercel-set-env.mjs` — never prints values, only fingerprints).
-   `ZBD_API_KEY` is intentionally excluded from that script.
+   `ZBD_API_KEY` is intentionally excluded from that script. Payment keys present in
+   `.env` (e.g. `BLOCKONOMICS_API_KEY`) sync automatically when set.
+
+## Blockonomics (on-chain BTC) setup
+
+1. Dashboard → Wallets: add a BTC wallet (xpub). Funds go straight there.
+2. Dashboard → Stores: create a store, enable BTC, select the wallet.
+3. Set the store's callback URL to `https://<TT_SITE_URL>/api/billing/blockonomics-webhook?secret=<BLOCKONOMICS_CALLBACK_SECRET>`
+   (or `?secret=<BLOCKONOMICS_API_KEY>` if no dedicated secret is configured).
+4. Set `BLOCKONOMICS_API_KEY` in `.env` (local) and on Vercel (or re-run
+   `scripts/vercel-set-env.mjs`), then redeploy.
+5. Verify: `npm run check:payments` should report the Blockonomics key; a test
+   purchase on `/buy` shows a BTC address + QR. Fulfillment happens at 2
+   confirmations (callback) or via buy-page polling of the confirmed balance.
 
 ## Database operations
 

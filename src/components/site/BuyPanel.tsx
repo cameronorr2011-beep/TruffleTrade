@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 
-type Phase = "idle" | "creating" | "awaiting" | "manual" | "paid" | "error";
+type Phase = "idle" | "creating" | "awaiting" | "btc" | "manual" | "paid" | "error";
 
 interface CheckoutResponse {
   ok: boolean;
@@ -13,6 +13,10 @@ interface CheckoutResponse {
   lightningUri?: string | null;
   priceSats?: number;
   lightningAddress?: string;
+  provider?: "blockonomics";
+  btcAmount?: string;
+  address?: string;
+  bitcoinUri?: string;
   error?: string;
 }
 
@@ -21,6 +25,7 @@ interface StatusResponse {
   status?: "pending" | "paid" | "issued" | "expired";
   accessCode?: string;
   expiresTs?: number;
+  chargeStatus?: string;
   error?: string;
 }
 
@@ -36,6 +41,9 @@ export default function BuyPanel() {
   const [copied, setCopied] = useState<"invoice" | "code" | "address" | null>(null);
   const [manual, setManual] = useState<{ address: string; orderId: string } | null>(null);
   const [manualQr, setManualQr] = useState<string | null>(null);
+  const [btc, setBtc] = useState<{ address: string; amount: string; uri: string | null } | null>(null);
+  const [btcQr, setBtcQr] = useState<string | null>(null);
+  const [btcSeen, setBtcSeen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -53,6 +61,7 @@ export default function BuyPanel() {
       if (!j.ok || !j.orderId) {
         throw new Error(j.error ?? "could not create invoice");
       }
+      let mode: "lightning" | "btc" | "manual" = "lightning";
       if (j.manual && j.lightningAddress) {
         setManual({ address: j.lightningAddress, orderId: j.orderId });
         setPhase("manual");
@@ -61,6 +70,17 @@ export default function BuyPanel() {
         QRCode.toDataURL(`lightning:${j.lightningAddress}`, { width: 220, margin: 1, color: { dark: "#14231a", light: "#ffffff" } })
           .then(setManualQr)
           .catch(() => setManualQr(null));
+        mode = "manual";
+      } else if (j.address && j.btcAmount) {
+        // Blockonomics on-chain BTC flow: QR encodes the BIP21 uri so wallet
+        // apps pre-fill address + exact amount. Confirmation is on-chain, so
+        // the copy explains the ~10–40 min confirmation wait.
+        mode = "btc";
+        setBtc({ address: j.address, amount: j.btcAmount, uri: j.bitcoinUri ?? null });
+        setPhase("btc");
+        QRCode.toDataURL(j.bitcoinUri ?? j.address, { width: 220, margin: 1, color: { dark: "#14231a", light: "#ffffff" } })
+          .then(setBtcQr)
+          .catch(() => setBtcQr(null));
       } else {
         if (!j.invoice) throw new Error("no invoice returned");
         setInvoice(j.invoice);
@@ -82,6 +102,8 @@ export default function BuyPanel() {
             setAccessCode(sj.accessCode ?? null);
             setExpiresTs(sj.expiresTs ?? null);
             setPhase("paid");
+          } else if (mode === "btc" && sj.chargeStatus === "bnc-seen") {
+            setBtcSeen(true);
           }
         } catch {
           // transient — keep polling
@@ -217,6 +239,51 @@ export default function BuyPanel() {
           </details>
           <p className="mt-4 flex items-center gap-2 animate-pulse text-[11.5px] font-semibold text-bone-soft">
             <span aria-hidden className="live-dot" /> Waiting for payment… this page confirms automatically
+          </p>
+          {orderId && <p className="mt-1 text-[10px] uppercase tracking-[0.6px] text-faint">Order {orderId}</p>}
+        </div>
+      )}
+
+      {phase === "btc" && btc && (
+        <div className="mt-5">
+          <p className="text-[13px] leading-relaxed text-bone-soft">
+            Send exactly <span className="font-semibold text-ink">{btc.amount} BTC</span> (= "
+            <span className="font-semibold text-ink">1,000 sats</span>) to this Bitcoin address — scan the QR with any
+            wallet or copy the address:
+          </p>
+          <div className="mt-3 flex flex-col items-center">
+            {btcQr ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={btcQr} alt="Bitcoin address QR code" width={220} height={220} className="rounded-xl border border-soil-500" />
+            ) : (
+              <div className="flex h-[220px] w-[220px] items-center justify-center rounded-xl border border-soil-500 text-[11px] text-faint">
+                generating QR…
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => copy(btc.address, "address")}
+            className="mt-3 w-full rounded-xl border border-forest/30 bg-mint px-4 py-3.5 text-left text-[13px] font-bold break-all text-forest transition-colors hover:border-forest/60"
+          >
+            {btc.address}
+            <span className="ml-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-forest/60">
+              {copied === "address" ? "copied ✓" : "copy"}
+            </span>
+          </button>
+          <ol className="mt-4 space-y-2 text-[12.5px] leading-relaxed text-bone-soft">
+            <li>
+              <span className="font-bold text-forest">1.</span> Send 1,000 sats (0.00001 BTC) on-chain — the network
+              fee is paid in your wallet on top.
+            </li>
+            <li>
+              <span className="font-bold text-forest">2.</span> Your access code appears here after 2 Bitcoin
+              confirmations — usually 10–40 minutes. This page confirms automatically; you don&apos;t need to keep it
+              open, your order link remembers the code.
+            </li>
+          </ol>
+          <p className="mt-4 flex items-center gap-2 animate-pulse text-[11.5px] font-semibold text-bone-soft">
+            <span aria-hidden className="live-dot" />
+            {btcSeen ? "Payment seen — waiting for confirmations…" : "Waiting for your Bitcoin transaction…"}
           </p>
           {orderId && <p className="mt-1 text-[10px] uppercase tracking-[0.6px] text-faint">Order {orderId}</p>}
         </div>

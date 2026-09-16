@@ -6,6 +6,11 @@ import crypto from "node:crypto";
 import { hashCode, generateAccessCode } from "./codes";
 import { isChargePaid, PRICE_MSATS as ZBD_PRICE_MSATS } from "./zbd";
 import { isInvoicePaid, PRICE_SATS as BLINK_PRICE_SATS } from "./blink";
+import {
+  chargeIdIsBlockonomics,
+  isBlockonomicsOrderPaid,
+  blockonomicsUnconfirmed,
+} from "./blockonomics";
 import { licensingDb, type OrderRow } from "./db";
 import { settleOrder } from "./settle";
 import { auditEvent } from "../audit";
@@ -58,11 +63,14 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
     return { orderId, status: "issued", paid: true, alreadyIssued: true };
   }
 
-  // Blink payment hash -> authoritative Blink check. ZBD charge ids are ZBD's
-  // own opaque ids, so a 64-char hex value uniquely identifies a Blink order.
-  const paid = chargeIdIsBlink(order.chargeId)
-    ? await isInvoicePaid(order.chargeId)
-    : await isChargePaid(order.chargeId);
+  // Blockonomics orders: authoritative check = confirmed on-chain balance at
+  // the order's address. Blink payment hash -> Blink. ZBD charge ids are
+  // ZBD's own opaque ids.
+  const paid = chargeIdIsBlockonomics(order.chargeId)
+    ? await isBlockonomicsOrderPaid(order.chargeId)
+    : chargeIdIsBlink(order.chargeId)
+      ? await isInvoicePaid(order.chargeId)
+      : await isChargePaid(order.chargeId);
   if (!paid) {
     if (order.status === "pending") {
       // keep pending; expiration is handled elsewhere
@@ -86,10 +94,11 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
   // Append-only audit trail (spec §48): license issuance is a critical event.
   auditEvent("license_issued", hashCode(code), { orderId });
 
-  // Blink invoices settle directly on the operator's own Blink wallet — no
-  // settlement/payout leg exists (that's the point of the Blink integration).
-  // ZBD orders still route received sats to the operator's Wallet of Satoshi.
-  if (!chargeIdIsBlink(order.chargeId)) {
+  // Blink invoices settle directly on the operator's own Blink wallet and
+  // Blockonomics payments land on the operator's own BTC wallet (xpub) —
+  // neither has a settlement/payout leg. ZBD orders still route received
+  // sats to the operator's Wallet of Satoshi.
+  if (!chargeIdIsBlink(order.chargeId) && !chargeIdIsBlockonomics(order.chargeId)) {
     try {
       await settleOrder(orderId);
     } catch {
@@ -137,6 +146,28 @@ export async function orderStatus(orderId: string): Promise<{
       accessCode: code ?? undefined,
       expiresTs: codeRow?.expiresTs,
     };
+  }
+  // Blockonomics orders: verify the on-chain confirmed balance. On paid,
+  // opportunistically fulfill (callback may be missed — polling keeps this
+  // reliable). Before confirmation, report the unconfirmed amount so the UI
+  // can show a "payment seen, confirming" state.
+  if (chargeIdIsBlockonomics(order.chargeId)) {
+    const paid = await isBlockonomicsOrderPaid(order.chargeId);
+    if (!paid) {
+      const unconfirmed = await blockonomicsUnconfirmed(order.chargeId).catch(() => 0);
+      return {
+        status: order.status,
+        paid: false,
+        chargeStatus: unconfirmed > 0 ? "bnc-seen" : "bnc-pending",
+      };
+    }
+    const r = await verifyAndFulfillOrder(orderId);
+    if (r.status === "issued") {
+      const code = await db.getOrderPlainCode(orderId);
+      const codeRow = order.codeHash ? await db.getCode(order.codeHash) : null;
+      return { status: "issued", paid: true, accessCode: code ?? undefined, expiresTs: codeRow?.expiresTs };
+    }
+    return { status: r.status, paid: r.paid, chargeStatus: "bnc-paid" };
   }
   // Blink orders: verify against Blink by payment hash. On PAID, opportunistically
   // fulfill (the webhook may not be configured yet — polling keeps this reliable).

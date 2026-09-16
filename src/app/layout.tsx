@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -44,7 +45,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         />
       </head>
-      <body className="relative min-h-screen bg-void antialiased">{children}</body>
+      <body className="relative min-h-screen bg-void antialiased">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { newOrderId } from "@core/licensing/codes";
 import { PRICE_SATS, createCharge } from "@core/licensing/zbd";
 import { blinkEnabled, createInvoice } from "@core/licensing/blink";
+import { blockonomicsEnabled, createBlockonomicsAddress, chargeIdForAddress, BTC_AMOUNT } from "@core/licensing/blockonomics";
 import { licensingDb } from "@core/licensing/db";
 
 export const runtime = "nodejs";
@@ -58,14 +59,42 @@ export async function POST(req: Request) {
     }
   }
 
-  // Manual mode: no ZBD_API_KEY configured (or TT_PAYMENT_MODE=manual).
-  // The buyer sends 1,000 sats to the operator's Lightning address from any
-  // wallet; the operator approves the order via /api/admin/orders and the
-  // access code appears on the buyer's screen. This keeps the site sellable
-  // while ZBD business onboarding (KYB) is pending.
-  // If Blink was enabled but its invoice creation just failed, fall back to
-  // manual rather than attempting ZBD (which likely has no key either).
-  const manualMode = blinkAttempted || !process.env.ZBD_API_KEY?.trim() || process.env.TT_PAYMENT_MODE === "manual";
+  // Blockonomics mode (when BLOCKONOMICS_API_KEY is set): on-chain BTC paid
+  // straight to the operator's own wallet (xpub-derived unique address per
+  // order — Blockonomics never custodies funds). The buyer sends exactly
+  // 1,000 sats (0.00001 BTC); fulfillment happens at 2 confirmations via the
+  // callback webhook plus buy-page polling of the confirmed balance.
+  let bncAttempted = false;
+  if (blockonomicsEnabled()) {
+    bncAttempted = true;
+    const siteUrl = process.env.TT_SITE_URL?.trim() || new URL(req.url).origin;
+    try {
+      const { address } = await createBlockonomicsAddress(siteUrl);
+      await licensingDb().createOrder(orderId, chargeIdForAddress(address), Date.now());
+      return NextResponse.json({
+        ok: true,
+        orderId,
+        provider: "blockonomics",
+        priceSats: PRICE_SATS,
+        btcAmount: BTC_AMOUNT,
+        address,
+        // BIP21 URI — wallet apps pre-fill address + amount when scanned.
+        bitcoinUri: `bitcoin:${address}?amount=${BTC_AMOUNT}&label=${encodeURIComponent(`TruffleTrade ${orderId}`)}`,
+      });
+    } catch (err) {
+      // Fall back to manual rather than losing the sale if the API hiccups.
+      console.error("[checkout] blockonomics address failed, falling back to manual:", (err as Error).message);
+    }
+  }
+
+  // Manual mode: no BLOCKONOMICS_API_KEY/BLINK_API_KEY configured (or
+  // TT_PAYMENT_MODE=manual). The buyer sends 1,000 sats to the operator's
+  // Lightning address from any wallet; the operator approves the order via
+  // /api/admin/orders and the access code appears on the buyer's screen.
+  // If Blink or Blockonomics was enabled but its invoice/address creation
+  // just failed, fall back to manual rather than attempting ZBD (which
+  // likely has no key either).
+  const manualMode = blinkAttempted || bncAttempted || !process.env.ZBD_API_KEY?.trim() || process.env.TT_PAYMENT_MODE === "manual";
   if (manualMode) {
     await licensingDb().createOrder(orderId, `wos-manual-${orderId}`, Date.now());
     return NextResponse.json({

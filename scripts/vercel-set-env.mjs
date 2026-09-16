@@ -4,9 +4,9 @@
 //
 // Vars managed here (see .env.example for what each does):
 //   DATABASE_URL, GROQ_API_KEY, GROQ_MODEL, LICENSE_HMAC_KEY,
-//   ADMIN_TOKEN, TT_SITE_URL
+//   ADMIN_TOKEN, TT_SITE_URL, BLOCKONOMICS_API_KEY, BLOCKONOMICS_CALLBACK_SECRET
 // ZBD_API_KEY is intentionally NOT set by this script — obtain it from the
-// ZBD developer dashboard and add it here to .env, then re-run.
+// ZBD developer dashboard and add it via the Vercel dashboard instead.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -53,6 +53,12 @@ const desired = {
   ADMIN_TOKEN,
   TT_SITE_URL: env.TT_SITE_URL || `https://ai-stock-trader-two.vercel.app`,
 };
+// Payment-provider keys sync only when present in .env (adding one to .env and
+// re-running this script is all it takes to enable that provider in production).
+if (env.BLOCKONOMICS_API_KEY) {
+  desired.BLOCKONOMICS_API_KEY = env.BLOCKONOMICS_API_KEY;
+  if (env.BLOCKONOMICS_CALLBACK_SECRET) desired.BLOCKONOMICS_CALLBACK_SECRET = env.BLOCKONOMICS_CALLBACK_SECRET;
+}
 
 const missing = Object.entries(desired).filter(([, v]) => !v).map(([k]) => k);
 if (missing.length) {
@@ -97,7 +103,6 @@ for (const [key, value] of Object.entries(desired)) {
 }
 
 console.log(`\n${ok}/${Object.keys(desired).length} vars synced to project "${PROJECT}".`);
-console.log("ZBD_API_KEY is NOT managed here — add it via the Vercel dashboard or:");
-console.log('  echo "<key>" | curl -X POST ... (see README) — safest: dashboard UI.');
+console.log("ZBD_API_KEY is NOT managed here — add it via the Vercel dashboard.");
 console.log("\nRedeploy production so the new vars take effect:");
 console.log(`  curl -X POST ${API}/v13/deployments -H "Authorization: Bearer $VT" -d '{"name":"${PROJECT}","target":"production","gitSource":{"ref":"main"}}'`);
