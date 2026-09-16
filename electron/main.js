@@ -100,8 +100,16 @@ async function startServer() {
   //   · TT_GATEWAY_URL  → the hosted AI gateway (subscribers get a code, not a key)
   //   · TT_SITE_URL     → absolute URL used for payment callbacks
   //   · TT_ACCESS_CODE  → picked up from the machine's real env when present
-  if (!process.env.TT_GATEWAY_URL) process.env.TT_GATEWAY_URL = "https://ai-stock-trader-two.vercel.app";
-  if (!process.env.TT_SITE_URL) process.env.TT_SITE_URL = "https://ai-stock-trader-two.vercel.app";
+  // Dev (`npm run app`) is untouched — there the repo .env drives everything.
+  if (app.isPackaged) {
+    if (!process.env.TT_GATEWAY_URL) process.env.TT_GATEWAY_URL = "https://ai-stock-trader-two.vercel.app";
+    if (!process.env.TT_SITE_URL) process.env.TT_SITE_URL = "https://ai-stock-trader-two.vercel.app";
+    // SQLite must live in a writable per-user dir: the install dir (Program
+    // Files) is read-only, and cwd-relative "data/" would break there. The
+    // core/* db modules honor absolute SQLITE_PATH/MEMORY_DB_PATH directly.
+    if (!process.env.SQLITE_PATH) process.env.SQLITE_PATH = path.join(app.getPath("userData"), "truffletrade.sqlite3");
+    if (!process.env.MEMORY_DB_PATH) process.env.MEMORY_DB_PATH = path.join(app.getPath("userData"), "memory.sqlite3");
+  }
   const next = require("next");
   const nextApp = next({ dev: false, dir: ROOT, conf: { env: process.env } });
   await nextApp.prepare();
