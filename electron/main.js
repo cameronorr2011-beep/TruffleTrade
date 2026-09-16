@@ -103,8 +103,8 @@ async function startServer() {
   //   · TT_ACCESS_CODE  → picked up from the machine's real env when present
   // Dev (`npm run app`) is untouched — there the repo .env drives everything.
   if (app.isPackaged) {
-    if (!process.env.TT_GATEWAY_URL) process.env.TT_GATEWAY_URL = "https://ai-stock-trader-two.vercel.app";
-    if (!process.env.TT_SITE_URL) process.env.TT_SITE_URL = "https://ai-stock-trader-two.vercel.app";
+    if (!process.env.TT_GATEWAY_URL) process.env.TT_GATEWAY_URL = "https://truffletrade.vercel.app";
+    if (!process.env.TT_SITE_URL) process.env.TT_SITE_URL = "https://truffletrade.vercel.app";
     // SQLite must live in a writable per-user dir: the install dir (Program
     // Files) is read-only, and cwd-relative "data/" would break there. The
     // core/* db modules honor absolute SQLITE_PATH/MEMORY_DB_PATH directly.
