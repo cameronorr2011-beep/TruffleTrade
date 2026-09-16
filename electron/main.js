@@ -93,8 +93,17 @@ function freePort() {
  * PATH — and Electron's patched fs reads .next straight out of the asar.
  */
 async function startServer() {
+  // Packaged buyers have no .env (secrets must never ship in the installer):
+  // default the TT_* knobs so the local app still boots. Production secrets
+  // (DATABASE_URL, GROQ_API_KEY, licensing keys) stay out of the package on
+  // purpose — the local app talks to the hosted gateway over HTTP.
+  //   · TT_GATEWAY_URL  → the hosted AI gateway (subscribers get a code, not a key)
+  //   · TT_SITE_URL     → absolute URL used for payment callbacks
+  //   · TT_ACCESS_CODE  → picked up from the machine's real env when present
+  if (!process.env.TT_GATEWAY_URL) process.env.TT_GATEWAY_URL = "https://ai-stock-trader-two.vercel.app";
+  if (!process.env.TT_SITE_URL) process.env.TT_SITE_URL = "https://ai-stock-trader-two.vercel.app";
   const next = require("next");
-  const nextApp = next({ dev: false, dir: ROOT });
+  const nextApp = next({ dev: false, dir: ROOT, conf: { env: process.env } });
   await nextApp.prepare();
   const handle = nextApp.getRequestHandler();
   server = http.createServer((req, res) => handle(req, res));
@@ -154,6 +163,12 @@ function createWindow() {
       if (win && !win.isDestroyed()) win.loadURL(`${APP_URL}/dashboard`);
     })
     .catch((err) => {
+      // Extra context: a stale/corrupt .next (no BUILD_ID) is the most common
+      // packaged-boot failure, and "not healthy after 45000ms" alone hides it.
+      if (/not healthy/i.test(String(err.message))) {
+        const buildId = path.join(ROOT, ".next", "BUILD_ID");
+        console.error("[truffletrade] boot failure detail: BUILD_ID present =", fs.existsSync(buildId));
+      }
       console.error("[truffletrade] local server failed to start:", err);
       if (win && !win.isDestroyed()) {
         win.loadURL(
