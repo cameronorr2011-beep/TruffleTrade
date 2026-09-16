@@ -4,7 +4,7 @@
 
 | | Local (subscriber desktop) | Production (Vercel) |
 |---|---|---|
-| App | `npm run dev` / Electron (`npm run app`) | truffletrade-orr5.vercel.app |
+| App | `npm run dev` / Electron (`npm run app`) | truffletrade.vercel.app |
 | Licensing/audit DB | SQLite (`data/truffletrade.sqlite3`) | Neon Postgres (`DATABASE_URL`) |
 | Research runs | SQLite (local history) | returned to client; serverless FS is read-only (known limitation, PRODUCTION-AUDIT §3a) |
 | Secrets | `.env` (gitignored) | Vercel encrypted env |

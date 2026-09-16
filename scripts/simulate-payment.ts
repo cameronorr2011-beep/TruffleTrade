@@ -18,7 +18,7 @@
 
 import "dotenv/config";
 
-const BASE = (process.argv[2] ?? "https://truffletrade-orr5.vercel.app").replace(/\/$/, "");
+const BASE = (process.argv[2] ?? "https://truffletrade.vercel.app").replace(/\/$/, "");
 
 async function main(): Promise<void> {
   const { randomBytes } = await import("node:crypto");
