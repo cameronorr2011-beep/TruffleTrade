@@ -125,17 +125,22 @@ const BALANCE_TTL_MS = 5_000;
 async function fetchBalance(address: string): Promise<BalanceRow> {
   const cached = balanceCache.get(address);
   if (cached && Date.now() - cached.ts < BALANCE_TTL_MS) return cached.row;
-  const res = await fetch(`${BLOCKONOMICS_API}/balance/${encodeURIComponent(address)}`, {
+  // GET /api/balance?addr=<address> → { response: [{ addr, confirmed, unconfirmed, ... }] }
+  // (path-param style /api/balance/<addr> returns 404 — verified against the live API)
+  const res = await fetch(`${BLOCKONOMICS_API}/balance?addr=${encodeURIComponent(address)}`, {
     headers: { Authorization: `Bearer ${apiKey()}` },
     signal: AbortSignal.timeout(20_000),
     cache: "no-store",
   });
-  const j = (await res.json().catch(() => ({}))) as BalanceRow[] | { message?: string };
-  if (!res.ok || !Array.isArray(j) || !j[0]) {
-    const msg = !Array.isArray(j) && j.message ? j.message : `HTTP ${res.status}`;
+  const j = (await res.json().catch(() => ({}))) as { response?: BalanceRow[]; message?: string };
+  if (!res.ok || !Array.isArray(j.response) || !j.response[0]) {
+    const msg = !Array.isArray(j.response) && j.message ? j.message : `HTTP ${res.status}`;
     throw new Error(`Blockonomics balance failed: ${msg}`);
   }
-  const row = { confirmed: Number(j[0].confirmed) || 0, unconfirmed: Number(j[0].unconfirmed) || 0 };
+  const row = {
+    confirmed: Number(j.response[0].confirmed) || 0,
+    unconfirmed: Number(j.response[0].unconfirmed) || 0,
+  };
   balanceCache.set(address, { ts: Date.now(), row });
   return row;
 }
