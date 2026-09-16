@@ -122,6 +122,22 @@ interface BalanceRow {
 const balanceCache = new Map<string, { ts: number; row: BalanceRow }>();
 const BALANCE_TTL_MS = 5_000;
 
+// Blockonomics Test Mode (dashboard → Stores → Testmode toggle) hands out
+// fake `1TestBTCAddress…` addresses and simulates payments via dashboard
+// callbacks at status 0 → 1 → 2. Two consequences, both verified live:
+//   1. /api/balance rejects fake test addresses (400 invalid_input), so the
+//      authoritative balance re-poll cannot work for test orders.
+//   2. Test payments never touch the real blockchain.
+// Therefore fulfillment in test mode trusts the dashboard callback directly
+// (the callback secret is the auth; no real funds exist to verify) and the
+// balance poll is bypassed. Production addresses are unaffected.
+const TEST_ADDRESS_RE = /^1TestBTCAddress/;
+
+/** Is this charge id a Blockonomics Test Mode order? */
+export function isTestModeCharge(chargeId: string): boolean {
+  return chargeIdIsBlockonomics(chargeId) && TEST_ADDRESS_RE.test(addressFromChargeId(chargeId));
+}
+
 async function fetchBalance(address: string): Promise<BalanceRow> {
   const cached = balanceCache.get(address);
   if (cached && Date.now() - cached.ts < BALANCE_TTL_MS) return cached.row;
@@ -149,8 +165,13 @@ async function fetchBalance(address: string): Promise<BalanceRow> {
  * Authoritative paid check for a Blockonomics order: the address has received
  * at least our price in CONFIRMED satoshis. Unconfirmed funds never fulfill —
  * unconfirmed transactions can be reversed (same rule as Blockonomics' own docs).
+ *
+ * Test Mode orders are the exception: the balance API rejects fake test
+ * addresses, so this always returns false — fulfillment for test orders goes
+ * through the dashboard's status=2 callback (see verifyAndFulfillOrder).
  */
 export async function isBlockonomicsOrderPaid(chargeId: string): Promise<boolean> {
+  if (isTestModeCharge(chargeId)) return false;
   const address = addressFromChargeId(chargeId);
   if (!address) return false;
   const { confirmed } = await fetchBalance(address);
@@ -159,6 +180,7 @@ export async function isBlockonomicsOrderPaid(chargeId: string): Promise<boolean
 
 /** Unconfirmed total for the address — the buy page shows a "seen, confirming" state. */
 export async function blockonomicsUnconfirmed(chargeId: string): Promise<number> {
+  if (isTestModeCharge(chargeId)) return 0;
   const address = addressFromChargeId(chargeId);
   if (!address) return 0;
   const { unconfirmed } = await fetchBalance(address);

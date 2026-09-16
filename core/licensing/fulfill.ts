@@ -10,6 +10,7 @@ import {
   chargeIdIsBlockonomics,
   isBlockonomicsOrderPaid,
   blockonomicsUnconfirmed,
+  isTestModeCharge,
 } from "./blockonomics";
 import { licensingDb, type OrderRow } from "./db";
 import { settleOrder } from "./settle";
@@ -105,6 +106,42 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
       // recorded inside settleOrder; retried by the sweep
     }
   }
+  return { orderId, status: "issued", paid: true, accessCode: code };
+}
+
+/**
+ * Test Mode fulfillment: the dashboard's simulated payment callback at
+ * status=2 IS the payment signal — fake test addresses are rejected by the
+ * /api/balance API, so there is no on-chain balance to re-verify, and no real
+ * funds exist to double-check. Gated on the test-address prefix so this can
+ * never be reached for a production address. Idempotent like the real path.
+ */
+export async function fulfillTestModeOrder(orderId: string): Promise<FulfillResult> {
+  const db = licensingDb();
+  const order = await db.getOrder(orderId);
+  if (!order) throw new Error(`unknown order ${orderId}`);
+  if (!isTestModeCharge(order.chargeId)) {
+    throw new Error("fulfillTestModeOrder called for a non-test order");
+  }
+
+  if (order.status === "issued" && order.codeHash) {
+    return { orderId, status: "issued", paid: true, alreadyIssued: true };
+  }
+
+  if (!order.paidTs) {
+    await db.setOrderPaid(orderId, Date.now());
+    auditEvent("payment_verified_testmode", "system", { orderId });
+  }
+
+  const refreshed = await db.getOrder(orderId);
+  if (refreshed && refreshed.codeHash) {
+    return { orderId, status: "issued", paid: true, alreadyIssued: true };
+  }
+
+  const code = issueCode(orderId);
+  auditEvent("license_issued", hashCode(code), { orderId, testMode: true });
+  // No settleOrder leg — Blockonomics payments land directly in the operator's
+  // own wallet (test payments in nobody's wallet at all).
   return { orderId, status: "issued", paid: true, accessCode: code };
 }
 

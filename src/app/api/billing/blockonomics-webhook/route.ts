@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { licensingDb } from "@core/licensing/db";
-import { verifyCallbackSecret } from "@core/licensing/blockonomics";
+import { verifyCallbackSecret, isTestModeCharge } from "@core/licensing/blockonomics";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +14,12 @@ export const dynamic = "force-dynamic";
  * trusted for fulfillment: we only use it as a hint to locate the order, then
  * the authoritative check polls Blockonomics' /api/balance for the address
  * (server-to-server, same trust model as the ZBD/Blink integrations).
+ *
+ * Test Mode exception: dashboard-simulated payments use fake
+ * `1TestBTCAddress…` addresses whose balance the /api/balance API rejects,
+ * so there is nothing to re-poll and no real funds to verify. A status=2
+ * callback (fully confirmed per Blockonomics' own simulation) fulfills the
+ * test order directly. Production addresses are unaffected.
  *
  * Dashboard setup: Store → Callback URL =
  *   https://<your-site>/api/billing/blockonomics-webhook?secret=<BLOCKONOMICS_CALLBACK_SECRET>
@@ -31,11 +37,22 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "invalid addr" }, { status: 400 });
   }
 
+  const status = Number(url.searchParams.get("status") ?? "");
+
   const db = licensingDb();
   const order = await db.getOrderByCharge(`bnc-btc-${addr}`);
   if (!order) {
     // Unknown address: acknowledge so Blockonomics doesn't retry forever.
     return NextResponse.json({ ok: true, ignored: true });
+  }
+
+  // Test Mode: fulfill on the simulated fully-confirmed callback (status=2).
+  // Statuses 0/1 are progress ticks — acknowledge and wait for the final one.
+  if (isTestModeCharge(order.chargeId)) {
+    if (status !== 2) return NextResponse.json({ ok: true, status, testMode: true, ignored: true });
+    const { fulfillTestModeOrder } = await import("@core/licensing/fulfill");
+    const result = await fulfillTestModeOrder(order.id);
+    return NextResponse.json({ ok: true, testMode: true, ...result });
   }
 
   const { verifyAndFulfillOrder } = await import("@core/licensing/fulfill");

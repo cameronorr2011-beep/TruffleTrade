@@ -10,6 +10,8 @@ import {
   blockonomicsEnabled,
   callbackSecret,
   verifyCallbackSecret,
+  isTestModeCharge,
+  isBlockonomicsOrderPaid,
   BTC_AMOUNT,
 } from "../core/licensing/blockonomics";
 import { chargeIdIsBlink } from "../core/licensing/fulfill";
@@ -83,5 +85,22 @@ describe("callback secret", () => {
 describe("pricing constants", () => {
   it("prices 1,000 sats = 0.00001 BTC on-chain", () => {
     expect(BTC_AMOUNT).toBe("0.00001000");
+  });
+});
+
+describe("test mode (fake 1TestBTCAddress orders)", () => {
+  const testAddr = "1TestBTCAddressv27SnekuDLzJwjbLaPT"; // real value returned by Blockonomics test mode
+  const realAddr = "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kygt080";
+
+  it("classifies test-mode charge ids", () => {
+    expect(isTestModeCharge(chargeIdForAddress(testAddr))).toBe(true);
+    expect(isTestModeCharge(chargeIdForAddress(realAddr))).toBe(false);
+    expect(isTestModeCharge("wos-manual-7124dac579829974698eab2a")).toBe(false);
+    expect(isTestModeCharge("")).toBe(false);
+  });
+
+  it("never treats a test order as balance-paid (balance API rejects test addresses)", async () => {
+    process.env.BLOCKONOMICS_API_KEY = "bnc_test"; // must be set for the adapter, but no network call may happen
+    await expect(isBlockonomicsOrderPaid(chargeIdForAddress(testAddr))).resolves.toBe(false);
   });
 });
