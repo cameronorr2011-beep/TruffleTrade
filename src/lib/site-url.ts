@@ -5,7 +5,7 @@
 // buy/renew links here keeps app and website payments identical (Blockonomics
 // on-chain BTC). Override with NEXT_PUBLIC_SITE_URL if the domain changes.
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "") || "https://truffletrade-orr5.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "") || "https://truffletrade.vercel.app";
 
 /** Absolute URL for the purchase page — safe to use from the desktop app. */
 export const BUY_URL = `${SITE_URL}/buy`;
