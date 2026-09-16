@@ -85,6 +85,11 @@
       "createDesktopShortcut": true,
       "shortcutName": "TruffleTrade"
     },
-    "asar": false
-  }
+  "asar": true,
+  "asarUnpack": [
+    ".next/node_modules/**",
+    "node_modules/better-sqlite3/**",
+    "node_modules/pg/**"
+  ]
+}
 }
