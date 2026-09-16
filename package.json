@@ -1,6 +1,6 @@
 {
   "name": "truffletrade",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "main": "electron/main.js",
   "description": "TruffleTrade — AI stock-chart intelligence with a memory that trains itself. Six rival analysts, a fact-checker, a red team, digital-twin priors, federated learning. 1,000 sats a month, no KYC.",
@@ -17,7 +17,7 @@
     "check:payments": "tsx scripts/check-payments.ts",
     "icons": "node scripts/gen-icons.mjs",
     "app": "electron electron/main.js",
-    "app:dist": "npm run build && node scripts/flatten-next-externals.mjs && electron-builder --win --publish never",
+    "app:dist": "npm run build && node scripts/flatten-next-externals.mjs && electron-builder --win --publish never -c.npmRebuild=false",
     "test": "vitest run",
     "test:watch": "vitest"
   },
