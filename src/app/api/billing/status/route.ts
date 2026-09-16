@@ -22,7 +22,6 @@ export async function GET(req: Request) {
   }
 }
 
-/** POST — same check, forcing fulfillment verification with ZBD. */
 export async function POST(req: Request) {
   let body: unknown;
   try {

@@ -6,7 +6,7 @@
   "description": "TruffleTrade — AI stock-chart intelligence with a memory that trains itself. Six rival analysts, a fact-checker, a red team, digital-twin priors, federated learning. 1,000 sats a month, no KYC.",
   "scripts": {
     "dev": "next dev -p 3210",
-    "build": "next build && node scripts/flatten-next-externals.mjs",
+    "build": "next build",
     "start": "next start -p 3210",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -17,7 +17,7 @@
     "check:payments": "tsx scripts/check-payments.ts",
     "icons": "node scripts/gen-icons.mjs",
     "app": "electron electron/main.js",
-    "app:dist": "npm run build && electron-builder --win --publish never",
+    "app:dist": "npm run build && node scripts/flatten-next-externals.mjs && electron-builder --win --publish never",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -16,8 +16,19 @@ const BodySchema = z.object({
 /**
  * POST /api/billing/checkout — create a 1000-sat Lightning charge for 30 days
  * of TruffleTrade access. Returns the invoice for QR / wallet payment.
+ * Wrapped end-to-end: the buy page parses JSON, so this route must ALWAYS
+ * answer with a JSON body — even for unexpected internal errors.
  */
 export async function POST(req: Request) {
+  try {
+    return await checkoutResponse(req);
+  } catch (err) {
+    console.error("[checkout] unexpected failure:", err);
+    return NextResponse.json({ ok: false, error: "checkout temporarily unavailable — please try again" }, { status: 500 });
+  }
+}
+
+async function checkoutResponse(req: Request) {
   let body: unknown = {};
   try {
     body = await req.json();
