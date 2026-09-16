@@ -17,6 +17,15 @@ const QUICK_ACTIONS = [
 
 type Phase = "chat" | "need-key" | "checking";
 
+/** Rotating progress copy shown while the analyst works — mirrors the real pipeline. */
+const THINKING_STAGES = [
+  "pulling live context · quote, technicals, headlines…",
+  "six analysts reading the evidence…",
+  "fact-checker cross-examining every number…",
+  "red team probing the weak points…",
+  "composing the verdict…",
+] as const;
+
 /**
  * TruffleTrade AI — the conversational research analyst (premium).
  * Context for the selected ticker is assembled server-side; the client only
@@ -33,7 +42,18 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
   const [subInfo, setSubInfo] = useState<{ daysRemaining?: number } | null>(null);
   const [keyDialog, setKeyDialog] = useState(false);
   const [confirmOff, setConfirmOff] = useState(false);
+  const [thinkingStage, setThinkingStage] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
+
+  // Cycle the thinking stages while a request is in flight; reset when done.
+  useEffect(() => {
+    if (!busy) {
+      setThinkingStage(0);
+      return;
+    }
+    const t = setInterval(() => setThinkingStage((s) => (s + 1) % THINKING_STAGES.length), 2_400);
+    return () => clearInterval(t);
+  }, [busy]);
 
   useEffect(() => {
     const code = getAccessCode();
@@ -243,7 +263,12 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
           <div className="tt-msg tt-msg-ai tt-msg-working">
             <span className="tt-msg-who">TT AI</span>
             <p className="tt-msg-body">
-              <span className="tt-stage-dot" style={{ background: "var(--app-gold)", animation: "tt-stagepulse 1.1s ease-in-out infinite" }} /> pulling live context · reasoning over evidence…
+              <span className="tt-thinking-dots" aria-hidden>
+                <i />
+                <i />
+                <i />
+              </span>
+              <span key={thinkingStage} className="tt-thinking-stage">{THINKING_STAGES[thinkingStage]}</span>
             </p>
           </div>
         )}
