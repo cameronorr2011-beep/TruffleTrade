@@ -7,7 +7,7 @@
  *
  * Reopen hardening: the shell is defensive about the local server. It probes
  * /api/status first; if that probe errors outright (port dead) it starts its
- * own `next start`. It NEVER trusts "port open" alone — an orphaned server or
+ * own in-process Next server. It NEVER trusts "port open" alone — an orphaned server or
  * a dev server serving a stale/missing build would otherwise show a blank
  * window. /api/status is a plain product liveness route (no subscriber data)
  * so probing it is safe. A verified-but-foreign server gets killed if we can.
@@ -18,7 +18,7 @@ const { app, BrowserWindow, Tray, Menu, shell, nativeImage } = require("electron
 const http = require("node:http");
 const path = require("node:path");
 const fs = require("node:fs");
-const { spawn, exec } = require("node:child_process");
+const { exec } = require("node:child_process");
 
 const PORT = process.env.TT_PORT || 3210;
 const APP_URL = `http://localhost:${PORT}`;
@@ -83,20 +83,27 @@ function freePort() {
   });
 }
 
-function startServer() {
-  return new Promise((resolve, reject) => {
-    const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-    server = spawn(npx, ["next", "start", "-p", String(PORT)], {
-      cwd: ROOT,
-      stdio: "ignore",
-      windowsHide: true,
-      shell: process.platform === "win32", // .cmd shims need a shell on Windows
-      env: { ...process.env }, // passes TT_ACCESS_CODE + TT_GATEWAY_URL through
-    });
-    server.on("exit", () => {
-      server = null;
-    });
-    resolve();
+/**
+ * Serve the built Next app IN-PROCESS. Spawning `npx next start` broke in the
+ * packaged app twice over: (1) spawn's cwd pointed into app.asar, which is not
+ * a real directory on disk → `spawn C:\\WINDOWS\\system32\\cmd.exe ENOENT`
+ * (Windows can't launch the shell with a nonexistent working directory); and
+ * (2) buyers' machines have no Node.js/npx at all. Requiring `next` inside
+ * Electron's main process avoids both: no child process, no shell, no Node on
+ * PATH — and Electron's patched fs reads .next straight out of the asar.
+ */
+async function startServer() {
+  const next = require("next");
+  const nextApp = next({ dev: false, dir: ROOT });
+  await nextApp.prepare();
+  const handle = nextApp.getRequestHandler();
+  server = http.createServer((req, res) => handle(req, res));
+  server.on("close", () => {
+    server = null;
+  });
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(Number(PORT), () => resolve());
   });
 }
 
@@ -231,7 +238,7 @@ if (!gotLock) {
   app.on("before-quit", () => {
     if (server) {
       try {
-        process.platform === "win32" ? server.kill() : server.kill("SIGTERM");
+        server.close();
       } catch {
         // already gone
       }
