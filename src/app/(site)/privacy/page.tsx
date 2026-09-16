@@ -21,7 +21,7 @@ const SECTIONS: { heading: string; paras: string[] }[] = [
   {
     heading: "What we collect when you buy access",
     paras: [
-      "Payments run through ZBD (Zebedee), a Lightning Network payment processor. When you pay, ZBD processes the payment and we receive: a charge identifier, the amount, and the payment status. We do not receive, ask for, or store your name, email, address, or any identity documents. There is no KYC for the product itself.",
+      "Payments run through Blockonomics, a Bitcoin payment processor that generates a unique on-chain address for every order. When you pay, the payment goes directly on the Bitcoin blockchain and we receive: the order's address, the amount, and the confirmation status. We do not receive, ask for, or store your name, email, address, or any identity documents. There is no KYC for the product itself.",
       "We store an order record (random order id, charge id, status, timestamps) and a hash of your access code. Access codes are stored only as cryptographic hashes — the plaintext code exists only in the moment of issuance.",
     ],
   },

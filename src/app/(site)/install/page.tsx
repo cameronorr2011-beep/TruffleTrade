@@ -58,7 +58,7 @@ export default function InstallPage() {
             <Link href="/buy" className="text-forest underline">
               /buy
             </Link>{" "}
-            — your code appears the moment your Lightning payment confirms.
+            — your code appears once your Bitcoin payment confirms (about 10–40 minutes).
           </li>
         </ol>
         <p className="mt-4 text-[0.8rem] leading-relaxed text-bone-soft">

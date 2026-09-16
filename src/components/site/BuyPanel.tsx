@@ -185,12 +185,12 @@ export default function BuyPanel() {
         <>
           <ol className="mt-5 space-y-3 text-[13px] text-bone-soft">
             <li>
-              <span className="font-bold text-forest">1.</span> Click below — a Lightning invoice for{" "}
-              <span className="font-semibold text-ink">1,000 sats</span> is generated just for you.
+              <span className="font-bold text-forest">1.</span> Click below — a unique Bitcoin address for{" "}
+              <span className="font-semibold text-ink">1,000 sats</span> (0.00001 BTC) is generated just for you.
             </li>
             <li>
-              <span className="font-bold text-forest">2.</span> Scan the QR or pay from any Lightning wallet (Wallet of
-              Satoshi, Phoenix, Zeus…).
+              <span className="font-bold text-forest">2.</span> Scan the QR or pay from any Bitcoin wallet (Muun, Blue
+              Wallet, Phoenix, Wallet of Satoshi…).
             </li>
             <li>
               <span className="font-bold text-forest">3.</span> Your access code + the app setup appear here the moment

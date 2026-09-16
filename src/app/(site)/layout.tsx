@@ -66,7 +66,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           <p className="mt-4 max-w-3xl text-[12px] leading-relaxed text-bone-soft/90">
             TruffleTrade is analysis and research software — not investment advice, not a broker, and it does not
             place trades. Markets are risky; you can lose money. You must be 18+, or 13–17 with a parent or
-            guardian&apos;s consent and supervision. Payments are in Bitcoin Lightning; subscriptions are per 30 days
+            guardian&apos;s consent and supervision. Payments are in Bitcoin (on-chain, 1,000 sats ≈ 0.00001 BTC); subscriptions are per 30 days
             and don&apos;t auto-renew. You are responsible for your own capital, taxes, and your jurisdiction&apos;s rules.
           </p>
           <p className="mt-4 flex items-center gap-2 text-[10px] font-semibold tracking-wide text-bone-soft/70">

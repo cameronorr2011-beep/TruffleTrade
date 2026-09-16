@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: "Why bitcoin and not a card?",
-    a: "1,000 sats over Lightning means no accounts, no chargebacks, no stored payment methods, and no identity documents. Pay, get your code, run the app. Renewal is always a deliberate new payment.",
+    a: "1,000 sats in on-chain Bitcoin means no accounts, no chargebacks, no stored payment methods, and no identity documents. Pay, get your code, run the app. Renewal is always a deliberate new payment.",
   },
   {
     q: "Is this investment advice?",
@@ -267,7 +267,7 @@ export default function LandingPage() {
                   "Desktop app for Windows — pin it, launch it, it's yours",
                   "Local memory system with automatic updates",
                   "Federated learning from every installation",
-                  "No KYC — pay from any Lightning wallet",
+                  "No KYC — pay from any Bitcoin wallet",
                 ].map((f) => (
                   <li key={f} className="flex gap-3">
                     <span aria-hidden className="mt-0.5 text-forest">◆</span>
@@ -276,7 +276,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Link href="/buy" className="btn-primary mt-8 inline-block">
-                Pay with Lightning
+Pay with Bitcoin
               </Link>
               <p className="mt-4 text-[10.5px] font-semibold uppercase tracking-[0.8px] text-faint">
                 30-day access · no auto-renew · pay again when you want

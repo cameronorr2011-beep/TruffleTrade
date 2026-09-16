@@ -178,9 +178,9 @@ export default function AdminPage() {
       {tab === "orders" && (
         <div className="mt-6">
           <p className="text-[0.85rem] leading-relaxed text-bone-soft">
-            When a buyer pays your Wallet of Satoshi address, their order appears here as{" "}
-            <span className="font-mono text-truffle-300">pending</span>. Check your WoS app for the matching 1,000-sat
-            deposit, then press Approve — their code appears on their screen instantly.
+            Blockonomics (Bitcoin) orders fulfill automatically at 2 confirmations — you'll see them flip from{" "}
+            <span className="font-mono text-truffle-300">pending</span> to <span className="font-mono text-truffle-300">issued</span> on their own.
+            Only manual fallback orders (buyer paid your Wallet-of-Satoshi address) need you to check the deposit and press Approve.
           </p>
           <div className="mt-4 space-y-2">
             {orders.length === 0 && <p className="text-sm text-faint">No orders yet.</p>}
