@@ -29,15 +29,19 @@ export function chargeIdIsBlink(chargeId: string): boolean {
   return /^[a-f0-9]{64}$/.test(chargeId);
 }
 
-function issueCode(orderId: string): string {
+async function issueCode(orderId: string): Promise<string> {
   // Retry generation on the (astronomically unlikely) hash collision.
+  // All DB calls MUST be awaited: on the Postgres backend every method returns
+  // a Promise, and an un-awaited getCode(...) is always truthy — which made
+  // every attempt look like a collision and fulfillment fail on production
+  // (SQLite's synchronous rows masked this in local tests).
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateAccessCode();
     const hash = hashCode(code);
-    const existing = licensingDb().getCode(hash);
+    const existing = await licensingDb().getCode(hash);
     if (existing) continue;
     const now = Date.now();
-    licensingDb().createCode({
+    await licensingDb().createCode({
       codeHash: hash,
       orderId,
       activatedTs: now,
@@ -45,7 +49,7 @@ function issueCode(orderId: string): string {
     });
     // Store the plaintext on the order row so the buyer can always retrieve
     // their code from the status endpoint (the tt_codes row stays hashed).
-    licensingDb().setOrderIssuedPlain(orderId, hash, code);
+    await licensingDb().setOrderIssuedPlain(orderId, hash, code);
     return code;
   }
   throw new Error("could not issue a unique access code after 5 attempts");
@@ -91,7 +95,7 @@ export async function verifyAndFulfillOrder(orderId: string): Promise<FulfillRes
     return { orderId, status: "issued", paid: true, alreadyIssued: true };
   }
 
-  const code = issueCode(orderId);
+  const code = await issueCode(orderId);
   // Append-only audit trail (spec §48): license issuance is a critical event.
   auditEvent("license_issued", hashCode(code), { orderId });
 
@@ -138,7 +142,7 @@ export async function fulfillTestModeOrder(orderId: string): Promise<FulfillResu
     return { orderId, status: "issued", paid: true, alreadyIssued: true };
   }
 
-  const code = issueCode(orderId);
+  const code = await issueCode(orderId);
   auditEvent("license_issued", hashCode(code), { orderId, testMode: true });
   // No settleOrder leg — Blockonomics payments land directly in the operator's
   // own wallet (test payments in nobody's wallet at all).

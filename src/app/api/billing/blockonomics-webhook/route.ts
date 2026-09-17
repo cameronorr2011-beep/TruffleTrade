@@ -50,9 +50,15 @@ export async function GET(req: Request) {
   // Statuses 0/1 are progress ticks — acknowledge and wait for the final one.
   if (isTestModeCharge(order.chargeId)) {
     if (status !== 2) return NextResponse.json({ ok: true, status, testMode: true, ignored: true });
-    const { fulfillTestModeOrder } = await import("@core/licensing/fulfill");
-    const result = await fulfillTestModeOrder(order.id);
-    return NextResponse.json({ ok: true, testMode: true, ...result });
+    try {
+      const { fulfillTestModeOrder } = await import("@core/licensing/fulfill");
+      const result = await fulfillTestModeOrder(order.id);
+      return NextResponse.json({ ok: true, testMode: true, ...result });
+    } catch (err) {
+      // 500 makes Blockonomics retry (7× backoff); next attempt is idempotent.
+      console.error("[blockonomics-webhook] test-mode fulfillment error:", (err as Error).message);
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
   }
 
   const { verifyAndFulfillOrder } = await import("@core/licensing/fulfill");
