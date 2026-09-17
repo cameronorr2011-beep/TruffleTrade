@@ -21,7 +21,7 @@ const SECTIONS: { heading: string; paras: string[] }[] = [
   {
     heading: "What we collect when you buy access",
     paras: [
-      "Payments run through Blockonomics, a Bitcoin payment processor that generates a unique on-chain address for every order. When you pay, the payment goes directly on the Bitcoin blockchain and we receive: the order's address, the amount, and the confirmation status. We do not receive, ask for, or store your name, email, address, or any identity documents. There is no KYC for the product itself.",
+      "Payments are made in Bitcoin over the Lightning Network to the operator's Lightning address, shown as a QR code at checkout. When you pay, the payment goes directly to the operator's wallet — there is no payment intermediary holding funds. We receive only: your order id, the amount due, and the payment confirmation you keep on this page. We do not receive, ask for, or store your name, email, address, or any identity documents. There is no KYC for the product itself.",
       "We store an order record (random order id, charge id, status, timestamps) and a hash of your access code. Access codes are stored only as cryptographic hashes — the plaintext code exists only in the moment of issuance.",
     ],
   },

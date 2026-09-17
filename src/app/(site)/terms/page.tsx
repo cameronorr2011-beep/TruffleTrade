@@ -35,7 +35,7 @@ const SECTIONS: { heading: string; paras: string[] }[] = [
   {
     heading: "5. Billing — 1,000 sats per 30 days",
     paras: [
-      "Access costs 1,000 satoshis (0.00001 BTC) per 30-day period, paid in full in Bitcoin on-chain via our payment processor (Blockonomics). Access begins when the Bitcoin network confirms your payment (2 confirmations) and ends 30 days later. There is no auto-renewal, no recurring charge, and no stored payment method — renewal is a deliberate new payment by you.",
+      "Access costs 1,000 satoshis per 30-day period, paid in full in Bitcoin over the Lightning Network to the Lightning address shown at checkout. Access begins when the payment is confirmed and the access code is issued, and ends 30 days later. There is no auto-renewal, no recurring charge, and no stored payment method — renewal is a deliberate new payment by you.",
       "Because Bitcoin payments are irreversible and the product is delivered immediately (access code issuance), all sales are final once a payment confirms and a code is issued. If a payment fails or an order expires, no charge occurs. Contact us via the GitHub repository if a confirmed payment did not yield a working code.",
     ],
   },

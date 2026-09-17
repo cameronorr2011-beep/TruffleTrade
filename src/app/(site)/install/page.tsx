@@ -58,7 +58,7 @@ export default function InstallPage() {
             <Link href="/buy" className="text-forest underline">
               /buy
             </Link>{" "}
-            — your code appears once your Bitcoin payment confirms (about 10–40 minutes).
+            — your code appears once your Bitcoin payment confirms (usually within minutes).
           </li>
         </ol>
         <p className="mt-4 text-[0.8rem] leading-relaxed text-bone-soft">

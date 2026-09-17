@@ -178,9 +178,9 @@ export default function AdminPage() {
       {tab === "orders" && (
         <div className="mt-6">
           <p className="text-[0.85rem] leading-relaxed text-bone-soft">
-            Blockonomics (Bitcoin) orders fulfill automatically at 2 confirmations — you'll see them flip from{" "}
-            <span className="font-mono text-truffle-300">pending</span> to <span className="font-mono text-truffle-300">issued</span> on their own.
-            Only manual fallback orders (buyer paid your Wallet-of-Satoshi address) need you to check the deposit and press Approve.
+            Every order arrives as <span className="font-mono text-truffle-300">pending</span>. When a buyer pays the
+            1,000 sats, the deposit lands in your Wallet-of-Satoshi app — check it, then press Approve. The buyer's
+            access code issues instantly and their page confirms itself.
           </p>
           <div className="mt-4 space-y-2">
             {orders.length === 0 && <p className="text-sm text-faint">No orders yet.</p>}

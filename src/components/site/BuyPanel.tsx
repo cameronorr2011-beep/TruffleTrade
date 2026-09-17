@@ -185,20 +185,20 @@ export default function BuyPanel() {
         <>
           <ol className="mt-5 space-y-3 text-[13px] text-bone-soft">
             <li>
-              <span className="font-bold text-forest">1.</span> Click below — a unique Bitcoin address for{" "}
-              <span className="font-semibold text-ink">1,000 sats</span> (0.00001 BTC) is generated just for you.
+              <span className="font-bold text-forest">1.</span> Click below — your payment request for{" "}
+              <span className="font-semibold text-ink">1,000 sats</span> is created instantly.
             </li>
             <li>
-              <span className="font-bold text-forest">2.</span> Scan the QR or pay from any Bitcoin wallet (Muun, Blue
-              Wallet, Phoenix, Wallet of Satoshi…).
+              <span className="font-bold text-forest">2.</span> Scan the QR with any Lightning wallet (Wallet of
+              Satoshi, Phoenix, Zeus, Muun…) and pay the exact amount.
             </li>
             <li>
-              <span className="font-bold text-forest">3.</span> Your access code + the app setup appear here the moment
-              payment confirms — usually seconds.
+              <span className="font-bold text-forest">3.</span> Your access code + the app setup appear here once the
+              deposit is confirmed — usually within minutes.
             </li>
           </ol>
           <button onClick={startCheckout} className="btn-primary mt-7 w-full">
-            Generate invoice
+            Pay 1,000 sats
           </button>
           <p className="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.8px] text-faint">
             No account. No email. No KYC.

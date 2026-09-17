@@ -4,7 +4,7 @@ import BuyPanel from "@/components/site/BuyPanel";
 
 export const metadata: Metadata = {
   title: "Get access",
-  description: "Pay 1,000 sats in Bitcoin on-chain for 30 days of TruffleTrade. No account, no KYC.",
+  description: "Pay 1,000 sats over Bitcoin Lightning for 30 days of TruffleTrade. No account, no KYC.",
 };
 
 export default function BuyPage() {
@@ -15,8 +15,9 @@ export default function BuyPage() {
         Thirty days of TruffleTrade
       </h1>
       <p className="mt-4 max-w-2xl text-[0.98rem] leading-relaxed text-bone-soft">
-        One Bitcoin payment of <span className="text-bone">1,000 sats</span> (0.00001 BTC, on-chain). No account creation, no email, no
-        identity verification. Your access code is issued the moment payment confirms.
+        One payment of <span className="text-bone">1,000 sats</span> over the Bitcoin Lightning Network. No account
+        creation, no email, no identity verification. Your access code appears here as soon as your payment is
+        confirmed — usually within minutes.
       </p>
 
       <div className="mt-8 rounded-xl border border-soil-500 bg-mint p-5">

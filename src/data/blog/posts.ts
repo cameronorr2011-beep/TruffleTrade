@@ -84,20 +84,20 @@ export const POSTS: BlogPost[] = [
     slug: "no-kyc-no-keys-no-nonsense",
     title: "No KYC, no keys, no nonsense",
     description:
-      "How TruffleTrade billing works: 1,000 sats in on-chain Bitcoin, an access code instead of an account, and an architecture where your AI credentials are ours — on purpose.",
+      "How TruffleTrade billing works: 1,000 sats over Bitcoin Lightning, an access code instead of an account, and an architecture where your AI credentials are ours — on purpose.",
     date: "2026-09-08",
     minutes: 5,
     tags: ["bitcoin", "payments", "security"],
     body: [
       {
         paragraphs: [
-          "TruffleTrade has no accounts. You pay 1,000 satoshis in Bitcoin on-chain, and a machine-generated access code unlocks the product for 30 days. No email, no name, no identity documents. Here's how that works under the hood, and why the AI API key is deliberately not yours.",
+          "TruffleTrade has no accounts. You pay 1,000 satoshis over the Bitcoin Lightning Network, and a machine-generated access code unlocks the product for 30 days. No email, no name, no identity documents. Here's how that works under the hood, and why the AI API key is deliberately not yours.",
         ],
       },
       {
         heading: "Bitcoin in, access code out",
         paragraphs: [
-          "When you press 'generate invoice', the site asks Blockonomics (a Bitcoin payments API) for a fresh on-chain address tied to your order and asks you to send exactly 1,000 sats (0.00001 BTC). Any Bitcoin wallet can pay it — Muun, Blue Wallet, Phoenix, whatever you already use. When the transaction reaches 2 confirmations, the server verifies the confirmed balance directly with Blockonomics, server-to-server, before fulfilling. Nothing is trusted from the wire. Fulfillment is idempotent: an order can only ever issue one code.",
+          "When you press 'generate invoice', the site creates an order and shows you the operator's Lightning address as a QR code — send exactly 1,000 sats from any Lightning wallet (Wallet of Satoshi, Phoenix, Zeus, whatever you already use), referencing your order id if your wallet supports notes. The page polls the order until the operator confirms your deposit and your access code appears — usually within minutes. Fulfillment is idempotent: an order can only ever issue one code.",
           "The code itself is unforgeable by construction: 12 random base32 characters plus a 4-character HMAC checksum. Codes are stored only as hashes, so even a database leak doesn't leak working licenses. Renewal is just a new payment — nothing auto-charges, because nothing can.",
         ],
       },
