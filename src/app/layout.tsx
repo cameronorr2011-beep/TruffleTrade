@@ -55,6 +55,10 @@ export const metadata: Metadata = {
     },
   },
   category: "finance",
+  // Google Search Console ownership verification.
+  verification: {
+    google: "3QqMPiKAxdmUzhfBN1Ow0QpgHPfrbxZ4tGcNDWvcc3s",
+  },
   icons: {
     icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
     apple: [{ url: "/icon-512.png" }],
