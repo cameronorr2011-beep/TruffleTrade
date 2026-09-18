@@ -8,7 +8,7 @@ import ffmpegPath from "ffmpeg-static";
 
 const OUT_DIR = path.join(import.meta.dirname, "..", "dist-video");
 fs.mkdirSync(OUT_DIR, { recursive: true });
-const SRC = "C:/Users/Cameron/Downloads/gabriawll - Recall [NCS Release].mp3";
+const SRC = process.argv[2] ?? path.join(import.meta.dirname, "..", "dist-video", "mortals.mp3");
 const RAW = path.join(OUT_DIR, "track.pcm");
 
 // decode to 48k mono s16le
