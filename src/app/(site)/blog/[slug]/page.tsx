@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { POSTS, getPost } from "@/data/blog/posts";
+import { JsonLd } from "@/components/site/JsonLd";
+import { SITE_NAME, SITE_URL, absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 
 export function generateStaticParams() {
   return POSTS.map((p) => ({ slug: p.slug }));
@@ -10,8 +12,23 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPost(slug);
-  if (!post) return { title: "Post not found" };
-  return { title: post.title, description: post.description };
+  if (!post) return { title: "Post not found", robots: { index: false, follow: false } };
+  const image = `/blog/${post.slug}/opengraph-image`;
+  return {
+    title: post.title,
+    description: post.description,
+    alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      type: "article",
+      url: `/blog/${post.slug}`,
+      title: post.title,
+      description: post.description,
+      publishedTime: post.date,
+      authors: [SITE_NAME],
+      images: [{ url: image, width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: { card: "summary_large_image", title: post.title, description: post.description, images: [image] },
+  };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -21,8 +38,29 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const others = POSTS.filter((p) => p.slug !== slug).slice(0, 2);
 
+  // Article rich result + breadcrumbs up to this post.
+  const postJsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.description,
+      datePublished: post.date,
+      author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+      publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+      mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
+      image: absoluteUrl(`/blog/${post.slug}/opengraph-image`),
+    },
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+      { name: post.title, path: `/blog/${post.slug}` },
+    ]),
+  ];
+
   return (
     <article className="mx-auto max-w-[760px] px-5 py-20 sm:px-8">
+      <JsonLd data={postJsonLd} />
       <Link href="/blog" className="font-mono text-[0.66rem] uppercase tracking-[0.2em] text-faint hover:text-ink">
         ← All posts
       </Link>

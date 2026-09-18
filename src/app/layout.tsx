@@ -1,27 +1,64 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/next";
+import { DESCRIPTION, SITE_NAME, SITE_URL, TAGLINE } from "@/lib/seo";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "TruffleTrade — AI stock-chart intelligence, memory included",
-    template: "%s · TruffleTrade",
+    default: `${SITE_NAME} — ${TAGLINE}`,
+    template: `%s · ${SITE_NAME}`,
   },
-  description:
-    "TruffleTrade is an AI research system for stock traders: six rival analysts, a fact-checker and a red team investigate any chart. Memory that learns, federated across installs. 1,000 sats a month. No KYC.",
-  applicationName: "TruffleTrade",
+  description: DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
     "AI stock analysis",
     "AI chart analysis",
-    "open source trading research",
+    "AI investment research",
+    "open source trading software",
+    "stock research tool",
     "bitcoin lightning",
     "no kyc",
     "digital twin markets",
     "federated learning",
+    "truffletrade",
   ],
-  icons: { icon: "/logo.svg" },
-  robots: { index: true, follow: true },
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  formatDetection: { telephone: false, address: false, email: false },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    url: SITE_URL,
+    title: `${SITE_NAME} — ${TAGLINE}`,
+    description: DESCRIPTION,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${SITE_NAME} — ${TAGLINE}` }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — ${TAGLINE}`,
+    description: DESCRIPTION,
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large" as const,
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  category: "finance",
+  icons: {
+    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon-512.png" }],
+  },
 };
 
 export const viewport: Viewport = {

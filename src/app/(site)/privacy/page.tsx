@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "What TruffleTrade collects (very little), what stays on your device (almost everything), and why.",
+  alternates: { canonical: "/privacy" },
 };
 
 const SECTIONS: { heading: string; paras: string[] }[] = [

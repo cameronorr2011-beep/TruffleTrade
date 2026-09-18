@@ -3,8 +3,15 @@ import Link from "next/link";
 import { POSTS } from "@/data/blog/posts";
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "How TruffleTrade works: adversarial analysis, self-training memory, and honest bitcoin billing.",
+  title: "Blog — field notes",
+  description:
+    "How TruffleTrade works: adversarial AI analysis, self-training memory, digital twins, federated learning, and honest bitcoin billing.",
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    title: "The TruffleTrade blog",
+    description: "Adversarial AI analysis, self-training memory, and honest bitcoin billing — explained.",
+    url: "/blog",
+  },
 };
 
 export default function BlogIndex() {

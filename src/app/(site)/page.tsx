@@ -1,6 +1,8 @@
 import Link from "next/link";
 import BuyPanel from "@/components/site/BuyPanel";
 import CandleChart from "@/components/market/CandleChart";
+import { JsonLd } from "@/components/site/JsonLd";
+import { faqJsonLd, organizationJsonLd, softwareApplicationJsonLd } from "@/lib/seo";
 
 const ANALYSTS = [
   { name: "Fundamentals", brief: "Balance sheets, margins, growth quality. Numbers first, narrative second.", tint: "#eaf1e5", ink: "#408260" },
@@ -33,7 +35,7 @@ const FAQ = [
   },
   {
     q: "Why bitcoin and not a card?",
-    a: "1,000 sats in on-chain Bitcoin means no accounts, no chargebacks, no stored payment methods, and no identity documents. Pay, get your code, run the app. Renewal is always a deliberate new payment.",
+    a: "1,000 sats over Bitcoin Lightning means no accounts, no chargebacks, no stored payment methods, and no identity documents. Pay, get your code, run the app. Renewal is always a deliberate new payment.",
   },
   {
     q: "Is this investment advice?",
@@ -43,6 +45,13 @@ const FAQ = [
 
 const REPO = "https://github.com/cameronorr2011-beep/TruffleTrade";
 const DOWNLOAD = "/api/download/desktop";
+
+// Rich results: Organization + SoftwareApplication + the on-page FAQ.
+const homeJsonLd = [
+  organizationJsonLd(),
+  softwareApplicationJsonLd(),
+  faqJsonLd(FAQ.map((f) => ({ question: f.q, answer: f.a }))),
+];
 
 export default function LandingPage() {
   return (
@@ -316,6 +325,7 @@ Pay with Bitcoin
           </p>
         </div>
       </section>
+      <JsonLd data={homeJsonLd} />
     </div>
   );
 }

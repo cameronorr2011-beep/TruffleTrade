@@ -3,8 +3,16 @@ import Link from "next/link";
 import BuyPanel from "@/components/site/BuyPanel";
 
 export const metadata: Metadata = {
-  title: "Get access",
-  description: "Pay 1,000 sats over Bitcoin Lightning for 30 days of TruffleTrade. No account, no KYC.",
+  title: "Get access — 1,000 sats, no KYC",
+  description:
+    "Pay 1,000 sats over Bitcoin Lightning for 30 days of TruffleTrade. No account, no email, no KYC. Your access code appears on this page once payment confirms.",
+  alternates: { canonical: "/buy" },
+  openGraph: {
+    title: "Get TruffleTrade access — 1,000 sats",
+    description: "30 days of AI chart research for 1,000 satoshis. Bitcoin Lightning, no KYC, code on-screen.",
+    url: "/buy",
+  },
+  twitter: { card: "summary_large_image", title: "Get TruffleTrade access — 1,000 sats" },
 };
 
 export default function BuyPage() {

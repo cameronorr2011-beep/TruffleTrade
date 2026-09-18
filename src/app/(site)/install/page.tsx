@@ -5,8 +5,16 @@ const REPO = "https://github.com/cameronorr2011-beep/TruffleTrade";
 const DOWNLOAD = "/api/download/desktop";
 
 export const metadata: Metadata = {
-  title: "Install",
-  description: "Download the free TruffleTrade desktop app for Windows, then activate TruffleTrade AI with your key.",
+  title: "Install the desktop app",
+  description:
+    "Download the free TruffleTrade desktop app for Windows — one-click installer, no Node.js, no command line. Then activate TruffleTrade AI with your access code.",
+  alternates: { canonical: "/install" },
+  openGraph: {
+    title: "Install TruffleTrade for Windows",
+    description: "Free desktop app: live charts, watchlists and market data. One-click installer.",
+    url: "/install",
+  },
+  twitter: { card: "summary_large_image", title: "Install TruffleTrade for Windows" },
 };
 
 function Code({ children }: { children: string }) {

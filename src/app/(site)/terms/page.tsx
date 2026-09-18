@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "The rules for using TruffleTrade: age requirement, what the product does and does not do, billing, and disclaimers.",
+  alternates: { canonical: "/terms" },
 };
 
 const SECTIONS: { heading: string; paras: string[] }[] = [
