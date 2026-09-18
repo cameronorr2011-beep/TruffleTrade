@@ -251,7 +251,7 @@ export default function LandingPage() {
               </h2>
               <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-bone-soft">
                 Nine analysts. A red team. A memory that keeps score. Here&apos;s the whole idea before you install
-                anything.
+                anything. Music: “Recall” by gabriawll (NCS).
               </p>
             </div>
             <VideoCard />
