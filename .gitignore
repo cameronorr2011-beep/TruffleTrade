@@ -32,3 +32,4 @@ research-run.json
 # desktop packaging output + local QA scripts
 /dist-desktop/
 /.qa/
+dist-video/
