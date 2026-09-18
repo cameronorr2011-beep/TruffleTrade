@@ -1,6 +1,7 @@
 import Link from "next/link";
 import BuyPanel from "@/components/site/BuyPanel";
 import CandleChart from "@/components/market/CandleChart";
+import VideoCard from "@/components/site/VideoCard";
 import { JsonLd } from "@/components/site/JsonLd";
 import { faqJsonLd, organizationJsonLd, softwareApplicationJsonLd } from "@/lib/seo";
 
@@ -233,6 +234,27 @@ export default function LandingPage() {
               alt="Memory graph: outcome, regime, risk, insight, twin, prediction, federated and audit nodes"
               className="w-full rounded-2xl border border-soil-500 bg-white"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Watch the film */}
+      <section className="px-5 pb-20 sm:px-8">
+        <div className="mx-auto max-w-[1280px]">
+          <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-[1.6px] text-faint">The film</span>
+              <h2 className="mt-4 max-w-xl text-[clamp(1.8rem,3.8vw,2.9rem)] font-extrabold leading-[1.08] tracking-[-1.6px] text-ink">
+                Thirty seconds.
+                <br />
+                <span className="text-forest">Every side.</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-bone-soft">
+                Nine analysts. A red team. A memory that keeps score. Here&apos;s the whole idea before you install
+                anything.
+              </p>
+            </div>
+            <VideoCard />
           </div>
         </div>
       </section>
