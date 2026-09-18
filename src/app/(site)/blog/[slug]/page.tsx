@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Post not found", robots: { index: false, follow: false } };
-  const image = `/blog/${post.slug}/opengraph-image`;
+  const image = `/blog/${post.slug}/og`;
   return {
     title: post.title,
     description: post.description,
@@ -49,7 +49,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
       publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
       mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
-      image: absoluteUrl(`/blog/${post.slug}/opengraph-image`),
+      image: absoluteUrl(`/blog/${post.slug}/og`),
     },
     breadcrumbJsonLd([
       { name: "Home", path: "/" },

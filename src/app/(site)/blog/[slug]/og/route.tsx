@@ -4,10 +4,12 @@ import { SITE_NAME } from "@/lib/seo";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "TruffleTrade blog post";
 
-/** Per-post social card: title, read time, and date on the brand background. */
-export default async function PostImage({ params }: { params: Promise<{ slug: string }> }) {
+// Satori requires every multi-child element to declare an explicit display.
+// Served as a route handler under /blog/<slug>/og — the file-convention
+// variant registers only a hash-suffixed URL in this Next version, which
+// doesn't match the canonical /opengraph-image path in meta tags.
+export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = getPost(slug);
   const title = post?.title ?? "The TruffleTrade blog";
