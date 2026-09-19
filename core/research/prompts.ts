@@ -26,6 +26,13 @@ const SAFETY_RULE =
   "LANGUAGE: Use 'evidence suggests', 'model scenario', 'insufficient evidence', 'high uncertainty'. " +
   "Never claim guaranteed returns, certainty about future prices, or knowledge you do not have. ";
 
+/** How to reason before answering — the thinking discipline every analyst shares. */
+const METHOD_RULE =
+  "METHOD: Before deciding, (1) list the 2-3 data points in your mandate that matter most, (2) name the single strongest " +
+  "argument AGAINST your emerging view and weigh it honestly, (3) if MEMORY shows a past call on this ticker was wrong, " +
+  "explain what is different now or lower your confidence. Calibrate: confidence 0.8+ only when multiple independent " +
+  "data points agree; 0.5 means a coin flip; below 0.35 you should usually answer insufficient-evidence. ";
+
 const JSON_RULES = {
   analyst:
     'Respond ONLY with JSON: {"stance":"bullish"|"bearish"|"neutral"|"caution"|"insufficient-evidence",' +
@@ -35,7 +42,7 @@ const JSON_RULES = {
     '"confidence":<0..1>,"rationale":"<=3 sentences","objections":["<=6 specific objections"],"requiresReject":true|false}',
 };
 
-function primer(pack: DataPack): string {
+export function primer(pack: DataPack): string {
   const q = pack.quote;
   const t = pack.technicals;
   const f = pack.fundamentals;
@@ -106,7 +113,7 @@ export const FUNDAMENTAL_AGENT: AgentSpec = {
     "You are FUNDAMENTALS, an equity research analyst. Evaluate business quality: revenue, earnings, margins, " +
     "free cash flow, debt, dilution, earnings quality. Judge the business, not the chart. " +
     "If fundamentals are unavailable, your stance MUST be insufficient-evidence. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const VALUATION_AGENT: AgentSpec = {
@@ -118,7 +125,7 @@ export const VALUATION_AGENT: AgentSpec = {
     "You will be shown DCF/reverse-DCF model output with explicit assumptions and peer comparisons. " +
     "Attack or defend the assumptions; never quote a fair value without naming the assumptions that produce it. " +
     "If the models are unavailable, your stance MUST be insufficient-evidence. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const TECHNICAL_AGENT: AgentSpec = {
@@ -130,7 +137,7 @@ export const TECHNICAL_AGENT: AgentSpec = {
     "moving averages, RSI, MACD, ATR, drawdown, support/resistance, trend regime, relative strength. " +
     "You must not invent or compute new indicator values beyond trivial rounding. " +
     "Name the indicator for every structural claim you make. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const MACRO_AGENT: AgentSpec = {
@@ -142,7 +149,7 @@ export const MACRO_AGENT: AgentSpec = {
     "and sector ETF performance where shown) affects THIS company specifically. Do not dump generic macro commentary; " +
     "explain the transmission channel for this company's revenue, costs, or discount rate. If no macro variable is " +
     "clearly relevant, take a neutral stance and say why. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const COMPETITIVE_AGENT: AgentSpec = {
@@ -154,7 +161,7 @@ export const COMPETITIVE_AGENT: AgentSpec = {
     "network effects, distribution, regulatory position, capital requirements, substitute threats. " +
     "Ground every claim in the provided business summary, fundamentals, or headlines — if the provided evidence " +
     "does not support a moat judgment, say insufficient-evidence. Assign your moat rating in the rationale. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const NEWS_AGENT: AgentSpec = {
@@ -166,7 +173,7 @@ export const NEWS_AGENT: AgentSpec = {
     "Identify material events vs noise, and attribute sentiment. Every claim you make must reference a specific " +
     "headline by quoting a fragment of it. If headlines are missing or trivial, your stance MUST be " +
     "insufficient-evidence. Never fabricate a headline, source, or date. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const PATTERNS_AGENT: AgentSpec = {
@@ -179,7 +186,7 @@ export const PATTERNS_AGENT: AgentSpec = {
     "breakouts/breakdowns, gaps, volatility contraction before expansion, distance from support/resistance. " +
     "Name the bars (dates) for every pattern claim. If the candle series is too short or noisy to support a " +
     "structural read, your stance MUST be insufficient-evidence. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const SCENARIO_AGENT: AgentSpec = {
@@ -191,7 +198,7 @@ export const SCENARIO_AGENT: AgentSpec = {
     "For EACH case name the assumption that must come true (from the data: growth, margins, multiple, macro) — " +
     "never a bare price target. Use the reverse-DCF implied growth and the 52-week range as anchors where shown. " +
     "Assign probabilities only as coarse words (likely/unlikely) — never fake precision. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const BACKTEST_AGENT: AgentSpec = {
@@ -204,7 +211,7 @@ export const BACKTEST_AGENT: AgentSpec = {
     "resolved up or down over 20 and 60 trading days, and the median move. Judge whether the council's directional " +
     "lean is historically supported or contradicted. Cite the sample sizes. If the sample is under 8 occurrences, " +
     "your stance MUST be insufficient-evidence. " +
-    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + JSON_RULES.analyst,
+    SECURITY_PREAMBLE + NUMBERS_RULE + SAFETY_RULE + METHOD_RULE + JSON_RULES.analyst,
 };
 
 export const RED_TEAM_AGENT: AgentSpec = {
@@ -218,6 +225,10 @@ export const RED_TEAM_AGENT: AgentSpec = {
     "You have permission to REJECT the whole exercise: if the evidence base is too thin to support ANY stance, " +
     "set requiresReject=true and stance=insufficient-evidence. Do not rubber-stamp. Do not soften objections. " +
     "You never produce a bullish or bearish stance yourself — only caution or reject. " +
+    "CHECKLIST you must run: (a) does any agent cite a number absent from the data? (b) is the consensus driven by " +
+    "one shared input (e.g. all leaning on the same headline or the same trend line)? (c) does MEMORY show this system " +
+    "was wrong on this ticker before in a similar setup? (d) is the historical replay sample too small? (e) does the " +
+    "valuation depend on one fragile assumption? Each objection must name the agent and the specific claim. " +
     SECURITY_PREAMBLE + NUMBERS_RULE + JSON_RULES.redteam,
 };
 
@@ -233,9 +244,10 @@ export const ALL_AGENT_SPECS: AgentSpec[] = [
   BACKTEST_AGENT,
 ];
 
-export function redTeamUser(pack: DataPack, agentJson: string): string {
+export function redTeamUser(pack: DataPack, agentJson: string, memory?: string): string {
+  const mem = memory ? `\n${memory}\n` : "";
   return (
-    `Company data:\n${primer(pack)}\n\nAgent outputs (JSON):\n${agentJson}\n\n` +
+    `Company data:\n${primer(pack)}\n${mem}\nAgent outputs (JSON):\n${agentJson}\n\n` +
     `Attack this council. Object to the weakest reasoning, the stalest data, and the unjustified assumptions. ` +
     `If the evidence cannot support any stance, REJECT.`
   );
@@ -246,7 +258,9 @@ export function agentUser(
   pack: DataPack,
   valuationContext: string,
   backtest?: string,
+  memory?: string,
 ): string {
   const bt = kind === "backtest" && backtest ? `\n${backtest}\n` : "";
-  return `Company data:\n${primer(pack)}\n${valuationContext}${bt}\nCast your independent analysis.`;
+  const mem = memory ? `\n${memory}\n` : "";
+  return `Company data:\n${primer(pack)}\n${valuationContext}${bt}${mem}\nCast your independent analysis.`;
 }

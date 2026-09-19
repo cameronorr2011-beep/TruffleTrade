@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 
 /**
- * The 30s brand film, rendered frame-by-frame (scripts/render-short.mjs).
+ * The 30s brand film, rendered frame-by-frame (scripts/render-v5.mjs).
+ * Captions are burned in, so muted autoplay still tells the whole story.
  * Autoplays muted + looping (browser-safe); tap toggles sound. A muted
  * <video> with playsInline autoplays on every mobile browser without JS.
  */
@@ -30,7 +31,9 @@ export default function VideoCard() {
         ref={ref}
         className="relative w-[248px] cursor-pointer rounded-[1.6rem] border border-truffle-400/20 shadow-2xl shadow-black/60 sm:w-[280px]"
         src="/video/truffletrade-short.mp4"
-        poster="/images/council-sim-dark.svg"
+        poster="/video/truffletrade-short-poster.jpg"
+        width={720}
+        height={1280}
         autoPlay
         muted
         loop

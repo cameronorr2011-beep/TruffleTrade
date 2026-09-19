@@ -9,7 +9,7 @@ function esc(s: string): string {
 
 /** RSS 2.0 feed of the blog — linked from <head> via alternates.types. */
 export function GET() {
-  const posts = [...POSTS].sort((a, b) => +new Date(b.date) - +new Date(a.date));
+  const posts = POSTS; // already newest-first
   const lastBuild = posts[0] ? new Date(posts[0].date).toUTCString() : new Date().toUTCString();
 
   const items = posts

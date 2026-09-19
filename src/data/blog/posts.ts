@@ -8,7 +8,11 @@ export interface BlogPost {
   body: { heading?: string; paragraphs: string[] }[];
 }
 
-export const POSTS: BlogPost[] = [
+import { ARTICLES_A } from "./articles-a";
+import { ARTICLES_B } from "./articles-b";
+
+/** The original three field notes; long-form articles live in articles-*.ts. */
+const FOUNDING_POSTS: BlogPost[] = [
   {
     slug: "why-six-analysts-beat-one-model",
     title: "Why six analysts beat one model",
@@ -118,6 +122,23 @@ export const POSTS: BlogPost[] = [
   },
 ];
 
+/** Every post, newest first. Sitemap, RSS and the index all read this list. */
+export const POSTS: BlogPost[] = [...FOUNDING_POSTS, ...ARTICLES_A, ...ARTICLES_B].sort(
+  (a, b) => +new Date(b.date) - +new Date(a.date),
+);
+
 export function getPost(slug: string): BlogPost | undefined {
   return POSTS.find((p) => p.slug === slug);
+}
+
+/** Posts sharing at least one tag, most recent first (falls back to newest). */
+export function relatedPosts(slug: string, limit = 3): BlogPost[] {
+  const me = getPost(slug);
+  if (!me) return POSTS.slice(0, limit);
+  const scored = POSTS.filter((p) => p.slug !== slug).map((p) => ({
+    p,
+    score: p.tags.filter((t) => me.tags.includes(t)).length,
+  }));
+  scored.sort((a, b) => b.score - a.score || +new Date(b.p.date) - +new Date(a.p.date));
+  return scored.slice(0, limit).map((s) => s.p);
 }

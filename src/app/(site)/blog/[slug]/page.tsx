@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { POSTS, getPost } from "@/data/blog/posts";
+import { POSTS, getPost, relatedPosts } from "@/data/blog/posts";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, SITE_URL, absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 
@@ -40,7 +40,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const post = getPost(slug);
   if (!post) notFound();
 
-  const others = POSTS.filter((p) => p.slug !== slug).slice(0, 2);
+  const others = relatedPosts(slug, 3);
 
   const wordCount = post.body.reduce((n, s) => n + s.paragraphs.join(" ").split(/\s+/).length, 0);
 
@@ -115,9 +115,26 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         ))}
       </div>
 
-      <div className="mt-14 border-t border-soil-600 pt-8">
+      {/* Contextual CTA — the article explained the idea; this is where it lives. */}
+      <aside className="card card-gold mt-14 p-6">
+        <span className="eyebrow">See it running</span>
+        <p className="mt-3 text-[15px] font-bold tracking-[-0.3px] text-ink">
+          Everything above is deterministic code or a versioned prompt inside TruffleTrade — free desktop app, AI for 1,000
+          sats a month, source on GitHub.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/install" className="btn-primary !px-5 !py-2.5 !text-[11.5px]">
+            Install for Windows
+          </Link>
+          <Link href="/#product" className="btn-secondary !px-5 !py-2.5 !text-[11.5px]">
+            How the council works
+          </Link>
+        </div>
+      </aside>
+
+      <div className="mt-12 border-t border-soil-600 pt-8">
         <h3 className="font-mono text-[0.66rem] uppercase tracking-[0.24em] text-faint">Keep reading</h3>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {others.map((p) => (
             <Link key={p.slug} href={`/blog/${p.slug}`} className="card block p-5">
               <p className="font-display text-[1.1rem] font-semibold text-ink">{p.title}</p>

@@ -299,8 +299,9 @@ export default function LandingPage() {
                 <span className="text-gold">Every side.</span>
               </h2>
               <p className="mt-4 max-w-xl text-[14.5px] leading-relaxed text-bone-soft">
-                Nine analysts. A red team. A memory that keeps score. Here&apos;s the whole idea before you install
-                anything. Music: “Recall” by gabriawll (NCS).
+                A 3D flythrough of the whole idea — the candle canyon, the council, the red team, the ledger of every
+                call it ever made — before you install anything. Captioned, so it works on mute. Music: “Invincible” by
+                Deaf Kev (NCS).
               </p>
             </div>
             <VideoCard />

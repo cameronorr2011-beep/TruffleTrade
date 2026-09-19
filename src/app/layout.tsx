@@ -24,7 +24,8 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — ${TAGLINE}`,
+    // Keyword-bearing default ("AI stock analysis") — the tagline stays on OG/Twitter cards.
+    default: `${SITE_NAME} — AI Stock Analysis with Nine Rival Analysts & a Memory`,
     template: `%s · ${SITE_NAME}`,
   },
   description: DESCRIPTION,

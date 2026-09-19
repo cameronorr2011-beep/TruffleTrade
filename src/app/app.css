@@ -612,6 +612,37 @@
   .tt-thinking-dots i { animation: none; opacity: 0.8; }
   .tt-thinking-stage { animation: none; }
 }
+/* ── Analyst modes + thinking trace ─────────────────────────── */
+.tt-modes { display: inline-flex; gap: 4px; margin-top: 10px; padding: 3px; border: 1px solid var(--app-line); border-radius: 9px; background: var(--app-bg-raised); }
+.tt-mode { border: 0; background: transparent; color: var(--app-ink-soft); font: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.2px; padding: 5px 10px; border-radius: 7px; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.tt-mode:hover { color: var(--app-ink); }
+.tt-mode.is-on { background: #1a2b21; color: #eef5ee; box-shadow: inset 0 0 0 1px var(--app-line-strong); }
+.tt-trace { margin-top: 8px; border-top: 1px dashed var(--app-line); padding-top: 8px; }
+.tt-trace-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tt-conf { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 3px 8px; border-radius: 999px; border: 1px solid var(--app-line-strong); font-family: var(--font-mono, monospace); font-size: 9.5px; letter-spacing: 0.4px; color: var(--app-ink-soft); overflow: hidden; }
+.tt-conf i { position: absolute; left: 0; top: 0; bottom: 0; opacity: 0.18; background: var(--app-accent); }
+.tt-conf.is-mid i { background: var(--app-gold); }
+.tt-conf.is-low i { background: var(--app-neg); }
+.tt-conf b { position: relative; color: #eef5ee; }
+.tt-trace-chip { font-family: var(--font-mono, monospace); font-size: 9.5px; letter-spacing: 0.4px; color: var(--app-ink-soft); border: 1px solid var(--app-line); border-radius: 999px; padding: 3px 9px; }
+.tt-trace-mem { color: var(--app-gold); border-color: rgba(232, 174, 82, 0.35); }
+.tt-trace-toggle { margin-left: auto; border: 0; background: transparent; color: var(--app-accent); font: inherit; font-size: 10px; font-weight: 700; cursor: pointer; letter-spacing: 0.2px; }
+.tt-trace-toggle:hover { text-decoration: underline; }
+.tt-trace-body { display: grid; gap: 10px; margin-top: 10px; padding: 12px; border: 1px solid var(--app-line); border-radius: 10px; background: var(--app-bg-raised); animation: tt-think-in 0.25s ease; }
+.tt-trace-sec h4 { margin: 0 0 5px; font-family: var(--font-mono, monospace); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--app-ink-faint); }
+.tt-trace-sec ol, .tt-trace-sec ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 11.5px; line-height: 1.55; color: var(--app-ink); }
+.tt-trace-sec ul { list-style: none; padding-left: 0; }
+.tt-trace-sec p { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--app-ink); }
+.tt-trace-ev { color: var(--app-ink-soft) !important; }
+.tt-trace-warn { color: var(--app-neg) !important; }
+.tt-trace-age { color: var(--app-ink-faint); font-size: 10px; }
+.tt-basis { display: inline-block; font-family: var(--font-mono, monospace); font-size: 8.5px; letter-spacing: 0.8px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; vertical-align: middle; border: 1px solid var(--app-line-strong); color: var(--app-ink-soft); text-transform: uppercase; }
+.tt-basis-fact { color: var(--app-pos); border-color: rgba(74, 222, 128, 0.35); }
+.tt-basis-model, .tt-basis-scenario { color: var(--app-gold); border-color: rgba(232, 174, 82, 0.35); }
+.tt-basis-uncertain, .tt-sev-high { color: var(--app-neg); border-color: rgba(240, 122, 90, 0.4); }
+.tt-sev-medium { color: var(--app-gold); border-color: rgba(232, 174, 82, 0.35); }
+.tt-basis-mem { color: var(--app-accent); border-color: rgba(88, 169, 123, 0.35); }
+
 .tt-chat-input { display: flex; gap: 8px; padding: 12px 18px 8px; border-top: 1px solid var(--app-line); }
 .tt-chat-input input {
   flex: 1; background: #0f1713; border: 1px solid var(--app-line-strong); border-radius: 10px;

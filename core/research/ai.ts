@@ -19,14 +19,31 @@ export interface AiResult<T> {
 }
 
 export interface ChatMessage {
-  role: "system" | "user";
+  role: "system" | "user" | "assistant";
   content: string;
+}
+
+export type ReasoningEffort = "low" | "medium" | "high";
+
+/** Per-call knobs. Reasoning effort only applies to reasoning-capable models (gpt-oss, qwen3, deepseek-r1). */
+export interface ChatOptions {
+  reasoningEffort?: ReasoningEffort;
+  temperature?: number;
 }
 
 export interface AIProvider {
   readonly kind: ProviderKind;
   readonly model: string;
-  chatJson<T>(messages: ChatMessage[], promptVersion: string, maxTokens?: number): Promise<AiResult<T>>;
+  chatJson<T>(messages: ChatMessage[], promptVersion: string, maxTokens?: number, opts?: ChatOptions): Promise<AiResult<T>>;
+}
+
+/**
+ * Models on Groq that accept `reasoning_effort: low|medium|high`. Only the
+ * gpt-oss family uses this ladder (qwen3 takes none|default, kimi-k2 rejects
+ * the field) — sending it anywhere else is a 400 on every call.
+ */
+export function supportsReasoning(model: string): boolean {
+  return /gpt-oss/i.test(model);
 }
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -73,20 +90,22 @@ export class GroqProvider implements AIProvider {
     public model: string,
   ) {}
 
-  async chatJson<T>(messages: ChatMessage[], promptVersion: string, maxTokens = 2200): Promise<AiResult<T>> {
+  async chatJson<T>(messages: ChatMessage[], promptVersion: string, maxTokens = 2200, opts: ChatOptions = {}): Promise<AiResult<T>> {
     const started = Date.now();
     const body = JSON.stringify({
       model: this.model,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
       response_format: { type: "json_object" },
-      temperature: 0.35,
+      temperature: opts.temperature ?? 0.35,
+      // Reasoning tokens count against the completion budget on gpt-oss, so
+      // callers requesting "high" must pass a larger maxTokens (router does).
       max_completion_tokens: maxTokens,
-      reasoning_effort: "low",
+      ...(supportsReasoning(this.model) ? { reasoning_effort: opts.reasoningEffort ?? "low" } : {}),
     });
     const { j } = await groqFetch(this.apiKey, body);
     const content = j.choices?.[0]?.message?.content ?? "";
     return {
-      data: JSON.parse(content) as T,
+      data: parseJsonLoose<T>(content),
       meta: {
         provider: this.kind,
         model: this.model,
@@ -114,13 +133,20 @@ export class GatewayProvider implements AIProvider {
     public model: string = "openai/gpt-oss-120b",
   ) {}
 
-  async chatJson<T>(messages: ChatMessage[], promptVersion: string, maxTokens = 2200): Promise<AiResult<T>> {
+  async chatJson<T>(messages: ChatMessage[], promptVersion: string, maxTokens = 2200, opts: ChatOptions = {}): Promise<AiResult<T>> {
     const started = Date.now();
     const res = await fetch(`${this.gatewayUrl.replace(/\/$/, "")}/api/gateway/ai`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-access-code": this.accessCode },
-      body: JSON.stringify({ messages, model: this.model, maxTokens, promptVersion }),
-      signal: AbortSignal.timeout(120_000),
+      body: JSON.stringify({
+        messages,
+        model: this.model,
+        maxTokens,
+        promptVersion,
+        reasoningEffort: opts.reasoningEffort,
+        temperature: opts.temperature,
+      }),
+      signal: AbortSignal.timeout(150_000),
     });
     const j = (await res.json().catch(() => ({}))) as {
       ok?: boolean;
@@ -143,6 +169,21 @@ export class GatewayProvider implements AIProvider {
         tokensOut: j.meta?.tokensOut ?? null,
       },
     };
+  }
+}
+
+/**
+ * JSON-mode models occasionally wrap the object in a code fence or emit a
+ * stray preamble; recover the outermost object instead of failing the call.
+ */
+export function parseJsonLoose<T>(content: string): T {
+  try {
+    return JSON.parse(content) as T;
+  } catch {
+    const start = content.indexOf("{");
+    const end = content.lastIndexOf("}");
+    if (start >= 0 && end > start) return JSON.parse(content.slice(start, end + 1)) as T;
+    throw new Error("model returned non-JSON content");
   }
 }
 

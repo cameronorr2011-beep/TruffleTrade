@@ -16,6 +16,7 @@ import { replaySetup, backtestContext } from "./backtest";
 import { buildConfidence, buildConsensus, allPromptVersions } from "./consensus";
 import { makeProvider } from "./ai";
 import { buildThesis, nullThesis } from "./thesis";
+import { buildValuationContext, memoryContext } from "./context";
 
 export interface ResearchOptions {
   ticker: string;
@@ -50,8 +51,13 @@ export async function runResearch(opts: ResearchOptions): Promise<ResearchRun> {
   const valuationContext = buildValuationContext(valuation);
   // Deterministic historical replay feeds the Backtest worker (computed fact, not opinion).
   const bt = replaySetup(pack.candles1d, pack.spyCloses, pack.technicals);
+  // What this installation already learned about the ticker (prior theses,
+  // red-team objections, resolved prediction outcomes) — every analyst and the
+  // red team see it, labeled as prior evidence, so the council can't repeat a
+  // mistake it has already been graded on.
+  const memory = await memoryContext(ticker);
   const provider = makeProvider(opts.accessCode);
-  const { agents } = await runAgentCouncil(provider, pack, valuationContext, backtestContext(bt));
+  const { agents } = await runAgentCouncil(provider, pack, valuationContext, backtestContext(bt), memory.text || undefined);
   const consensus = buildConsensus(agents);
   const confidence = buildConfidence(pack, agents);
 
@@ -100,42 +106,6 @@ export async function runResearch(opts: ResearchOptions): Promise<ResearchRun> {
     durationMs: Date.now() - started,
     errors,
   };
-}
-
-function buildValuationContext(v: ValuationModel): string {
-  const lines: string[] = [];
-  if (v.dcf) {
-    const a = v.dcf.assumptions;
-    const sens = v.dcf.sensitivity.map((s) => s.fairValue);
-    lines.push(
-      `DCF model (assumptions exposed): base FCF ${Math.round(a.baseFcf).toLocaleString("en-US")}, ` +
-        `growth years 1-5 ${(a.growthYears1to5 * 100).toFixed(1)}%, terminal growth ${(a.growthTerminal * 100).toFixed(1)}%, ` +
-        `discount rate ${(a.discountRate * 100).toFixed(1)}%, net debt ${Math.round(a.netDebt).toLocaleString("en-US")}, ` +
-        `fair value ${v.dcf.fairValue} (PV explicit ${Math.round(v.dcf.pvExplicit).toLocaleString()}, ` +
-        `PV terminal ${Math.round(v.dcf.pvTerminal).toLocaleString()}), sensitivity range ` +
-        `${Math.min(...sens)} to ${Math.max(...sens)}.`,
-    );
-  } else {
-    lines.push(`DCF model: NOT APPLICABLE (${v.dcfError ?? "insufficient inputs"}). Do not estimate a fair value.`);
-  }
-  if (v.reverseDcf) {
-    lines.push(
-      `Reverse DCF: the current price of ${v.reverseDcf.price} implies ` +
-        `${(v.reverseDcf.impliedGrowthYears1to5 * 100).toFixed(1)}% annual FCF growth for 5 years ` +
-        `(same discount/terminal assumptions as the DCF). Judge whether that expectation is plausible.`,
-    );
-  }
-  if (v.comps.length) {
-    lines.push(
-      "Peer comparison:\n" +
-        v.comps
-          .map((c) => `- ${c.metric}: company ${c.value ?? "unavailable"} vs peer median ${c.peerMedian ?? "unavailable"}: ${c.verdict}`)
-          .join("\n"),
-    );
-  } else {
-    lines.push("Peer comparison: unavailable (no peer fundamentals).");
-  }
-  return lines.join("\n");
 }
 
 function makeForecast(

@@ -5,7 +5,30 @@ import { authHeaders, getAccessCode, setAccessCode, clearAccessCode } from "@/li
 import { BUY_URL } from "@/lib/site-url";
 import AccessCodeDialog from "@/components/research/AccessCodeDialog";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Mode = "analyst" | "devil" | "brief";
+
+interface Thinking {
+  plan: string[];
+  claims: { text: string; basis: string }[];
+  critic: { verdict: string; issues: { severity: string; text: string }[] };
+  confidence: number;
+  invalidator: string | null;
+  factCheck: { verifiedClaims: number; violations: number };
+  evidence: string[];
+  memoryFacts: number;
+  lastRun: { stance: string; score: number; ts: number } | null;
+  contextErrors: string[];
+  passes: number;
+  durationMs: number;
+}
+type MemoryLine = { kind: string; content: string; ageDays: number; confidence: number };
+type Msg = { role: "user" | "assistant"; content: string; thinking?: Thinking; memory?: MemoryLine[]; mode?: Mode };
+
+const MODES: { id: Mode; label: string; hint: string }[] = [
+  { id: "analyst", label: "Analyst", hint: "Balanced, evidence-weighted read. Two passes: draft → red-team critic." },
+  { id: "devil", label: "Devil's advocate", hint: "Argues against the prevailing view using the same data." },
+  { id: "brief", label: "Brief", hint: "Three bullets, single pass, fastest." },
+];
 
 const QUICK_ACTIONS = [
   { label: "Explain This", prompt: "Explain what is driving this ticker right now — price action, technicals, and the news that matters." },
@@ -19,11 +42,12 @@ type Phase = "chat" | "need-key" | "checking";
 
 /** Rotating progress copy shown while the analyst works — mirrors the real pipeline. */
 const THINKING_STAGES = [
-  "pulling live context · quote, technicals, headlines…",
-  "six analysts reading the evidence…",
-  "fact-checker cross-examining every number…",
-  "red team probing the weak points…",
-  "composing the verdict…",
+  "assembling the evidence pack · quote, technicals, valuation, replay, twin…",
+  "recalling what this system already learned about the ticker…",
+  "drafting with high reasoning effort — steelmanning the other side…",
+  "red-team critic checking every number and label…",
+  "fact-checker stripping anything the data can't support…",
+  "calibrating confidence…",
 ] as const;
 
 /**
@@ -43,6 +67,8 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
   const [keyDialog, setKeyDialog] = useState(false);
   const [confirmOff, setConfirmOff] = useState(false);
   const [thinkingStage, setThinkingStage] = useState(0);
+  const [mode, setMode] = useState<Mode>("analyst");
+  const [openTrace, setOpenTrace] = useState<number | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   // Cycle the thinking stages while a request is in flight; reset when done.
@@ -51,7 +77,7 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
       setThinkingStage(0);
       return;
     }
-    const t = setInterval(() => setThinkingStage((s) => (s + 1) % THINKING_STAGES.length), 2_400);
+    const t = setInterval(() => setThinkingStage((s) => (s + 1) % THINKING_STAGES.length), 3_000);
     return () => clearInterval(t);
   }, [busy]);
 
@@ -106,22 +132,22 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
         const res = await fetch("/api/analyst", {
           method: "POST",
           headers: { "Content-Type": "application/json", ...authHeaders() },
-          body: JSON.stringify({ messages: next.slice(-10), ticker }),
+          body: JSON.stringify({ messages: next.slice(-10).map(({ role, content }) => ({ role, content })), ticker, mode }),
         });
         if (res.status === 401 || res.status === 402 || res.status === 403) {
           setPhase("need-key");
           throw new Error("activation required");
         }
-        const j = (await res.json()) as { ok: boolean; reply?: string; error?: string };
+        const j = (await res.json()) as { ok: boolean; reply?: string; error?: string; thinking?: Thinking; memory?: MemoryLine[]; mode?: Mode };
         if (!j.ok || !j.reply) throw new Error(j.error ?? `HTTP ${res.status}`);
-        setMessages([...next, { role: "assistant", content: j.reply }]);
+        setMessages([...next, { role: "assistant", content: j.reply, thinking: j.thinking, memory: j.memory, mode: j.mode }]);
       } catch (e) {
         setError((e as Error).message);
       } finally {
         setBusy(false);
       }
     },
-    [messages, busy, ticker],
+    [messages, busy, ticker, mode],
   );
 
   /** Device deactivation: wipe the stored key — the gate re-appears. */
@@ -203,9 +229,26 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
         <div>
           <h2>TruffleTrade AI</h2>
           <p className="tt-chat-sub">
-            {ticker ? `Context locked on ${ticker} — live quote, technicals, valuation, headlines` : "Ask about any ticker — add one above to ground answers in live data"}
+            {ticker
+              ? `Evidence pack locked on ${ticker} — live quote, technicals, valuation, replay, twin, memory`
+              : "Ask about any ticker — add one above to ground answers in live data"}
             {subInfo?.daysRemaining != null ? ` · ${subInfo.daysRemaining}d remaining` : ""}
           </p>
+          <div className="tt-modes" role="tablist" aria-label="Analyst mode">
+            {MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                role="tab"
+                aria-selected={mode === m.id}
+                className={`tt-mode ${mode === m.id ? "is-on" : ""}`}
+                title={m.hint}
+                onClick={() => setMode(m.id)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span className="tt-pill tt-pill-ok">AI ACTIVE</span>
@@ -255,8 +298,11 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
         )}
         {messages.map((m, i) => (
           <div key={i} className={`tt-msg ${m.role === "user" ? "tt-msg-user" : "tt-msg-ai"}`}>
-            <span className="tt-msg-who">{m.role === "user" ? "YOU" : "TT AI"}</span>
+            <span className="tt-msg-who">
+              {m.role === "user" ? "YOU" : `TT AI${m.mode && m.mode !== "analyst" ? ` · ${m.mode === "devil" ? "DEVIL'S ADVOCATE" : "BRIEF"}` : ""}`}
+            </span>
             <p className="tt-msg-body">{m.content}</p>
+            {m.thinking && <ThinkingTrace t={m.thinking} memory={m.memory ?? []} open={openTrace === i} onToggle={() => setOpenTrace(openTrace === i ? null : i)} />}
           </div>
         ))}
         {busy && (
@@ -293,7 +339,102 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
           {busy ? "…" : "Send"}
         </button>
       </form>
-      <p className="tt-chat-foot">Research, not investment advice. Answers cite the server-verified market context — the model cannot see your data.</p>
+      <p className="tt-chat-foot">
+        Research, not investment advice. Every answer is drafted with high reasoning effort, reviewed by a red-team critic, and
+        number-checked against the live data pack — open “show its work” on any reply.
+      </p>
     </section>
+  );
+}
+
+/** The analyst's visible work: plan, critic findings, verified claims, evidence used, and what it remembers. */
+function ThinkingTrace({ t, memory, open, onToggle }: { t: Thinking; memory: MemoryLine[]; open: boolean; onToggle: () => void }) {
+  const conf = Math.round(t.confidence * 100);
+  const confClass = conf >= 70 ? "is-high" : conf >= 45 ? "is-mid" : "is-low";
+  const highIssues = t.critic.issues.filter((i) => i.severity === "high").length;
+  return (
+    <div className="tt-trace">
+      <div className="tt-trace-bar">
+        <span className={`tt-conf ${confClass}`} title="Calibrated confidence after critic review and fact-check">
+          <i style={{ width: `${conf}%` }} />
+          <b>{conf}%</b> confidence
+        </span>
+        <span className="tt-trace-chip" title="Numeric claims verified against the data pack · unsupported numbers stripped">
+          ✓ {t.factCheck.verifiedClaims} verified{t.factCheck.violations ? ` · ${t.factCheck.violations} stripped` : ""}
+        </span>
+        {t.passes > 1 && (
+          <span className="tt-trace-chip" title="Draft → red-team critic → fact-check">
+            {t.critic.verdict === "pass" ? "critic: pass" : highIssues ? `critic: ${highIssues} high` : `critic: ${t.critic.issues.length} fixes`}
+          </span>
+        )}
+        {t.memoryFacts > 0 && <span className="tt-trace-chip tt-trace-mem" title="On-device memory facts recalled for this ticker">◈ remembers {t.memoryFacts}</span>}
+        <button type="button" className="tt-trace-toggle" onClick={onToggle} aria-expanded={open}>
+          {open ? "hide its work" : "show its work"} · {(t.durationMs / 1000).toFixed(1)}s
+        </button>
+      </div>
+      {open && (
+        <div className="tt-trace-body">
+          {t.plan.length > 0 && (
+            <div className="tt-trace-sec">
+              <h4>Plan</h4>
+              <ol>{t.plan.map((p, i) => <li key={i}>{p}</li>)}</ol>
+            </div>
+          )}
+          {t.claims.length > 0 && (
+            <div className="tt-trace-sec">
+              <h4>Key claims</h4>
+              <ul>
+                {t.claims.map((c, i) => (
+                  <li key={i}>
+                    <span className={`tt-basis tt-basis-${c.basis.toLowerCase()}`}>{c.basis}</span> {c.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {t.critic.issues.length > 0 && (
+            <div className="tt-trace-sec">
+              <h4>Red-team critic</h4>
+              <ul>
+                {t.critic.issues.map((c, i) => (
+                  <li key={i}>
+                    <span className={`tt-basis tt-sev-${c.severity}`}>{c.severity}</span> {c.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {t.invalidator && (
+            <div className="tt-trace-sec">
+              <h4>What would change this view</h4>
+              <p>{t.invalidator}</p>
+            </div>
+          )}
+          <div className="tt-trace-sec">
+            <h4>Evidence used</h4>
+            <p className="tt-trace-ev">{t.evidence.length ? t.evidence.join(" · ") : "no ticker context — general knowledge only"}</p>
+            {t.lastRun && (
+              <p className="tt-trace-ev">
+                Last council run: {t.lastRun.stance} (score {t.lastRun.score.toFixed(2)}), {Math.round((Date.now() - t.lastRun.ts) / 86_400_000)}d ago
+              </p>
+            )}
+            {t.contextErrors.length > 0 && <p className="tt-trace-ev tt-trace-warn">Unavailable: {t.contextErrors.join("; ")}</p>}
+          </div>
+          {memory.length > 0 && (
+            <div className="tt-trace-sec">
+              <h4>What it remembers</h4>
+              <ul>
+                {memory.map((m, i) => (
+                  <li key={i}>
+                    <span className="tt-basis tt-basis-mem">{m.kind.replace("_", " ")}</span> {m.content}{" "}
+                    <span className="tt-trace-age">{m.ageDays}d ago</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

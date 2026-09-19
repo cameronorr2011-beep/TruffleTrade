@@ -11,15 +11,20 @@ const STANCE_WEIGHTS: Record<Stance, number> = {
   "insufficient-evidence": 0,
 };
 
+// v2.0: METHOD rule (steelman + calibration + memory check), memory block in
+// every prompt, red-team checklist, reasoning effort per task class.
 const PROMPT_VERSIONS: Record<string, string> = {
-  fundamental: "fundamental-agent-v1.0",
-  valuation: "valuation-agent-v1.0",
-  technical: "technical-agent-v1.0",
-  macro: "macro-agent-v1.0",
-  competitive: "competitive-agent-v1.0",
-  news: "news-agent-v1.0",
-  redteam: "redteam-agent-v1.0",
-  thesis: "thesis-engine-v1.0",
+  fundamental: "fundamental-agent-v2.0",
+  valuation: "valuation-agent-v2.0",
+  technical: "technical-agent-v2.0",
+  macro: "macro-agent-v2.0",
+  competitive: "competitive-agent-v2.0",
+  news: "news-agent-v2.0",
+  patterns: "patterns-agent-v2.0",
+  scenario: "scenario-agent-v2.0",
+  backtest: "backtest-agent-v2.0",
+  redteam: "redteam-agent-v2.0",
+  thesis: "thesis-engine-v1.1",
 };
 
 export function promptVersion(kind: string): string {

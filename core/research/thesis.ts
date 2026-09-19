@@ -13,6 +13,7 @@ import type {
 } from "./types";
 import { metricTable } from "./factcheck";
 import type { AIProvider } from "./ai";
+import { selectModel } from "./router";
 
 interface RawThesisJson {
   summary?: string;
@@ -31,7 +32,7 @@ interface RawThesisJson {
   }[];
 }
 
-const THESIS_PROMPT_VERSION = "thesis-engine-v1.0";
+const THESIS_PROMPT_VERSION = "thesis-engine-v1.1";
 
 const THESIS_SYSTEM =
   "You are the THESIS ENGINE. Using ONLY the council outputs and data provided, draft the investment thesis. " +
@@ -77,13 +78,15 @@ export async function buildThesis(
     `Draft the thesis.`;
 
   try {
+    const sel = selectModel("synthesis");
     const r = await provider.chatJson<RawThesisJson>(
       [
         { role: "system", content: THESIS_SYSTEM },
         { role: "user", content: user },
       ],
       THESIS_PROMPT_VERSION,
-      2600,
+      sel.maxTokens,
+      { reasoningEffort: sel.reasoningEffort },
     );
     const d = r.data;
     const invalidation = sanitizeInvalidation(d.invalidation, table);

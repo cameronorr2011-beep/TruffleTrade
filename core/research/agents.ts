@@ -65,6 +65,7 @@ export async function runAgentCouncil(
   pack: DataPack,
   valuationContext: string,
   backtestCtx?: string,
+  memoryCtx?: string,
 ): Promise<CouncilResult> {
   // Delegated subagents: every analyst is an independent worker with its own
   // mandate, fired concurrently. One agent failing never fails the council.
@@ -81,10 +82,11 @@ export async function runAgentCouncil(
         const r = await provider.chatJson<RawAgentJson>(
           [
             { role: "system", content: spec.system },
-            { role: "user", content: agentUser(spec.key, pack, valuationContext, backtestCtx) },
+            { role: "user", content: agentUser(spec.key, pack, valuationContext, backtestCtx, memoryCtx) },
           ],
           promptVersion(spec.key),
           sel.maxTokens,
+          { reasoningEffort: sel.reasoningEffort },
         );
         recordUsage({
           requestId: requestId(),
@@ -156,11 +158,11 @@ export async function runAgentCouncil(
   );
 
   // Red team sees the council's raw outputs and attacks (§7).
-  const redTeam = await runRedTeam(provider, pack, council);
+  const redTeam = await runRedTeam(provider, pack, council, memoryCtx);
   return { agents: [...council, redTeam], aiCalls: ALL_AGENT_SPECS.length + 1 };
 }
 
-async function runRedTeam(provider: AIProvider, pack: DataPack, council: AgentOutput[]): Promise<AgentOutput> {
+async function runRedTeam(provider: AIProvider, pack: DataPack, council: AgentOutput[], memoryCtx?: string): Promise<AgentOutput> {
   const spec = RED_TEAM_AGENT;
   const agentJson = JSON.stringify(
     council.map((a) => ({
@@ -181,10 +183,11 @@ async function runRedTeam(provider: AIProvider, pack: DataPack, council: AgentOu
     const r = await provider.chatJson<RawAgentJson>(
       [
         { role: "system", content: spec.system },
-        { role: "user", content: redTeamUser(pack, agentJson) },
+        { role: "user", content: redTeamUser(pack, agentJson, memoryCtx) },
       ],
       promptVersion(spec.key),
       sel.maxTokens,
+      { reasoningEffort: sel.reasoningEffort },
     );
     recordUsage({
       requestId: requestId(),
@@ -209,7 +212,9 @@ async function runRedTeam(provider: AIProvider, pack: DataPack, council: AgentOu
       evidence: [],
       numericClaims: [],
       strengths: [],
-      weaknesses: [],
+      // Objections are surfaced as weaknesses so the thesis engine, the memory
+      // ingest, and the UI all see exactly what the red team attacked.
+      weaknesses: asStringArray(d.objections, 6),
       assumptions: [],
       violations: [],
       model: r.meta.model,

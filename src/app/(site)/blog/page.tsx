@@ -38,7 +38,7 @@ const blogJsonLd = [
 ];
 
 export default function BlogIndex() {
-  const posts = [...POSTS].sort((a, b) => +new Date(b.date) - +new Date(a.date));
+  const posts = POSTS; // already newest-first
   return (
     <div className="mx-auto max-w-[900px] px-5 py-20 sm:px-8">
       <JsonLd data={blogJsonLd} />

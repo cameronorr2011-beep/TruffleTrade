@@ -3,6 +3,8 @@
 // The research engine's GroqProvider remains the transport; this router adds
 // the accounting/selection layer on top so provider changes don't ripple.
 
+import type { ReasoningEffort } from "./ai";
+
 export type TaskClass = "FAST" | "REASONING" | "VERIFICATION" | "SYNTHESIS";
 
 export interface ModelSelection {
@@ -11,6 +13,7 @@ export interface ModelSelection {
   taskClass: TaskClass;
   maxTokens: number;
   timeoutMs: number;
+  reasoningEffort: ReasoningEffort;
 }
 
 export interface UsageRecord {
@@ -41,14 +44,24 @@ const CLASS_BY_OPERATION: Record<string, TaskClass> = {
   fact_check: "VERIFICATION",
   red_team: "VERIFICATION",
   synthesis: "SYNTHESIS",
+  analyst_draft: "SYNTHESIS",
+  analyst_critic: "VERIFICATION",
 };
 
-// Budgets per task class (token ceilings and hard timeouts).
-const BUDGETS: Record<TaskClass, { maxTokens: number; timeoutMs: number }> = {
-  FAST: { maxTokens: 1_200, timeoutMs: 25_000 },
-  REASONING: { maxTokens: 2_000, timeoutMs: 45_000 },
-  VERIFICATION: { maxTokens: 1_500, timeoutMs: 35_000 },
-  SYNTHESIS: { maxTokens: 2_200, timeoutMs: 50_000 },
+// Budgets per task class. On gpt-oss the model's private reasoning tokens
+// count against max_completion_tokens, so higher effort needs more headroom
+// or the visible JSON gets truncated. Override the effort ladder with
+// TT_REASONING=low|medium|high (e.g. to trade smarts for speed).
+const EFFORT_LADDER: readonly ReasoningEffort[] = ["low", "medium", "high"];
+const envEffort = process.env.TT_REASONING?.trim().toLowerCase();
+const EFFORT_OVERRIDE: ReasoningEffort | undefined = EFFORT_LADDER.includes(envEffort as ReasoningEffort)
+  ? (envEffort as ReasoningEffort)
+  : undefined;
+const BUDGETS: Record<TaskClass, { maxTokens: number; timeoutMs: number; reasoningEffort: ReasoningEffort }> = {
+  FAST: { maxTokens: 1_800, timeoutMs: 35_000, reasoningEffort: "low" },
+  REASONING: { maxTokens: 3_200, timeoutMs: 60_000, reasoningEffort: "medium" },
+  VERIFICATION: { maxTokens: 4_000, timeoutMs: 75_000, reasoningEffort: "high" },
+  SYNTHESIS: { maxTokens: 4_800, timeoutMs: 90_000, reasoningEffort: "high" },
 };
 
 // Model preference per task class (provider-qualified). The gateway/operator
@@ -72,6 +85,7 @@ export function selectModel(operation: string): ModelSelection {
     taskClass,
     maxTokens: budget.maxTokens,
     timeoutMs: budget.timeoutMs,
+    reasoningEffort: EFFORT_OVERRIDE ?? budget.reasoningEffort,
   };
 }
 

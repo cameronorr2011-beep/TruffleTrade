@@ -24,6 +24,8 @@ const BodySchema = z.object({
   model: z.string().max(80).optional(),
   maxTokens: z.number().int().min(64).max(8_000).optional(),
   promptVersion: z.string().max(40).optional(),
+  reasoningEffort: z.enum(["low", "medium", "high"]).optional(),
+  temperature: z.number().min(0).max(1).optional(),
 });
 
 /**
@@ -63,7 +65,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: `invalid body: ${parsed.error.issues[0]?.message}` }, { status: 400 });
   }
 
-  const { messages, model, maxTokens, promptVersion } = parsed.data;
+  const { messages, model, maxTokens, promptVersion, reasoningEffort, temperature } = parsed.data;
   const provider = makeProvider(); // operator path — reads GROQ_API_KEY server-side only
   if (model && provider.model !== model) {
     // Only the operator decides the model; silently honor the default if a
@@ -72,7 +74,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await provider.chatJson<unknown>(messages as ChatMessage[], promptVersion ?? "gateway-v1", maxTokens ?? 2200);
+    const result = await provider.chatJson<unknown>(messages as ChatMessage[], promptVersion ?? "gateway-v1", maxTokens ?? 2200, {
+      reasoningEffort,
+      temperature,
+    });
     // Record usage against the code.
     const { licensingDb } = await import("@core/licensing/db");
     await licensingDb().touchCode(validation.codeHash!, Date.now());

@@ -14,8 +14,10 @@ How the adversarial AI works, what it may claim, and how it is evaluated.
 | **News** | material events, sentiment, attribution to real headlines | fabricated citations |
 | **RedTeam** | attack everything; may REJECT the whole run | rubber-stamping |
 
-Agents run in parallel and never see each other's outputs — independence by construction.
-The red team runs last and sees everything.
+Three more specialists joined the council: **Chart patterns** (raw OHLC structure), **Scenario**
+(bull/base/bear with the assumption each needs) and **Backtest** (deterministic replay of the
+current setup over the ticker's own history). Agents run in parallel and never see each other's
+outputs — independence by construction. The red team runs last and sees everything.
 
 ## What the AI is forbidden from doing
 
@@ -77,3 +79,39 @@ directional accuracy across ALL resolved forecasts — hits and misses both stay
 `AIProvider.chatJson()` is the single AI entry point. Groq today; OpenAI / Anthropic /
 Google / local models are one class away. Every call logs provider, model, prompt version,
 timestamp, duration, and token usage where available.
+
+### Reasoning effort per task class (v2.0)
+
+| Task class | Operations | Effort | Token budget |
+|---|---|---|---|
+| FAST | technicals, macro, news, patterns, backtest | low | 1,800 |
+| REASONING | fundamentals, valuation, competition, scenario | medium | 3,200 |
+| VERIFICATION | red team, analyst critic | high | 4,000 |
+| SYNTHESIS | thesis, analyst draft | high | 4,800 |
+
+`reasoning_effort` is only sent to models that accept the low/medium/high ladder (gpt-oss).
+Override the whole ladder with `TT_REASONING=low|medium|high` to trade smarts for speed.
+
+### Memory in the loop (v2.0)
+
+Every analyst and the red team receive a MEMORY block: what this installation previously
+concluded about the ticker (theses, red-team objections) and how its resolved predictions
+scored. It is labeled prior evidence; live data wins on conflict. Prompts (`METHOD` rule)
+require each analyst to steelman the opposite view, calibrate confidence, and explain what
+is different when a past call was wrong.
+
+## The conversational analyst (`/api/analyst`)
+
+Two passes over one evidence pack (live primer, deterministic DCF/reverse-DCF, historical
+replay, digital-twin distribution, on-device memory, last council run):
+
+1. **Draft** (SYNTHESIS, high effort) — plan, labeled claims (FACT / INFERENCE / SCENARIO /
+   MODEL / UNCERTAIN), reply, confidence, invalidator.
+2. **Critic** (VERIFICATION, high effort) — a red-team reviewer checks numbers, labels,
+   contradictions across pack sections and calibration, then rewrites. Skipped in `brief` mode.
+3. **Deterministic fact-check** — numbers that contradict the metric table are stripped and
+   penalize confidence; numbers legitimately outside the table (model outputs) are left alone.
+
+Modes: `analyst` (balanced), `devil` (argue against the prevailing view), `brief` (single pass).
+The UI shows the trace ("show its work"): plan, critic findings, verified-claim count,
+evidence sections used, and the memory facts recalled.
