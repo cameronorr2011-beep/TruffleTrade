@@ -954,3 +954,68 @@
   .bt-stat-value { font-size: 24px !important; }
   .bt-brief-text { font-size: 13px; }
 }
+
+/* ── Desktop update surfaces (UpdateBanner.tsx) ─────────────────────────
+   Rendered only inside the desktop shell (bridge present). The strip keeps
+   its own row; the banner spans full width above the topbar. */
+.tt-update-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 18px;
+  background: #101814;
+  border-bottom: 1px solid var(--app-line);
+  font-size: 11px;
+  color: var(--app-ink-soft);
+}
+.tt-update-strip-label { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tt-update-strip-bar {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 3px;
+  background: #1a2620;
+  overflow: hidden;
+}
+.tt-update-strip-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--app-accent-deep), var(--app-accent));
+  transition: width 0.4s ease;
+}
+.tt-update-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  background: linear-gradient(90deg, rgba(88, 169, 123, 0.14), rgba(88, 169, 123, 0.05));
+  border-bottom: 1px solid var(--app-accent-deep);
+}
+.tt-update-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--app-pos);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.7);
+  flex: none;
+}
+.tt-update-banner strong { font-size: 12.5px; color: var(--app-ink); white-space: nowrap; }
+.tt-update-copy { font-size: 12px; color: var(--app-ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tt-update-restart {
+  margin-left: auto;
+  flex: none;
+  border: 1px solid var(--app-accent);
+  background: var(--app-accent);
+  color: #08110c;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.tt-update-restart:hover { filter: brightness(1.12); }
+@media (max-width: 720px) {
+  .tt-update-copy { display: none; }
+}

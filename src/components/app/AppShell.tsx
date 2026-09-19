@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import BlackTrufflePanel from "@/components/app/BlackTrufflePanel";
+import UpdateBanner from "@/components/app/UpdateBanner";
 import "@/app/app.css";
 
 const NAV: { href: string; label: string; icon: string; badge?: string }[] = [
@@ -134,6 +135,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="tt-main">
+          <UpdateBanner />
           <header className="tt-topbar">
             <span className="tt-topbar-scrim" aria-hidden />
             <span className="tt-topbar-title">

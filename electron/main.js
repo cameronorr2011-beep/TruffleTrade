@@ -14,7 +14,7 @@
  * The window also shows a splash immediately and swaps in the dashboard as
  * soon as /api/status proves healthy, so a slow boot is never a blank frame.
  */
-const { app, BrowserWindow, Tray, Menu, shell, nativeImage, dialog } = require("electron");
+const { app, BrowserWindow, Tray, Menu, shell, nativeImage, dialog, ipcMain } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const http = require("node:http");
 const path = require("node:path");
@@ -40,6 +40,26 @@ let win = null;
 let tray = null;
 let server = null;
 let quitting = false;
+
+// ── Update state shared with the renderer (read via IPC) ─────────────
+// The updater runs entirely in the main process; the in-app banner polls this
+// snapshot instead of importing electron-updater itself.
+const updateState = {
+  status: "idle", // idle | checking | available | downloading | downloaded | error
+  info: null, // { version } of the pending/new release
+  progress: 0, // 0..100 while downloading
+  error: null,
+  checkedAt: 0, // epoch ms of last completed check
+};
+function broadcastUpdateState() {
+  if (win && !win.isDestroyed()) {
+    try {
+      win.webContents.send("tt:update-state", { ...updateState });
+    } catch {
+      // window tearing down — the renderer also polls via IPC, so nothing is lost
+    }
+  }
+}
 
 // ── Local server lifecycle ────────────────────────────────────────────
 /** HEAD/GET /api/status → 200 only if the local Next app is genuinely ours and healthy. */
@@ -150,6 +170,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
@@ -214,15 +235,43 @@ function startWatchdog() {
 }
 
 // ── Auto-update: releases come from GitHub (app-update.yml) ───────────
-// Checks in the background, downloads silently, applies on next quit — with
-// an opt-in "Restart now" prompt so an update never interrupts a session.
-// Dev builds skip this (no packaged app-update.yml).
+// Checks on launch, then every 30 minutes, and again when the window regains
+// focus after a long idle. Downloads run in the background and resume across
+// launches via electron-updater's cache, so closing the app mid-download is
+// safe. Once downloaded, the renderer shows a persistent in-app banner with a
+// Restart button (primary surface) and the one-shot native dialog stays as a
+// backstop for users parked on a single page. Dev builds skip all of this.
+const UPDATE_CHECK_MS = 30 * 60 * 1000;
+const UPDATE_FOCUS_RECHECK_MS = 4 * 60 * 60 * 1000; // focus re-check only if last check is older
 let updatePromptShown = false;
+
 function startAutoUpdate() {
   if (!app.isPackaged) return;
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.on("update-downloaded", async () => {
+
+  autoUpdater.on("checking-for-update", () => {
+    updateState.status = "checking";
+    broadcastUpdateState();
+  });
+  autoUpdater.on("update-available", (i) => {
+    updateState.status = "downloading"; // autoDownload is on — the fetch starts right away
+    updateState.info = { version: i && i.version ? i.version : null };
+    updateState.error = null;
+    broadcastUpdateState();
+  });
+  autoUpdater.on("download-progress", (p) => {
+    updateState.status = "downloading";
+    updateState.progress = Math.max(0, Math.min(100, Math.round(p.percent || 0)));
+    broadcastUpdateState();
+  });
+  autoUpdater.on("update-downloaded", async (i) => {
+    updateState.status = "downloaded";
+    updateState.info = { version: i && i.version ? i.version : null };
+    updateState.progress = 100;
+    broadcastUpdateState();
+    // Backstop prompt, shown at most once per session. The in-app banner is
+    // persistent, so the user always has a visible path to restart.
     if (updatePromptShown) return;
     updatePromptShown = true;
     try {
@@ -240,10 +289,47 @@ function startAutoUpdate() {
       // window gone — update applies on quit
     }
   });
-  autoUpdater.on("error", (e) => console.error("[truffletrade] updater:", (e && e.message) || e));
-  const check = () => autoUpdater.checkForUpdates().catch(() => undefined); // offline/rate-limited → silent
+  autoUpdater.on("error", (e) => {
+    updateState.status = "error";
+    updateState.error = (e && e.message) || String(e);
+    updateState.checkedAt = Date.now();
+    broadcastUpdateState();
+    console.error("[truffletrade] updater:", updateState.error);
+  });
+
+  const check = () => {
+    // While a build is downloading or already staged, further checks can only
+    // restart work — everything newer than the staged build arrives after it.
+    if (updateState.status === "downloading" || updateState.status === "downloaded") return Promise.resolve();
+    return autoUpdater.checkForUpdates().then(
+      (r) => {
+        updateState.checkedAt = Date.now();
+        if (updateState.status === "checking") updateState.status = "idle";
+        broadcastUpdateState();
+        return r;
+      },
+      () => undefined, // offline / rate-limited → silent
+    );
+  };
   check();
-  setInterval(check, 6 * 60 * 60 * 1000);
+  setInterval(check, UPDATE_CHECK_MS);
+
+  // Machines that sleep for days should still see fresh releases promptly.
+  app.on("browser-window-focus", () => {
+    if (Date.now() - updateState.checkedAt > UPDATE_FOCUS_RECHECK_MS) check();
+  });
+}
+
+// Renderer bridge for the in-app update banner. Registered unconditionally so
+// dev mode answers too (idle state) instead of rejecting the invoke.
+function registerUpdateIpc() {
+  ipcMain.handle("tt:get-update-state", () => ({ ...updateState }));
+  ipcMain.handle("tt:install-update", () => {
+    if (app.isPackaged && updateState.status === "downloaded") {
+      quitting = true;
+      autoUpdater.quitAndInstall();
+    }
+  });
 }
 
 // ── Tray ──────────────────────────────────────────────────────────────
@@ -281,6 +367,7 @@ if (!gotLock) {
   });
 
   app.whenReady().then(() => {
+    registerUpdateIpc();
     createWindow(); // window first (splash), server boot inside it
     createTray();
     startWatchdog();
