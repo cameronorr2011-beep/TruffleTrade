@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { guard, callerId } from "@/lib/guard";
+import { softGuard, callerId } from "@/lib/guard";
 import { ecoDb } from "@core/eco/store";
 
 export const runtime = "nodejs";
@@ -20,7 +20,7 @@ const CREATE = z.object({
 
 /** GET /api/eco/theses?asset=&status= — the user's investment theses. */
 export async function GET(req: Request) {
-  const denied = await guard(req);
+  const denied = await softGuard(req);
   if (denied) return denied;
   const db = ecoDb();
   const url = new URL(req.url);
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
 /** POST /api/eco/theses — create a thesis. */
 export async function POST(req: Request) {
-  const denied = await guard(req);
+  const denied = await softGuard(req);
   if (denied) return denied;
   const body = CREATE.safeParse(await req.json().catch(() => null));
   if (!body.success) {

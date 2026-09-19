@@ -806,3 +806,151 @@
   .tt-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bt-bars li { grid-template-columns: 90px 1fr 26px; }
 }
+
+/* ═══════════════ Ecosystem polish pass — depth, motion, breathing room ═══════════════ */
+
+/* Breathing room: the app shell gives every page more air */
+.tt-content { padding: 26px 34px 48px; }
+.tt-pagehead h1 { font-size: 24px; letter-spacing: -0.7px; }
+.tt-pagehead .tt-faint { font-size: 12.5px; margin-top: 4px; }
+
+/* Cards: layered surface, hairline top light, quiet hover lift */
+.tt-app .tt-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0) 42%),
+    var(--app-panel);
+  border: 1px solid var(--app-line);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 22px rgba(0, 0, 0, 0.22);
+  border-radius: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.tt-app .tt-card:hover {
+  border-color: var(--app-line-strong);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+.tt-card h2 { letter-spacing: -0.3px; }
+
+/* Buttons: primary sheen sweep + crisper focus everywhere */
+.tt-app .tt-btn { border-radius: 10px; font-weight: 700; letter-spacing: 0.2px; }
+.tt-app .tt-btn-primary { position: relative; overflow: hidden; }
+.tt-app .tt-btn-primary::after {
+  content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  transform: skewX(-18deg); transition: left 0.45s ease; pointer-events: none;
+}
+.tt-app .tt-btn-primary:hover::after { left: 130%; }
+.tt-app .tt-btn:focus-visible, .tt-app input:focus-visible, .tt-app textarea:focus-visible {
+  outline: none; box-shadow: 0 0 0 3px rgba(88, 169, 123, 0.22);
+}
+.tt-app .tt-btn-primary { box-shadow: 0 2px 12px rgba(47, 107, 71, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14); }
+
+/* Sidebar: active pill with a soft left accent bar */
+.tt-nav a { position: relative; }
+.tt-nav a.is-active { background: linear-gradient(90deg, rgba(88, 169, 123, 0.16), rgba(88, 169, 123, 0.03)); }
+.tt-nav a.is-active::before {
+  content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 2.5px;
+  border-radius: 3px; background: var(--app-accent);
+}
+
+/* Scrollbars: thin and dark across the app */
+.tt-app *, .bt-thread { scrollbar-width: thin; scrollbar-color: #2e4038 transparent; }
+.tt-app ::-webkit-scrollbar { width: 9px; height: 9px; }
+.tt-app ::-webkit-scrollbar-thumb { background: #26362e; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+.tt-app ::-webkit-scrollbar-thumb:hover { background: #33473c; background-clip: content-box; }
+.tt-app ::-webkit-scrollbar-track { background: transparent; }
+
+/* Entrance motion: cards rise in with a soft stagger (skip: reduce-motion) */
+@keyframes bt-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+.tt-app .tt-grid > *, .tt-app .tt-grid-4 > *, .tt-app .bt-brief {
+  animation: bt-in 0.42s cubic-bezier(0.22, 0.8, 0.36, 1) both;
+}
+.tt-app .tt-grid > *:nth-child(2), .tt-app .tt-grid-4 > *:nth-child(2) { animation-delay: 60ms; }
+.tt-app .tt-grid > *:nth-child(3), .tt-app .tt-grid-4 > *:nth-child(3) { animation-delay: 120ms; }
+.tt-app .tt-grid > *:nth-child(4), .tt-app .tt-grid-4 > *:nth-child(4) { animation-delay: 180ms; }
+.tt-app .tt-grid > *:nth-child(5), .tt-app .tt-grid-4 > *:nth-child(5) { animation-delay: 240ms; }
+
+/* My Intelligence: the brief — Black Truffle's voice */
+.bt-brief {
+  position: relative; overflow: hidden;
+  border: 1px solid rgba(232, 174, 82, 0.28); border-radius: 14px;
+  background:
+    radial-gradient(520px 190px at 12% 0%, rgba(232, 174, 82, 0.09), transparent 60%),
+    linear-gradient(180deg, #151d18, #121a15);
+  padding: 18px 22px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+}
+.bt-brief-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.bt-brief-badge {
+  font-family: var(--font-mono, monospace); font-size: 9.5px; letter-spacing: 2.4px; font-weight: 800;
+  color: var(--app-gold); border: 1px solid rgba(232, 174, 82, 0.4);
+  background: rgba(232, 174, 82, 0.08); border-radius: 6px; padding: 4px 10px;
+}
+.bt-brief-text { margin: 0; font-size: 14px; line-height: 1.75; color: #e6efe7; max-width: 900px; }
+
+/* Stats */
+.bt-stat { gap: 5px; }
+.bt-stat-label { font-size: 9.5px !important; letter-spacing: 1.3px; text-transform: uppercase; font-weight: 800; }
+.bt-stat-value { font-size: 30px !important; line-height: 1.1; }
+.bt-stat-value.bt-gold { color: var(--app-gold); }
+.bt-stat-of { font-size: 15px; color: var(--app-ink-faint); font-weight: 700; margin-left: 2px; }
+
+/* Focus assets */
+.bt-focus { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
+.bt-focus li { display: grid; grid-template-columns: 74px 1fr 110px 26px; align-items: center; gap: 12px; }
+.bt-focus-asset { font-family: var(--font-mono, monospace); font-size: 13px; font-weight: 800; color: #eef5ee; letter-spacing: 0.4px; }
+.bt-focus-split { display: flex; gap: 8px; flex-wrap: wrap; }
+.bt-focus-split em { font-style: normal; font-size: 10.5px; color: var(--app-ink-faint); border: 1px solid var(--app-line); border-radius: 99px; padding: 2px 8px; }
+.bt-focus-track { height: 6px; }
+.bt-bars-track { border-radius: 99px; }
+
+/* Activity heatmap */
+.bt-heat { display: flex; gap: 3px; overflow-x: auto; padding: 4px 2px 8px; }
+.bt-heat-col { display: flex; flex-direction: column; gap: 3px; }
+.bt-heat-cell { width: 13px; height: 13px; border-radius: 3.5px; display: inline-block; }
+.bt-heat-cell.lvl-0 { background: #16211b; border: 1px solid #1d2b23; }
+.bt-heat-cell.lvl-1 { background: #1e3a2a; }
+.bt-heat-cell.lvl-2 { background: #2a5a3c; }
+.bt-heat-cell.lvl-3 { background: #3a7d54; }
+.bt-heat-cell.lvl-4 { background: #58a97b; box-shadow: 0 0 6px rgba(88, 169, 123, 0.45); }
+.bt-heat-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 10.5px; }
+.bt-heat-legend .bt-heat-cell { width: 10px; height: 10px; }
+
+/* Topic chips (learning empty state) */
+.bt-topic-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.bt-chip {
+  font-size: 11.5px; font-weight: 700; color: var(--app-ink-soft);
+  border: 1px solid var(--app-line-strong); border-radius: 99px; padding: 6px 12px;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.bt-chip:hover { border-color: var(--app-accent); color: var(--app-ink); background: rgba(88, 169, 123, 0.08); }
+
+/* Skeletons */
+@keyframes bt-shimmer { from { background-position: -200px 0; } to { background-position: 200px 0; } }
+.bt-skeleton {
+  height: 92px;
+  background: linear-gradient(100deg, #141d18 40%, #1a2620 50%, #141d18 60%);
+  background-size: 200px 100%; animation: bt-shimmer 1.3s linear infinite;
+}
+
+/* Panel composer + messages: match the new depth */
+.bt-panel { box-shadow: -24px 0 60px rgba(0, 0, 0, 0.55); backdrop-filter: blur(6px); }
+.bt-msg.bt-assistant p { margin: 0; }
+.bt-msg.bt-user { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); }
+.bt-fab { backdrop-filter: blur(6px); }
+.bt-fab:hover { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(88, 169, 123, 0.25); }
+
+/* Motion safety */
+@media (prefers-reduced-motion: reduce) {
+  .tt-app .tt-grid > *, .tt-app .tt-grid-4 > *, .tt-app .bt-brief { animation: none; }
+  .tt-app .tt-card, .tt-app .tt-card:hover { transform: none; }
+  .tt-app .tt-btn-primary::after { display: none; }
+}
+
+/* Small screens: give content back its side padding */
+@media (max-width: 860px) {
+  .tt-content { padding: 18px 16px 40px; }
+  .bt-focus li { grid-template-columns: 60px 1fr 80px 22px; gap: 8px; }
+  .bt-stat-value { font-size: 24px !important; }
+  .bt-brief-text { font-size: 13px; }
+}

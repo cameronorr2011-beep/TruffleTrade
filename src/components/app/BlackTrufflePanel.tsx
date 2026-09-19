@@ -45,34 +45,17 @@ export default function BlackTrufflePanel() {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight });
   }, [messages, open, busy]);
 
-  // Same activation gate as the analyst: code in localStorage → verify once.
+  // Open optimistically: on the operator's own machine (loopback) the eco
+  // APIs work without a key, so we only gate when an API call is rejected.
   useEffect(() => {
-    if (!open || phase !== "checking") return;
-    const code = getAccessCode();
-    if (!code) {
-      setPhase("need-key");
-      setKeyDialog(true);
-      return;
-    }
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/gateway/verify", { headers: authHeaders(), cache: "no-store" });
-        const j = (await res.json()) as { ok: boolean };
-        if (alive) setPhase(j.ok ? "chat" : "need-key");
-      } catch {
-        if (alive) setPhase("need-key");
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [open, phase]);
+    if (!open) return;
+    setPhase((p) => (p === "checking" ? "chat" : p));
+  }, [open]);
 
   const saveKey = useCallback((code: string) => {
     setAccessCode(code);
     setKeyDialog(false);
-    setPhase("checking");
+    setPhase("chat"); // revalidation happens server-side on the next call
   }, []);
 
   const send = useCallback(
@@ -91,6 +74,7 @@ export default function BlackTrufflePanel() {
           body: JSON.stringify({ messages: next.map(({ role, content }) => ({ role, content })), context: contextForPath(pathname) }),
         });
         if (res.status === 401 || res.status === 402 || res.status === 403) {
+          // Public deployment without a valid code — offer activation.
           setPhase("need-key");
           setKeyDialog(true);
           return;

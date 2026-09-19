@@ -23,6 +23,28 @@ const STEPS = [
   { n: "03", title: "It remembers", text: "Predictions are stored, later resolved against reality, and distilled into a memory on your device that trains on digital-twin markets between sessions." },
 ];
 
+const ECOSYSTEM = [
+  { icon: "◈", title: "Theses", text: "Write structured investment theses — claim, evidence, counterarguments, and the exact conditions that would prove you wrong. Black Truffle checks them against new information." },
+  { icon: "✎", title: "Decision journal", text: "Record what you believed, why, and what would prove you wrong. Come back and record what actually happened. Patterns surface — no grades, just your own record." },
+  { icon: "❖", title: "Learn", text: "Ten topics from chart reading to behavioral finance. Lessons adapt to your progress, and every quick-check is remembered so explanations meet you where you are." },
+  { icon: "◑", title: "My Market Intelligence", text: "A transparent dashboard of your own patterns: focus assets, research streaks, expectation-vs-outcome, and learning progress. Every number traces to your records." },
+];
+
+const TRUFFLES = [
+  {
+    name: "Black Truffle",
+    role: "Personal AI assistant",
+    text: "Your memory, research, learning, and TruffleTrade ecosystem. It retrieves your theses and journal, drafts new ones with you, and delegates chart reads.",
+    tone: "gold" as const,
+  },
+  {
+    name: "White Truffle",
+    role: "AI market analyst",
+    text: "The specialist: nine-analyst council, fact-checker, red team, backtester. Focused stock-chart intelligence — deliberately not a general-purpose chatbot.",
+    tone: "green" as const,
+  },
+];
+
 const FAQ = [
   {
     q: "Does TruffleTrade trade for me?",
@@ -39,6 +61,10 @@ const FAQ = [
   {
     q: "What is the memory system?",
     a: "Every analysis, prediction, and outcome becomes a memory fact on your machine. A digital twin — a market simulator calibrated on real candles — trains it with synthetic experience, and optional federated learning blends anonymized insights across all installs. Nothing raw ever leaves your device.",
+  },
+  {
+    q: "What are theses, the journal, and My Market Intelligence?",
+    a: "Your personal research layer. Theses are structured beliefs with explicit invalidation conditions. The decision journal records what you believed and what actually happened. My Market Intelligence surfaces transparent patterns from your own records — focus assets, streaks, expectation-vs-outcome — never grades. Black Truffle, your personal AI, reads and connects all of it.",
   },
   {
     q: "Why bitcoin and not a card?",
@@ -90,8 +116,9 @@ export default function LandingPage() {
               </h1>
               <p className="arrive arrive-3 mt-6 max-w-xl text-[15.5px] leading-relaxed text-bone-soft">
                 TruffleTrade points nine rival AI analysts, a fact-checker, and a red team at any stock chart — then
-                remembers what it learned. It doesn&apos;t trade for you. It makes sure you&apos;ve seen every side of
-                the argument before you click the button yourself.
+                remembers what it learned. Theses, a decision journal, and adaptive lessons turn analysis into a
+                system: research in, honest patterns out. It doesn&apos;t trade for you. It makes sure you&apos;ve seen
+                every side of the argument before you click the button yourself.
               </p>
               <div className="arrive arrive-4 mt-8 flex flex-wrap items-center gap-3.5">
                 <a href={DOWNLOAD} className="btn-primary !px-7 !py-3.5 !text-[12.5px]">
@@ -111,7 +138,7 @@ export default function LandingPage() {
                 {[
                   ["9+1", "analysts incl. red team"],
                   ["100%", "claims fact-checked"],
-                  ["24/7", "memory on your device"],
+                  ["2", "AIs: analyst + personal"],
                   ["1,000", "sats a month"],
                 ].map(([n, l]) => (
                   <div key={l} className="card px-4 py-3.5">
@@ -177,6 +204,59 @@ export default function LandingPage() {
                 <span className="eyebrow">Step {i + 1}</span>
                 <h2 className="mt-3 text-[17px] font-bold tracking-[-0.4px] text-ink">{s.title}</h2>
                 <p className="mt-2 text-[13px] leading-relaxed text-bone-soft">{s.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Two Truffles */}
+      <section id="truffles" className="scroll-mt-20 px-5 py-16 sm:px-8">
+        <div className="mx-auto max-w-[1280px]">
+          <span className="eyebrow">Two AIs, one system</span>
+          <h2 className="mt-4 max-w-2xl text-[clamp(1.8rem,3.8vw,2.9rem)] font-extrabold leading-[1.08] tracking-[-1.6px] text-ink">
+            A specialist and a personal chief of staff
+          </h2>
+          <p className="mt-4 max-w-2xl text-[14.5px] leading-relaxed text-bone-soft">
+            They share one memory backbone and one subscription — and never blur their jobs. The analyst reads the
+            market. The assistant knows you.
+          </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {TRUFFLES.map((t) => (
+              <article key={t.name} className="card relative overflow-hidden p-6">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-50 blur-2xl"
+                  style={{ background: t.tone === "gold" ? "radial-gradient(closest-side, rgba(223,174,76,0.3), transparent)" : "radial-gradient(closest-side, rgba(111,195,148,0.3), transparent)" }}
+                />
+                <span className="eyebrow" style={t.tone === "gold" ? { color: "#e8ae52" } : undefined}>
+                  {t.role}
+                </span>
+                <h3 className="mt-3 text-[19px] font-bold tracking-[-0.5px] text-ink">{t.name}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-bone-soft">{t.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Ecosystem loop */}
+      <section id="ecosystem" className="scroll-mt-20 px-5 py-16 sm:px-8">
+        <div className="mx-auto max-w-[1280px]">
+          <span className="eyebrow">The ecosystem</span>
+          <h2 className="mt-4 max-w-2xl text-[clamp(1.8rem,3.8vw,2.9rem)] font-extrabold leading-[1.08] tracking-[-1.6px] text-ink">
+            Research becomes a loop, not a tab you close
+          </h2>
+          <p className="mt-4 max-w-2xl text-[14.5px] leading-relaxed text-bone-soft">
+            You research → White Truffle analyzes → Black Truffle remembers → you form a thesis → the journal records
+            your reasoning → the market moves → White Truffle analyzes again → Black Truffle compares → you learn.
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ECOSYSTEM.map((f) => (
+              <article key={f.title} className="card p-6">
+                <span aria-hidden className="text-[20px] text-gold">{f.icon}</span>
+                <h3 className="mt-3 text-[15.5px] font-bold tracking-[-0.4px] text-ink">{f.title}</h3>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-bone-soft">{f.text}</p>
               </article>
             ))}
           </div>

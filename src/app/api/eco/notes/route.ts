@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { guard, callerId } from "@/lib/guard";
+import { softGuard, callerId } from "@/lib/guard";
 import { ecoDb } from "@core/eco/store";
 
 export const runtime = "nodejs";
@@ -14,7 +14,7 @@ const CREATE = z.object({
 
 /** GET /api/eco/notes?limit= — research notes, newest first. */
 export async function GET(req: Request) {
-  const denied = await guard(req);
+  const denied = await softGuard(req);
   if (denied) return denied;
   const limit = Number(new URL(req.url).searchParams.get("limit") ?? 50);
   const notes = await ecoDb().listNotes(callerId(req), Number.isFinite(limit) ? limit : 50);
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
 
 /** POST /api/eco/notes — save a research note. */
 export async function POST(req: Request) {
-  const denied = await guard(req);
+  const denied = await softGuard(req);
   if (denied) return denied;
   const body = CREATE.safeParse(await req.json().catch(() => null));
   if (!body.success) {

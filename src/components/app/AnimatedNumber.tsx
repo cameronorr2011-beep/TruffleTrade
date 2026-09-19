@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
  */
 export default function AnimatedNumber({
   value,
-  format = (n: number) => n.toFixed(2),
+  format,
   className = "",
 }: {
   value: number | null;
@@ -39,22 +39,18 @@ export default function AnimatedNumber({
     const dur = Math.min(600, 140 + Math.abs(delta) * 40); // bigger moves glide faster
     const step = (t: number) => {
       const k = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - k, 3);
+      const eased = 1 - Math.pow(1 - k, 3); // cubic ease-out
       setShown(from + delta * eased);
       if (k < 1) rafRef.current = requestAnimationFrame(step);
       else {
         fromRef.current = value;
-        setShown(value);
-        setTimeout(() => setFlash(""), 550);
+        setTimeout(() => setFlash(""), 480);
       }
     };
     rafRef.current = requestAnimationFrame(step);
     return () => cancelAnimationFrame(rafRef.current);
   }, [value]);
 
-  return (
-    <span className={`tt-num ${flash} ${className}`}>
-      {shown == null ? "—" : format(shown)}
-    </span>
-  );
+  const fmt = format ?? ((n: number) => n.toFixed(2));
+  return <span className={`${className} ${flash}`.trim()}>{fmt(shown ?? 0)}</span>;
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { guard, callerId } from "@/lib/guard";
+import { softGuard, callerId } from "@/lib/guard";
 import { ecoDb } from "@core/eco/store";
 
 export const runtime = "nodejs";
@@ -23,7 +23,7 @@ const OUTCOME = z.object({
 
 /** GET /api/eco/journal?asset= — decision journal entries (with outcomes). */
 export async function GET(req: Request) {
-  const denied = await guard(req);
+  const denied = await softGuard(req);
   if (denied) return denied;
   const asset = new URL(req.url).searchParams.get("asset") ?? undefined;
   const entries = await ecoDb().listJournal(callerId(req), { asset, limit: 100 });
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
 /** POST /api/eco/journal — record a belief + reasoning. */
 export async function POST(req: Request) {
-  const denied = await guard(req);
+  const denied = await softGuard(req);
   if (denied) return denied;
   const body = CREATE.safeParse(await req.json().catch(() => null));
   if (!body.success) {
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 
 /** PATCH /api/eco/journal — record what actually happened for an entry. */
 export async function PATCH(req: Request) {
-  const denied = await guard(req);
+  const denied = await softGuard(req);
   if (denied) return denied;
   const body = OUTCOME.safeParse(await req.json().catch(() => null));
   if (!body.success) {

@@ -6,6 +6,44 @@ import { isLockedOut, recordFailure, pruneFailures } from "@core/licensing/abuse
 import { clientIp } from "@/lib/client-ip";
 
 /**
+ * The x-forwarded-for value Vercel's edge injects on every request. Its mere
+ * PRESENCE means the caller came through a proxy — i.e. the public internet.
+ * A direct local call from the user's own machine carries no such header.
+ */
+const LOOPBACKS = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+
+/**
+ * True when the request originates from the operator's own machine. Two
+ * independent gates (both must hold), because Next.js itself injects
+ * x-forwarded-for on local requests:
+ *
+ *  1. The LAST hop of x-forwarded-for is loopback. Proxies append the real
+ *     client IP, so a spoofed "x-forwarded-for: ::1" from the public internet
+ *     still ends with the attacker's real address at the last position.
+ *  2. The Host header is localhost/loopback — a public request can never
+ *     legitimately carry it (DNS resolves the domain, not loopback).
+ *
+ * Used ONLY to waive the access code for the user's personal eco data on
+ * their own hardware — never for AI, licensing, or research endpoints.
+ * Set TT_LOCAL_OPERATOR=0 to disable.
+ */
+export function isLocalOperator(req: Request): boolean {
+  if (process.env.TT_LOCAL_OPERATOR?.trim() === "0") return false;
+
+  const host = (req.headers.get("host") ?? "").toLowerCase().split(":")[0];
+  if (host !== "localhost" && !LOOPBACKS.has(host)) return false;
+
+  const fwd = req.headers.get("x-forwarded-for") ?? "";
+  const hops = fwd.split(",").map((s) => s.trim()).filter(Boolean);
+  const lastHop = hops[hops.length - 1] ?? "";
+  if (hops.length > 0 && !LOOPBACKS.has(lastHop)) return false;
+
+  // No x-forwarded-for at all: trust the socket-derived ip (direct local call).
+  const ip = clientIp(req) || "";
+  return hops.length === 0 ? LOOPBACKS.has(ip) || ip === "unknown" : true;
+}
+
+/**
  * Gate for endpoints that burn paid AI (research runs, cycles, halt).
  *
  * Two modes:
@@ -88,6 +126,20 @@ export function callerId(req: Request): string {
   const presented = req.headers.get("x-access-code") ?? "";
   const operatorToken = process.env.DASHBOARD_TOKEN?.trim();
   if (operatorToken && req.headers.get("x-desk-token") === operatorToken) return "operator";
+  // Loopback operator: local requests without a code get one stable identity
+  // so their theses/journal/notes persist across sessions on this machine.
+  if (isLocalOperator(req) && !presented.trim()) return "local-operator";
   if (presented.trim()) return hashCode(presented);
   return "operator";
+}
+
+/**
+ * Guard for PERSONAL-DATA eco endpoints. AI-burning routes (assistant,
+ * learn-lesson) and everything monetized keep the full `guard()`. Data the
+ * user already owns is readable/writable without friction from their own
+ * machine; the public deployment still requires a valid access code.
+ */
+export async function softGuard(req: Request): Promise<NextResponse | null> {
+  if (isLocalOperator(req)) return null;
+  return guard(req);
 }
