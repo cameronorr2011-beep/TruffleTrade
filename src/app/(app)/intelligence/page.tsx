@@ -12,7 +12,7 @@
  * features (lesson generation, Black Truffle) are freemium — 5 sessions/day,
  * unlimited on subscription.
  */
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authHeaders } from "@/lib/accessCodeClient";
 import AnimatedNumber from "@/components/app/AnimatedNumber";
@@ -102,7 +102,7 @@ function Heatmap({ activity }: { activity: { day: string; count: number }[] }) {
   );
 }
 
-export default function IntelligencePage() {
+function IntelligenceHub() {
   const router = useRouter();
   const params = useSearchParams();
   const tabParam = params.get("tab");
@@ -650,5 +650,17 @@ export default function IntelligencePage() {
         </>
       )}
     </section>
+  );
+}
+
+/**
+ * useSearchParams needs a Suspense boundary for static prerendering; the hub
+ * itself is client-rendered regardless, so a neutral skeleton is fine.
+ */
+export default function IntelligencePage() {
+  return (
+    <Suspense fallback={<section className="tt-page mi-page"><div className="mi-grid-4">{[0, 1, 2, 3].map((i) => <div key={i} className="mi-card mi-skeleton" />)}</div></section>}>
+      <IntelligenceHub />
+    </Suspense>
   );
 }
