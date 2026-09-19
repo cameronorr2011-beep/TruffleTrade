@@ -1,6 +1,6 @@
 import fs from "node:fs"; import path from "node:path";
 import { createCanvas, loadImage } from "@napi-rs/canvas";
-const dir = "dist-video/v6-preview";
+const dir = process.argv[2] ? path.join("dist-video", process.argv[2]) : "dist-video/v7-preview";
 const files = fs.readdirSync(dir).filter(f=>f.endsWith(".jpg")).sort();
 const c = createCanvas(108, 192), x = c.getContext("2d");
 let prev = null, report = [];

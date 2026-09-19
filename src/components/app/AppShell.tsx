@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import BlackTrufflePanel from "@/components/app/BlackTrufflePanel";
 import "@/app/app.css";
 
 const NAV: { href: string; label: string; icon: string; badge?: string }[] = [
@@ -12,6 +13,13 @@ const NAV: { href: string; label: string; icon: string; badge?: string }[] = [
   { href: "/analyst", label: "AI Analyst", icon: "✦" },
   { href: "/watchlist", label: "Watchlist", icon: "★" },
   { href: "/compare", label: "Compare", icon: "⇄" },
+];
+
+const PERSONAL = [
+  { href: "/theses", label: "Theses", icon: "◈" },
+  { href: "/journal", label: "Journal", icon: "✎" },
+  { href: "/learn", label: "Learn", icon: "❖" },
+  { href: "/intelligence", label: "My Intelligence", icon: "◑" },
 ];
 
 const TOOLS = [
@@ -89,6 +97,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
+          <p className="tt-nav-label">Personal</p>
+          <nav className="tt-nav">
+            {PERSONAL.map((n) => (
+              <Link key={n.href} href={n.href} className={isActive(n.href) ? "is-active" : ""}>
+                <span className="tt-ico" aria-hidden>{n.icon}</span>
+                <span className="flex-1">{n.label}</span>
+              </Link>
+            ))}
+          </nav>
+
           <p className="tt-nav-label">History</p>
           <nav className="tt-nav">
             {TOOLS.map((n) => (
@@ -100,10 +118,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="tt-promo">
-            <h3>Pick any stock. Let the twins argue over it.</h3>
-            <p>Search a symbol, read the candles, and run digital-twin simulations grounded in its own history.</p>
+            <h3>Two Truffles, one system.</h3>
+            <p>
+              <strong>White</strong> reads the chart. <strong>Black</strong> remembers your research and connects it. The Analyst page stays the
+              specialist; the ◆ button everywhere else is yours.
+            </p>
             <Link href="/analyst">
-              Open AI Analyst <span aria-hidden>→</span>
+              Open White Truffle <span aria-hidden>→</span>
             </Link>
           </div>
           <p className="tt-faint tt-status-line">
@@ -116,7 +137,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <header className="tt-topbar">
             <span className="tt-topbar-scrim" aria-hidden />
             <span className="tt-topbar-title">
-              {NAV.find((n) => isActive(n.href))?.label ?? "TruffleTrade"}
+              {[...NAV, ...PERSONAL, ...TOOLS].find((n) => isActive(n.href))?.label ?? "TruffleTrade"}
             </span>
             <span className="tt-topbar-clock" aria-hidden>
               {clock}
@@ -126,6 +147,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <div className="tt-content">{children}</div>
         </div>
       </div>
+      <BlackTrufflePanel />
     </div>
   );
 }

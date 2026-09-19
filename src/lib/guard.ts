@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { validateAccessCode, validateWithAbuseTracking, checkRateLimit } from "@core/licensing/validate";
+import { hashCode } from "@core/licensing/codes";
 import { isLockedOut, recordFailure, pruneFailures } from "@core/licensing/abuse";
 import { clientIp } from "@/lib/client-ip";
 
@@ -75,4 +76,18 @@ async function checkGuard(req: Request): Promise<NextResponse | null> {
   }
   void pruneFailures; // opportunistic cleanup happens via recordFailure paths
   return null;
+}
+
+/**
+ * Resolve the caller's identity WITHOUT re-validating (call right after
+ * `guard()` returned null). Operator mode falls back to a stable "operator"
+ * id; otherwise the caller's code hash — the same id used to scope all
+ * eco_* tables. Never log or expose the plaintext code.
+ */
+export function callerId(req: Request): string {
+  const presented = req.headers.get("x-access-code") ?? "";
+  const operatorToken = process.env.DASHBOARD_TOKEN?.trim();
+  if (operatorToken && req.headers.get("x-desk-token") === operatorToken) return "operator";
+  if (presented.trim()) return hashCode(presented);
+  return "operator";
 }
