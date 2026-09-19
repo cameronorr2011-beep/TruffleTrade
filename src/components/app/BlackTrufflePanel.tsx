@@ -73,10 +73,16 @@ export default function BlackTrufflePanel() {
           headers: { "Content-Type": "application/json", ...authHeaders() },
           body: JSON.stringify({ messages: next.map(({ role, content }) => ({ role, content })), context: contextForPath(pathname) }),
         });
-        if (res.status === 401 || res.status === 402 || res.status === 403) {
+        if (res.status === 401 || res.status === 403) {
           // Public deployment without a valid code — offer activation.
           setPhase("need-key");
           setKeyDialog(true);
+          return;
+        }
+        if (res.status === 402) {
+          // Freemium daily limit reached — show the paywall inline.
+          const j = (await res.json()) as { ok?: boolean; error?: string };
+          setError(j.error ?? "Free daily limit reached — subscribe for unlimited Truffle.");
           return;
         }
         const j = (await res.json()) as { ok?: boolean; reply?: string; toolsUsed?: string[]; memoryUsed?: string[]; error?: string };
@@ -94,8 +100,11 @@ export default function BlackTrufflePanel() {
   if (!open) {
     return (
       <button type="button" className="bt-fab" onClick={() => setOpen(true)} aria-label="Open Black Truffle assistant">
-        <span aria-hidden>◆</span>
-        <span className="bt-fab-label">Black Truffle</span>
+        <span className="bt-fab-avatars" aria-hidden>
+          <span className="bt-avatar bt-avatar-black">B</span>
+          <span className="bt-avatar bt-avatar-white">W</span>
+        </span>
+        <span className="bt-fab-label">Truffles</span>
       </button>
     );
   }
@@ -104,8 +113,9 @@ export default function BlackTrufflePanel() {
     <aside className="bt-panel" aria-label="Black Truffle assistant">
       <header className="bt-panel-head">
         <div>
-          <h2>
-            BLACK TRUFFLE <span className="bt-tag">personal AI</span>
+          <h2 className="bt-panel-title">
+            <span className="bt-avatar bt-avatar-black" aria-hidden>B</span> BLACK TRUFFLE <span className="bt-avatar bt-avatar-white" aria-hidden>W</span>
+            <span className="bt-tag">personal AI</span>
           </h2>
           <p>Your memory, research, learning, and TruffleTrade ecosystem.</p>
         </div>

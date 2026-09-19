@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { softGuard, callerId } from "@/lib/guard";
+import { softGuard, ecoCallerId } from "@/lib/guard";
 import { ecoDb } from "@core/eco/store";
 
 export const runtime = "nodejs";
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   const denied = await softGuard(req);
   if (denied) return denied;
   const asset = new URL(req.url).searchParams.get("asset") ?? undefined;
-  const entries = await ecoDb().listJournal(callerId(req), { asset, limit: 100 });
+  const entries = await ecoDb().listJournal(await ecoCallerId(req), { asset, limit: 100 });
   return NextResponse.json({ ok: true, entries });
 }
 
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: body.error.issues[0]?.message ?? "invalid body" }, { status: 400 });
   }
   const b = body.data;
-  const id = await ecoDb().createJournalEntry(callerId(req), {
+  const id = await ecoDb().createJournalEntry(await ecoCallerId(req), {
     asset: b.asset ?? null,
     belief: b.belief,
     reasoning: b.reasoning ?? null,
@@ -58,7 +58,7 @@ export async function PATCH(req: Request) {
   if (!body.success) {
     return NextResponse.json({ ok: false, error: body.error.issues[0]?.message ?? "invalid body" }, { status: 400 });
   }
-  const ok = await ecoDb().addOutcome(callerId(req), body.data.journalId, body.data.whatHappened, body.data.differed);
+  const ok = await ecoDb().addOutcome(await ecoCallerId(req), body.data.journalId, body.data.whatHappened, body.data.differed);
   if (!ok) return NextResponse.json({ ok: false, error: "entry not found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

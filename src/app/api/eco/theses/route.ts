@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { softGuard, callerId } from "@/lib/guard";
+import { softGuard, ecoCallerId } from "@/lib/guard";
 import { ecoDb } from "@core/eco/store";
 
 export const runtime = "nodejs";
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const asset = url.searchParams.get("asset") ?? undefined;
   const status = url.searchParams.get("status") ?? undefined;
-  const theses = await db.listTheses(callerId(req), { asset, status, limit: 100 });
+  const theses = await db.listTheses(await ecoCallerId(req), { asset, status, limit: 100 });
   return NextResponse.json({ ok: true, theses });
 }
 
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: body.error.issues[0]?.message ?? "invalid body" }, { status: 400 });
   }
   const b = body.data;
-  const id = await ecoDb().createThesis(callerId(req), {
+  const id = await ecoDb().createThesis(await ecoCallerId(req), {
     asset: b.asset,
     claim: b.claim,
     timeHorizon: b.timeHorizon ?? null,

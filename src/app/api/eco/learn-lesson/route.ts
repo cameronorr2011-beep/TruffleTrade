@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { guard, callerId } from "@/lib/guard";
+import { freemiumGuard, recordAiUse, ecoCallerId } from "@/lib/guard";
 import { makeProvider } from "@core/research/ai";
 import { ecoDb } from "@core/eco/store";
+
+const AI_KIND = "learn";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -17,10 +19,12 @@ const KNOWN = [
 
 /**
  * POST /api/eco/learn-lesson — generate one lesson + quick-check questions,
- * adapted to the user's recorded learning progress (retrieval, not dumps).
+ * adapted to the user's recorded learning progress. Freemium: 5 lessons/day
+ * free, unlimited with a subscription (or on the operator's own machine).
  */
 export async function POST(req: Request) {
-  const denied = await guard(req);
+  const db = ecoDb();
+  const denied = await freemiumGuard(req, db, AI_KIND);
   if (denied) return denied;
   const body = BODY.safeParse(await req.json().catch(() => null));
   if (!body.success) return NextResponse.json({ ok: false, error: "invalid topic" }, { status: 400 });
@@ -32,8 +36,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: (e as Error).message }, { status: 503 });
   }
 
-  const db = ecoDb();
-  const userId = callerId(req);
+  const userId = await ecoCallerId(req);
   const topic = body.data.topic;
   const progress = await db.lessonProgress(userId);
 
@@ -67,6 +70,7 @@ export async function POST(req: Request) {
       .map((q) => ({ q: String(q.q), a: String(q.a ?? "") }));
     const lesson = (res.data.lesson ?? res.data.markdown ?? "").trim();
     if (!lesson) throw new Error("empty lesson");
+    await recordAiUse(req, db, AI_KIND); // quota counts successful lessons only
     return NextResponse.json({ ok: true, lesson, questions });
   } catch (e) {
     return NextResponse.json({ ok: false, error: `Lesson generation failed: ${(e as Error).message}` }, { status: 502 });

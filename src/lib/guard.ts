@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 import { validateAccessCode, validateWithAbuseTracking, checkRateLimit } from "@core/licensing/validate";
+import type { Awaitable } from "@core/eco/store";
 import { hashCode } from "@core/licensing/codes";
 import { isLockedOut, recordFailure, pruneFailures } from "@core/licensing/abuse";
 import { clientIp } from "@/lib/client-ip";
@@ -134,12 +136,102 @@ export function callerId(req: Request): string {
 }
 
 /**
- * Guard for PERSONAL-DATA eco endpoints. AI-burning routes (assistant,
- * learn-lesson) and everything monetized keep the full `guard()`. Data the
- * user already owns is readable/writable without friction from their own
- * machine; the public deployment still requires a valid access code.
+ * Guard for PERSONAL-DATA eco endpoints (theses, journal, notes, learning,
+ * insights). My Intelligence is FREE for everyone:
+ *   · desktop app (loopback) → stable "local-operator" identity
+ *   · valid access code      → the subscriber's normal identity
+ *   · everyone else          → an anonymous cookie identity (own private space,
+ *                              no code, no signup)
+ * AI-burning routes keep `guard()` (or freemiumGuard below).
  */
+const ECO_COOKIE = "tt-eco-id";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function hasValidCode(req: Request): Promise<boolean> {
+  const presented = req.headers.get("x-access-code") ?? "";
+  if (!presented.trim()) return false;
+  try {
+    return (await validateAccessCode(presented)).ok;
+  } catch {
+    return false; // store unreachable → treat as anonymous rather than 503-ing a free feature
+  }
+}
+
 export async function softGuard(req: Request): Promise<NextResponse | null> {
   if (isLocalOperator(req)) return null;
-  return guard(req);
+  if (await hasValidCode(req)) return null;
+  // Anonymous: ensure a durable cookie identity exists, then allow.
+  try {
+    const jar = await cookies();
+    const existing = jar.get(ECO_COOKIE)?.value ?? "";
+    if (!UUID_RE.test(existing)) {
+      jar.set(ECO_COOKIE, crypto.randomUUID(), {
+        httpOnly: false,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 365,
+        path: "/",
+      });
+    }
+  } catch {
+    // cookies unavailable (e.g. prerender) → allow without identity
+  }
+  return null;
+}
+
+/**
+ * Identity for eco data — MUST be awaited after softGuard (the cookie is set
+ * during the guard call). Same resolution order as softGuard so every route
+ * scoping agrees: local-operator → code hash → anon cookie id.
+ */
+export async function ecoCallerId(req: Request): Promise<string> {
+  if (isLocalOperator(req)) return "local-operator";
+  const presented = req.headers.get("x-access-code") ?? "";
+  if (presented.trim()) return hashCode(presented);
+  try {
+    const jar = await cookies();
+    const id = jar.get(ECO_COOKIE)?.value ?? "";
+    if (UUID_RE.test(id)) return `anon-${id}`;
+  } catch {
+    // fall through
+  }
+  return "anon-unknown";
+}
+
+/**
+ * Freemium guard for Black Truffle + Learn (the AI features inside My
+ * Intelligence). White Truffle (AI Analyst) remains subscription-only via
+ * `guard()`. Free tier: 5 successful AI sessions per day per identity; a
+ * valid access code is unlimited; the operator's own machine is unlimited.
+ * The caller records usage AFTER a successful generation via recordAiUse().
+ */
+export async function freemiumGuard(req: Request, db: { countAiToday: (u: string, k: string) => Awaitable<number> }, kind: string): Promise<NextResponse | null> {
+  if (isLocalOperator(req)) return null;
+  if (await hasValidCode(req)) return null;
+  const used = await db.countAiToday(await ecoCallerId(req), kind);
+  if (used >= FREE_AI_SESSIONS_PER_DAY) {
+    return NextResponse.json(
+      {
+        ok: false,
+        code: "FREEMIUM_LIMIT",
+        error: `Free limit reached — ${FREE_AI_SESSIONS_PER_DAY} Truffle sessions per day. Subscribe (1,000 sats/month) for unlimited White + Black Truffle.`,
+      },
+      { status: 402 },
+    );
+  }
+  return null;
+}
+
+export const FREE_AI_SESSIONS_PER_DAY = 5;
+
+/** Record one successful freemium AI session (call only after generation worked). */
+export async function recordAiUse(req: Request, db: { recordAiUse: (u: string, k: string) => Awaitable<void> }, kind: string): Promise<void> {
+  if (isLocalOperator(req)) return;
+  const presented = req.headers.get("x-access-code") ?? "";
+  if (presented.trim()) return; // subscribers don't consume the free quota
+  try {
+    await db.recordAiUse(await ecoCallerId(req), kind);
+  } catch {
+    // usage accounting is best-effort — never break the response
+  }
 }

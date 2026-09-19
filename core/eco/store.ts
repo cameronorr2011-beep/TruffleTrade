@@ -117,6 +117,13 @@ CREATE TABLE IF NOT EXISTS eco_conversations (
   topic TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_eco_conv_user ON eco_conversations(user_id, ts DESC);
+
+CREATE TABLE IF NOT EXISTS eco_ai_usage (
+  user_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  uses INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day)
+);
 `;
 
 const SCHEMA_PG = `
@@ -295,6 +302,11 @@ export interface LessonRecord {
 
 const THESIS_STATUSES = ["active", "validated", "invalidated", "retired"] as const;
 
+/** UTC day key for freemium quota windows. */
+function aiToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 // ── backend interface ─────────────────────────────────────────────────────
 
 export interface EcoDb {
@@ -321,6 +333,9 @@ export interface EcoDb {
   // conversations
   saveConversationSummary(userId: string, summary: string, topic?: string): Awaitable<void>;
   recentConversations(userId: string, limit?: number): Awaitable<{ ts: number; summary: string; topic: string | null }[]>;
+  // freemium AI usage (per identity, per UTC day)
+  countAiToday(userId: string, kind: string): Awaitable<number>;
+  recordAiUse(userId: string, kind: string): Awaitable<void>;
 }
 
 // ── shared row mapping ────────────────────────────────────────────────────
@@ -536,6 +551,24 @@ class SqliteEcoDb implements EcoDb {
         .all(userId, Math.min(limit, 20)) as Record<string, unknown>[]
     ).map((r) => ({ ts: Number(r.ts), summary: String(r.summary), topic: r.topic == null ? null : String(r.topic) }));
   }
+
+  countAiToday(userId: string, kind: string): number {
+    void kind;
+    const r = sqliteDb()
+      .prepare(`SELECT uses FROM eco_ai_usage WHERE user_id=? AND day=?`)
+      .get(userId, aiToday()) as { uses: number } | undefined;
+    return r ? Number(r.uses) : 0;
+  }
+
+  recordAiUse(userId: string, kind: string): void {
+    void kind;
+    const day = aiToday();
+    sqliteDb()
+      .prepare(
+        `INSERT INTO eco_ai_usage (user_id, day, uses) VALUES (?,?,1) ON CONFLICT(user_id, day) DO UPDATE SET uses = uses + 1`,
+      )
+      .run(userId, day);
+  }
 }
 
 // ── Postgres backend (Neon) ──────────────────────────────────────────────
@@ -678,6 +711,20 @@ class PostgresEcoDb implements EcoDb {
   async recentConversations(userId: string, limit = 5): Promise<{ ts: number; summary: string; topic: string | null }[]> {
     const rows = await this.q(`SELECT ts, summary, topic FROM eco_conversations WHERE user_id=$1 ORDER BY ts DESC LIMIT $2`, [userId, Math.min(limit, 20)]);
     return rows.map((row) => ({ ts: Number(row.ts), summary: String(row.summary), topic: row.topic == null ? null : String(row.topic) }));
+  }
+
+  async countAiToday(userId: string, kind: string): Promise<number> {
+    void kind;
+    const rows = await this.q(`SELECT uses FROM eco_ai_usage WHERE user_id=$1 AND day=$2`, [userId, aiToday()]);
+    return rows[0] ? Number(rows[0].uses) : 0;
+  }
+
+  async recordAiUse(userId: string, kind: string): Promise<void> {
+    void kind;
+    await this.q(
+      `INSERT INTO eco_ai_usage (user_id, day, uses) VALUES ($1,$2,1) ON CONFLICT (user_id, day) DO UPDATE SET uses = eco_ai_usage.uses + 1`,
+      [userId, aiToday()],
+    );
   }
 }
 

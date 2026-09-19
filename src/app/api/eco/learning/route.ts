@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { softGuard, callerId } from "@/lib/guard";
+import { softGuard, ecoCallerId } from "@/lib/guard";
 import { ecoDb } from "@core/eco/store";
 
 export const runtime = "nodejs";
@@ -16,7 +16,7 @@ const RECORD = z.object({
 export async function GET(req: Request) {
   const denied = await softGuard(req);
   if (denied) return denied;
-  const progress = await ecoDb().lessonProgress(callerId(req));
+  const progress = await ecoDb().lessonProgress(await ecoCallerId(req));
   return NextResponse.json({ ok: true, progress });
 }
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   if (!body.success) {
     return NextResponse.json({ ok: false, error: body.error.issues[0]?.message ?? "invalid body" }, { status: 400 });
   }
-  await ecoDb().recordLesson(callerId(req), {
+  await ecoDb().recordLesson(await ecoCallerId(req), {
     topic: body.data.topic,
     lesson: body.data.lesson,
     quizScore: body.data.quizScore ?? null,

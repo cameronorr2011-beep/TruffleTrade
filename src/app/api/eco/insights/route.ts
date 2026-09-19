@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { softGuard, callerId, isLocalOperator } from "@/lib/guard";
+import { softGuard, ecoCallerId, isLocalOperator } from "@/lib/guard";
 import { ecoDb } from "@core/eco/store";
 
 export const runtime = "nodejs";
@@ -21,7 +21,7 @@ const DAY = 86_400_000;
 export async function GET(req: Request) {
   const denied = await softGuard(req);
   if (denied) return denied;
-  const userId = callerId(req);
+  const userId = await ecoCallerId(req);
   const db = ecoDb();
 
   const [theses, journal, notes, lessons] = await Promise.all([

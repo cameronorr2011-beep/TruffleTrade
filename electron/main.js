@@ -243,7 +243,6 @@ function startWatchdog() {
 // backstop for users parked on a single page. Dev builds skip all of this.
 const UPDATE_CHECK_MS = 30 * 60 * 1000;
 const UPDATE_FOCUS_RECHECK_MS = 4 * 60 * 60 * 1000; // focus re-check only if last check is older
-let updatePromptShown = false;
 
 function startAutoUpdate() {
   if (!app.isPackaged) return;
@@ -265,29 +264,15 @@ function startAutoUpdate() {
     updateState.progress = Math.max(0, Math.min(100, Math.round(p.percent || 0)));
     broadcastUpdateState();
   });
-  autoUpdater.on("update-downloaded", async (i) => {
+  autoUpdater.on("update-downloaded", (i) => {
     updateState.status = "downloaded";
     updateState.info = { version: i && i.version ? i.version : null };
     updateState.progress = 100;
     broadcastUpdateState();
-    // Backstop prompt, shown at most once per session. The in-app banner is
-    // persistent, so the user always has a visible path to restart.
-    if (updatePromptShown) return;
-    updatePromptShown = true;
-    try {
-      const r = await dialog.showMessageBox(win, {
-        type: "info",
-        title: "TruffleTrade update ready",
-        message: "A new version of TruffleTrade has been downloaded.",
-        detail: "Restart now to apply it, or keep working — it installs automatically the next time you close the app.",
-        buttons: ["Restart now", "Later"],
-        defaultId: 0,
-        cancelId: 1,
-      });
-      if (r.response === 0) autoUpdater.quitAndInstall();
-    } catch {
-      // window gone — update applies on quit
-    }
+    // Zero-action updates: no dialogs, no prompts. The update installs
+    // silently the next time the user closes the app (quit path now reliably
+    // fires — see before-quit). The in-app banner exists only for users who
+    // want to switch immediately.
   });
   autoUpdater.on("error", (e) => {
     updateState.status = "error";
@@ -325,10 +310,26 @@ function startAutoUpdate() {
 function registerUpdateIpc() {
   ipcMain.handle("tt:get-update-state", () => ({ ...updateState }));
   ipcMain.handle("tt:install-update", () => {
-    if (app.isPackaged && updateState.status === "downloaded") {
-      quitting = true;
-      autoUpdater.quitAndInstall();
-    }
+    if (!app.isPackaged || updateState.status !== "downloaded") return;
+    quitting = true;
+    // Silent + force-run-after: the installer runs unattended and the app
+    // relaunches straight into the new version. Belt-and-braces: if quit
+    // somehow hangs (socket keep-alives etc.), force-exit after 3s — the
+    // staged installer is applied automatically on the next launch anyway.
+    setImmediate(() => {
+      try {
+        autoUpdater.quitAndInstall(true, true);
+      } catch {
+        app.exit(0);
+      }
+      setTimeout(() => {
+        try {
+          app.exit(0);
+        } catch {
+          // already gone
+        }
+      }, 3_000);
+    });
   });
 }
 
@@ -383,6 +384,15 @@ if (!gotLock) {
 
   app.on("before-quit", () => {
     if (server) {
+      // closeAllConnections is the fix for the "update never installs on
+      // quit" bug: browser/HTTP keep-alive sockets kept server.close() waiting
+      // forever, which blocked app.quit() — so the on-quit updater hook never
+      // fired and the staged installer never ran.
+      try {
+        server.closeAllConnections?.();
+      } catch {
+        // older Node — fall through to plain close
+      }
       try {
         server.close();
       } catch {

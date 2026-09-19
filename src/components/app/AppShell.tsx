@@ -17,9 +17,6 @@ const NAV: { href: string; label: string; icon: string; badge?: string }[] = [
 ];
 
 const PERSONAL = [
-  { href: "/theses", label: "Theses", icon: "◈" },
-  { href: "/journal", label: "Journal", icon: "✎" },
-  { href: "/learn", label: "Learn", icon: "❖" },
   { href: "/intelligence", label: "My Intelligence", icon: "◑" },
 ];
 
