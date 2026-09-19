@@ -955,70 +955,6 @@
   .bt-brief-text { font-size: 13px; }
 }
 
-/* ── Desktop update surfaces (UpdateBanner.tsx) ─────────────────────────
-   Rendered only inside the desktop shell (bridge present). The strip keeps
-   its own row; the banner spans full width above the topbar. */
-.tt-update-strip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 18px;
-  background: #101814;
-  border-bottom: 1px solid var(--app-line);
-  font-size: 11px;
-  color: var(--app-ink-soft);
-}
-.tt-update-strip-label { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.tt-update-strip-bar {
-  position: relative;
-  flex: 1;
-  height: 3px;
-  border-radius: 3px;
-  background: #1a2620;
-  overflow: hidden;
-}
-.tt-update-strip-bar i {
-  position: absolute;
-  inset: 0 auto 0 0;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--app-accent-deep), var(--app-accent));
-  transition: width 0.4s ease;
-}
-.tt-update-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 18px;
-  background: linear-gradient(90deg, rgba(88, 169, 123, 0.14), rgba(88, 169, 123, 0.05));
-  border-bottom: 1px solid var(--app-accent-deep);
-}
-.tt-update-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--app-pos);
-  box-shadow: 0 0 10px rgba(74, 222, 128, 0.7);
-  flex: none;
-}
-.tt-update-banner strong { font-size: 12.5px; color: var(--app-ink); white-space: nowrap; }
-.tt-update-copy { font-size: 12px; color: var(--app-ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tt-update-restart {
-  margin-left: auto;
-  flex: none;
-  border: 1px solid var(--app-accent);
-  background: var(--app-accent);
-  color: #08110c;
-  font-weight: 700;
-  font-size: 12px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: filter 0.15s ease;
-}
-.tt-update-restart:hover { filter: brightness(1.12); }
-@media (max-width: 720px) {
-  .tt-update-copy { display: none; }
-}
 
 /* ── White + Black Truffle avatars ──────────────────────────────────────
    Round initials chips used in the FAB, panel header, and Intelligence. */
@@ -1235,3 +1171,96 @@
   border-radius: 999px;
   text-decoration: none;
 }
+
+/* ── Desktop update chip (UpdateBanner.tsx) ────────────────────────────
+   Always visible in the topbar: quiet when current, gold when an update is
+   ready, with a small popover for progress / restart / errors. */
+.tt-upd-wrap { position: relative; display: inline-flex; }
+.tt-upd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--app-line);
+  background: #0f1713;
+  color: var(--app-ink-faint);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.tt-upd:hover { color: var(--app-ink-soft); border-color: var(--app-line-strong); }
+.tt-upd-wait { color: var(--app-ink-soft); }
+.tt-upd-ready {
+  border-color: var(--app-gold);
+  color: var(--app-gold);
+  box-shadow: 0 0 12px rgba(232, 174, 82, 0.25);
+}
+.tt-upd-err { border-color: var(--app-neg); color: var(--app-neg); }
+.tt-upd-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--app-gold);
+  box-shadow: 0 0 8px rgba(232, 174, 82, 0.8);
+  animation: tt-upd-pulse 1.6s ease-in-out infinite;
+}
+@keyframes tt-upd-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.tt-upd-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  width: 300px;
+  background: #101814;
+  border: 1px solid var(--app-line-strong);
+  border-radius: 12px;
+  padding: 13px 15px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+.tt-upd-pop strong { display: block; font-size: 12.5px; color: var(--app-ink); margin-bottom: 5px; }
+.tt-upd-pop p { font-size: 12px; color: var(--app-ink-soft); line-height: 1.55; margin: 0 0 8px; }
+.tt-upd-fine { font-size: 11px !important; color: var(--app-ink-faint) !important; }
+.tt-upd-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tt-upd-restart {
+  border: 0;
+  background: var(--app-gold);
+  color: #221806;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.tt-upd-restart:hover { filter: brightness(1.1); }
+.tt-upd-quiet {
+  border: 0;
+  background: transparent;
+  color: var(--app-ink-faint);
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tt-upd-quiet:hover { color: var(--app-ink-soft); }
+.tt-upd-bar {
+  position: relative;
+  height: 5px;
+  border-radius: 5px;
+  background: #1a2620;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.tt-upd-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--app-accent-deep), var(--app-accent));
+  transition: width 0.4s ease;
+}
+
+/* Analyst chat header with White Truffle avatar */
+.tt-chat-title { display: flex; align-items: center; gap: 9px; }
+.tt-chat-title .bt-avatar { width: 26px; height: 26px; font-size: 12px; }

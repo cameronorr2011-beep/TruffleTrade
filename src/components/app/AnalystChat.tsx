@@ -227,7 +227,9 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
     <section className="tt-card tt-chat">
       <div className="tt-chat-head">
         <div>
-          <h2>TruffleTrade AI</h2>
+          <h2 className="tt-chat-title">
+            <span className="bt-avatar bt-avatar-white" aria-hidden>W</span> White Truffle
+          </h2>
           <p className="tt-chat-sub">
             {ticker
               ? `Evidence pack locked on ${ticker} — live quote, technicals, valuation, replay, twin, memory`
@@ -285,7 +287,7 @@ export default function AnalystChat({ ticker: initialTicker }: { ticker: string 
         {messages.length === 0 && !confirmOff && (
           <div className="tt-chat-empty">
             <p className="tt-chat-hello">
-              Research assistant online{ticker ? ` for ${ticker}` : ""}. I read the live market context server-side — ask me anything about it.
+              White Truffle online{ticker ? ` on ${ticker}` : ""}. I'm your chart specialist — every answer is grounded in live data pulled server-side: quote, technicals, valuation, and your memory of this ticker. Ask me anything.
             </p>
             <div className="tt-quick">
               {QUICK_ACTIONS.map((a) => (

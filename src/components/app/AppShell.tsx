@@ -132,7 +132,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="tt-main">
-          <UpdateBanner />
           <header className="tt-topbar">
             <span className="tt-topbar-scrim" aria-hidden />
             <span className="tt-topbar-title">
@@ -141,6 +140,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <span className="tt-topbar-clock" aria-hidden>
               {clock}
             </span>
+            <UpdateBanner />
             <span className={`tt-pill ${subChip.cls} tt-topbar-sub`}>{subChip.text}</span>
           </header>
           <div className="tt-content">{children}</div>
