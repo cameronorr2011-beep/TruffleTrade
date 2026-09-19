@@ -1,8 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/site/JsonLd";
+import { REPO_URL as REPO, breadcrumbJsonLd, howToJsonLd } from "@/lib/seo";
 
-const REPO = "https://github.com/cameronorr2011-beep/TruffleTrade";
 const DOWNLOAD = "/api/download/desktop";
+
+const installJsonLd = [
+  howToJsonLd({
+    name: "How to install TruffleTrade on Windows",
+    description: "Download the free TruffleTrade desktop app, run the installer, launch it, and (optionally) activate TruffleTrade AI with an access code.",
+    steps: [
+      { name: "Download the installer", text: "Click Download TruffleTrade-Setup.exe on truffletrade.vercel.app/install. The newest release downloads instantly." },
+      { name: "Run the installer", text: "Open TruffleTrade-Setup.exe. It installs like any Windows program with a Start Menu entry and desktop shortcut — no Node.js, no command line." },
+      { name: "Launch TruffleTrade", text: "Open the app. Live charts, watchlists and market data work immediately and are free." },
+      { name: "Activate TruffleTrade AI", text: "Open AI Analyst → Enter activation key and paste the TT-… code from your purchase at /buy (1,000 sats over Bitcoin Lightning)." },
+    ],
+  }),
+  breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Install", path: "/install" },
+  ]),
+];
 
 export const metadata: Metadata = {
   title: "Install the desktop app",
@@ -19,7 +37,7 @@ export const metadata: Metadata = {
 
 function Code({ children }: { children: string }) {
   return (
-    <pre className="mt-3 overflow-x-auto rounded-lg border border-soil-600  p-4 font-mono text-[0.78rem] leading-relaxed code-block text-truffle-600">
+    <pre className="code-block mt-3 overflow-x-auto p-4 font-mono text-[0.78rem] leading-relaxed text-truffle-600">
       {children}
     </pre>
   );
@@ -28,9 +46,10 @@ function Code({ children }: { children: string }) {
 export default function InstallPage() {
   return (
     <div className="mx-auto max-w-[900px] px-5 py-20 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300">Setup</span>
-      <h1 className="font-display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] font-semibold leading-[1.05] text-ink">
-        Install TruffleTrade
+      <JsonLd data={installJsonLd} />
+      <span className="eyebrow">Setup</span>
+      <h1 className="font-display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] font-extrabold leading-[1.05] tracking-[-1.8px] text-ink">
+        Install TruffleTrade <span className="text-gold">for Windows</span>
       </h1>
       <p className="mt-4 max-w-2xl text-[0.98rem] leading-relaxed text-bone-soft">
         The app is <strong className="text-ink">free</strong>. TruffleTrade AI (the analyst, the council, the digital
@@ -38,28 +57,28 @@ export default function InstallPage() {
       </p>
 
       {/* The only path most people need */}
-      <section className="mt-10 rounded-xl border border-forest/30 bg-mint p-6">
+      <section className="card card-gold mt-10 p-6">
         <h2 className="font-display text-[1.35rem] font-semibold text-ink">
           <span className="font-mono text-[0.8rem] text-truffle-300">WINDOWS ·</span> One-click install
         </h2>
         <ol className="mt-4 space-y-3 text-[0.92rem] leading-relaxed text-bone-soft">
-          <li>
+          <li id="step-1">
             <span className="font-bold text-forest">1.</span>{" "}
             <a href={DOWNLOAD} className="btn-primary mt-1 inline-block !py-2.5">
               ⬇ Download TruffleTrade-Setup.exe
             </a>{" "}
             — the download starts instantly, right here.
           </li>
-          <li>
+          <li id="step-2">
             <span className="font-bold text-forest">2.</span> Run the installer. The app installs like any Windows
             program — Start Menu entry, desktop shortcut, auto-start of its local research terminal.{" "}
             <strong className="text-ink">No Node.js, no command line.</strong>
           </li>
-          <li>
+          <li id="step-3">
             <span className="font-bold text-forest">3.</span> Launch <strong className="text-ink">TruffleTrade</strong>.
             Charts, watchlists and market data work immediately — the app is free.
           </li>
-          <li>
+          <li id="step-4">
             <span className="font-bold text-forest">4.</span> To unlock TruffleTrade AI: open{" "}
             <strong className="text-ink">AI Analyst</strong> → <strong className="text-ink">Enter activation key</strong>{" "}
             → paste the TT-… key from your purchase. No key yet? Get one at{" "}
@@ -131,8 +150,7 @@ npm run dev`}</Code>
           </h2>
           <p className="mt-3 text-[0.92rem] leading-relaxed text-bone-soft">
             Open <strong className="text-ink">AI Analyst</strong>, pick a ticker, and launch your first council
-            investigation. If you ever see{" "}
-            <code className="rounded bg-soil-800 px-1.5 py-0.5 font-mono text-[0.8rem] text-truffle-600">401</code> or
+            investigation. If you ever see{" "}              <code className="rounded border border-soil-600 bg-soil-800 px-1.5 py-0.5 font-mono text-[0.8rem] text-truffle-600">401</code> or
             the activation gate, your key expired — renew at /buy and paste the new code.
           </p>
         </section>

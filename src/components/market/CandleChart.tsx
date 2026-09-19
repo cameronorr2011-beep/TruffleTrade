@@ -131,8 +131,11 @@ export default function CandleChart({
   const change = last && ref != null ? last.c - ref : 0;
   const changePct = last && ref ? (change / ref) * 100 : 0;
   const up = change >= 0;
-  const upColor = "#408260";
-  const downColor = "#b3543f";
+  // Chart chrome reads site-scoped CSS variables (set on .tt-site in
+  // globals.css) and falls back to the original values everywhere else, so
+  // the paid app's charts render exactly as before.
+  const upColor = "var(--chart-up, #408260)";
+  const downColor = "var(--chart-down, #b3543f)";
   const lastColor = last ? (last.c >= (first?.c ?? last.c) ? upColor : downColor) : upColor;
   const current = hover != null ? candles[hover] : last;
 
@@ -242,8 +245,8 @@ export default function CandleChart({
             </defs>
             {gridVals.map((v, i) => (
               <g key={i}>
-                <line x1="0" x2={plotW} y1={y(v)} y2={y(v)} stroke="#e9ede8" strokeDasharray="3 4" />
-                <text x={width - 4} y={y(v) + 3.5} textAnchor="end" fontSize="9.5" fill="#a7ae9b">
+                <line x1="0" x2={plotW} y1={y(v)} y2={y(v)} stroke="var(--chart-grid, #e9ede8)" strokeDasharray="3 4" />
+                <text x={width - 4} y={y(v) + 3.5} textAnchor="end" fontSize="9.5" fill="var(--chart-label, #a7ae9b)">
                   {fmtPrice(v, data?.currency ?? null)}
                 </text>
               </g>
@@ -272,7 +275,7 @@ export default function CandleChart({
             {last && (
               <>
                 <line x1={plotW} x2={plotW + 4} y1={y(last.c)} y2={y(last.c)} stroke={lastColor} />
-                <rect x={plotW + 6} y={y(last.c) - 9} width="52" height="18" rx="4" fill="#eaf1e5" stroke="#dbe7d6" />
+                <rect x={plotW + 6} y={y(last.c) - 9} width="52" height="18" rx="4" fill="var(--chart-badge, #eaf1e5)" stroke="var(--chart-badge-line, #dbe7d6)" />
                 <text x={plotW + 32} y={y(last.c) + 3.5} textAnchor="middle" fontSize="9.5" fontWeight="700" fill={lastColor}>
                   {last.c.toFixed(2)}
                 </text>
@@ -280,11 +283,11 @@ export default function CandleChart({
             )}
             {hover != null && candles[hover] && (
               <>
-                <line x1={cx(hover)} x2={cx(hover)} y1="0" y2={height - 20} stroke="#86a891" strokeDasharray="4 4" />
-                <circle cx={cx(hover)} cy={y(candles[hover].c)} r="4.5" fill="#fff" stroke={upColor} strokeWidth="2" />
+                <line x1={cx(hover)} x2={cx(hover)} y1="0" y2={height - 20} stroke="var(--chart-crosshair, #86a891)" strokeDasharray="4 4" />
+                <circle cx={cx(hover)} cy={y(candles[hover].c)} r="4.5" fill="var(--chart-dot, #fff)" stroke={upColor} strokeWidth="2" />
               </>
             )}
-            <line x1="0" x2={plotW} y1={height - 19.5} y2={height - 19.5} stroke="#e7eae4" />
+            <line x1="0" x2={plotW} y1={height - 19.5} y2={height - 19.5} stroke="var(--chart-axis, #e7eae4)" />
           </svg>
         )}
         {hover != null && candles[hover] && (

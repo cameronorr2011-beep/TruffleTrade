@@ -237,6 +237,9 @@
   --color-bone: #dce7de;
   --color-bone-soft: #9db1a3;
   --color-faint: #66796d;
+  /* `forest` is the site's signal-green token; map it to the app accent so
+     text-forest / border-forest utilities stay on-palette in the terminal. */
+  --color-forest: #58a97b;
 }
 .tt-app .candle-tooltip {
   background: #101713;

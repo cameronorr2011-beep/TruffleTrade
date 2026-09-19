@@ -1,8 +1,25 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { JetBrains_Mono, Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { DESCRIPTION, SITE_NAME, SITE_URL, TAGLINE } from "@/lib/seo";
 import "./globals.css";
+
+// Self-hosted via next/font: no third-party font requests, no FOIT, and the
+// packaged desktop app works offline. Exposed as CSS variables consumed by
+// the Tailwind theme (--font-sans / --font-mono in globals.css).
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-manrope",
+});
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-jetbrains",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -14,12 +31,15 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   keywords: [
     "AI stock analysis",
+    "AI stock research software",
     "AI chart analysis",
     "AI investment research",
+    "stock analysis app for Windows",
+    "multi-agent AI trading research",
     "open source trading software",
     "stock research tool",
-    "bitcoin lightning",
-    "no kyc",
+    "bitcoin lightning payment",
+    "no KYC software",
     "digital twin markets",
     "federated learning",
     "truffletrade",
@@ -28,9 +48,13 @@ export const metadata: Metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
   formatDetection: { telephone: false, address: false, email: false },
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": `${SITE_URL}/feed.xml` },
+  },
   openGraph: {
     type: "website",
+    locale: "en_US",
     siteName: SITE_NAME,
     url: SITE_URL,
     title: `${SITE_NAME} — ${TAGLINE}`,
@@ -55,19 +79,30 @@ export const metadata: Metadata = {
     },
   },
   category: "finance",
+  classification: "Finance software",
+  referrer: "strict-origin-when-cross-origin",
   // Google Search Console ownership verification.
   verification: {
     google: "3QqMPiKAxdmUzhfBN1Ow0QpgHPfrbxZ4tGcNDWvcc3s",
   },
   icons: {
-    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon-512.png" }],
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: ["/icon-192.png"],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: "black-translucent" },
+  other: { "msapplication-TileColor": "#0b0908" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fafbf9",
-  colorScheme: "light",
+  themeColor: "#0b0908",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
 };
 
 /**
@@ -77,15 +112,7 @@ export const viewport: Viewport = {
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" style={{ backgroundColor: "#fafbf9", colorScheme: "light" }}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-        />
-      </head>
+    <html lang="en" className={`${manrope.variable} ${jetbrains.variable}`} style={{ backgroundColor: "#0b0908" }}>
       <body className="relative min-h-screen bg-void antialiased">
         {children}
         {/* Vercel Analytics ships only with Vercel builds — in the packaged

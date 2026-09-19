@@ -128,18 +128,18 @@ export default function BuyPanel() {
   if (phase === "paid" && accessCode) {
     const exp = expiresTs ? new Date(expiresTs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
     return (
-      <aside className="card p-7" id="your-code" style={{ borderColor: "#a6bf8a", boxShadow: "0 4px 24px rgba(33,88,62,0.1)" }}>
+      <aside className="card p-7" id="your-code" style={{ borderColor: "rgba(111,195,148,0.45)", boxShadow: "0 14px 44px rgba(0,0,0,0.5), 0 0 0 1px rgba(111,195,148,0.15)" }}>
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[1.2px] text-jade">
           <span aria-hidden className="live-dot" /> Payment confirmed
         </p>
         <h3 className="mt-2 text-[22px] font-bold tracking-[-0.8px] text-ink">Your TruffleTrade access code</h3>
         <button
           onClick={() => copy(accessCode, "code")}
-          className="code-block mt-5 w-full px-4 py-4 text-[16px] font-semibold tracking-[0.12em] transition-colors hover:border-[#3a5a44]"
+          className="code-block mt-5 w-full px-4 py-4 text-[16px] font-semibold tracking-[0.12em] text-truffle-600 transition-colors hover:border-truffle-400/50"
           title="Click to copy"
         >
           {accessCode}
-          <span className="ml-3 text-[10px] uppercase tracking-[0.2em] text-[#8aa88f]">{copied === "code" ? "copied ✓" : "copy"}</span>
+          <span className="ml-3 text-[10px] uppercase tracking-[0.2em] text-faint">{copied === "code" ? "copied ✓" : "copy"}</span>
         </button>
         {exp && <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.6px] text-faint">Active through {exp} · no auto-renew</p>}
 
@@ -159,11 +159,11 @@ export default function BuyPanel() {
             <p className="mt-1">In the app open <strong className="text-ink">AI Analyst</strong> → <strong className="text-ink">Enter activation key</strong> and paste:</p>
             <button
               onClick={() => copy(accessCode, "code")}
-              className="code-block mt-2 w-full px-3 py-2.5 text-[13px] font-semibold tracking-[0.08em] transition-colors hover:border-[#3a5a44]"
+              className="code-block mt-2 w-full px-3 py-2.5 text-[13px] font-semibold tracking-[0.08em] text-truffle-600 transition-colors hover:border-truffle-400/50"
               title="Click to copy"
             >
               {accessCode}
-              <span className="ml-3 text-[10px] uppercase tracking-[0.2em] text-[#8aa88f]">{copied === "code" ? "copied ✓" : "copy"}</span>
+              <span className="ml-3 text-[10px] uppercase tracking-[0.2em] text-faint">{copied === "code" ? "copied ✓" : "copy"}</span>
             </button>
           </li>
         </ol>
@@ -179,8 +179,9 @@ export default function BuyPanel() {
   }
 
   return (
-    <aside className="card p-7">
-      <h3 className="text-[19px] font-bold tracking-[-0.6px] text-ink">Buy in three steps</h3>
+    <aside className="card relative overflow-hidden p-7">
+      <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-truffle-500/10 blur-3xl" />
+      <h3 className="relative text-[19px] font-bold tracking-[-0.6px] text-ink">Buy in three steps</h3>
       {phase === "idle" && (
         <>
           <ol className="mt-5 space-y-3 text-[13px] text-bone-soft">
@@ -263,7 +264,7 @@ export default function BuyPanel() {
           </div>
           <button
             onClick={() => copy(btc.address, "address")}
-            className="mt-3 w-full rounded-xl border border-forest/30 bg-mint px-4 py-3.5 text-left text-[13px] font-bold break-all text-forest transition-colors hover:border-forest/60"
+            className="mt-3 w-full rounded-xl border border-forest/30 bg-mint px-4 py-3.5 text-left text-[13px] font-bold break-all text-forest transition-colors hover:border-forest/60 hover:bg-forest/10"
           >
             {btc.address}
             <span className="ml-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-forest/60">
@@ -307,7 +308,7 @@ export default function BuyPanel() {
           </div>
           <button
             onClick={() => copy(manual.address, "address")}
-            className="mt-3 w-full rounded-xl border border-forest/30 bg-mint px-4 py-3.5 text-left text-[14px] font-bold text-forest transition-colors hover:border-forest/60"
+            className="mt-3 w-full rounded-xl border border-forest/30 bg-mint px-4 py-3.5 text-left text-[14px] font-bold text-forest transition-colors hover:border-forest/60 hover:bg-forest/10"
           >
             {manual.address}
             <span className="ml-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-forest/60">

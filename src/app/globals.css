@@ -1,42 +1,48 @@
 @import "tailwindcss";
 
 @theme {
-  /* TruffleTrade — white workspace palette (ivory surfaces, forest accents).
-     Token names are kept from the previous dark theme and remapped, so pages
-     styled with bg-void / text-bone / text-truffle-400 render correctly in
-     the light theme without a per-file sweep. */
-  --color-void: #fafbf9;          /* page background (was near-black) */
-  --color-ink: #26352d;           /* primary ink */
-  --color-soil-950: #f4f6f2;      /* sidebar / recessed surface */
-  --color-soil-900: #ffffff;      /* card surface */
-  --color-soil-800: #fbfcf9;      /* raised input surface */
-  --color-soil-700: #f1f4ec;      /* hover surface */
-  --color-soil-600: #e7eae4;      /* hairline */
-  --color-soil-500: #d9dfd3;      /* strong border */
+  /* TruffleTrade — dark "soil & gold" palette.
+     Warm near-black surfaces (the truffle), gold for the trend line (primary
+     action), forest green for "signal" highlights and positive numbers.
+     Token names are kept from the previous light theme so every page styled
+     with bg-void / text-ink / border-soil-600 re-themes without a sweep.
+     NOTE: the paid app overrides all of these under .tt-app (app.css) and is
+     unaffected by anything in this block. */
+  --color-void: #0b0908;          /* page background */
+  --color-ink: #f3ede3;           /* primary ink (bone on soil) */
+  --color-soil-950: #0f0c0a;      /* recessed surface */
+  --color-soil-900: #141110;      /* card surface */
+  --color-soil-800: #1a1613;      /* raised / input surface */
+  --color-soil-700: #211c18;      /* hover surface */
+  --color-soil-600: #2a241f;      /* hairline */
+  --color-soil-500: #3a322a;      /* strong border */
 
-  --color-truffle-600: #18442f;   /* forest-dark (hover) */
-  --color-truffle-500: #21583e;   /* forest primary (buttons) */
-  --color-truffle-400: #2f6b47;   /* accent — underlines, active text */
-  --color-truffle-300: #4a8663;   /* secondary accent text */
-  --color-truffle-200: #dcead9;   /* light accent fill */
+  --color-truffle-600: #f4d38a;   /* brightest gold — hover text, headings */
+  --color-truffle-500: #dfae4c;   /* gold primary (buttons) */
+  --color-truffle-400: #e6b95f;   /* accent — underlines, active text */
+  --color-truffle-300: #c9a468;   /* muted gold — eyebrows, tags */
+  --color-truffle-200: #2b2214;   /* gold-tinted fill */
 
-  --color-mint: #eaf1e5;          /* soft highlight fill */
-  --color-surface: #ffffff;
-  --color-sidebar: #f4f6f2;
+  --color-forest: #6fc394;        /* signal green — highlights, bullets */
+  --color-mint: #14201a;          /* green-tinted fill */
+  --color-surface: #141110;
+  --color-sidebar: #0f0c0a;
 
-  --color-blood: #b3543f;         /* negative */
-  --color-jade: #408260;          /* positive */
-  --color-paper: #ffffff;         /* explicit white surface */
-  --color-bone: #26352d;          /* primary readable text (was light on dark) */
-  --color-bone-soft: #5c6a5e;     /* secondary text */
-  --color-faint: #90968f;         /* tertiary text */
+  --color-blood: #ef7a5f;         /* negative */
+  --color-jade: #5ccf8a;          /* positive */
+  --color-paper: #141110;
+  --color-bone: #f3ede3;          /* primary readable text */
+  --color-bone-soft: #b3a797;     /* secondary text */
+  --color-faint: #8c8073;         /* tertiary text (AA on void) */
 
-  --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --animate-pulse-glow: pulseGlow 4.5s ease-in-out infinite;
   --animate-marquee: marquee 38s linear infinite;
+  --animate-arrive: arrive 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-float: floatY 7s ease-in-out infinite;
 }
 
 @keyframes pulseGlow {
@@ -48,16 +54,22 @@
   100% { transform: translate3d(-50%, 0, 0); }
 }
 @keyframes arrive {
-  from { opacity: 0; transform: translateY(7px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-:root {
-  color-scheme: light;
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
+/* The marketing site (.tt-site) is dark; the paid app (.tt-app) ships its
+   own theme in app.css. Anything that must differ between the two is keyed
+   off html:has(.tt-site) or scoped under .tt-site so the app never changes. */
 html, body {
-  background-color: #fafbf9;
+  background-color: #0b0908;
+}
+html:has(.tt-site) {
+  color-scheme: dark;
 }
 
 html {
@@ -76,9 +88,9 @@ body {
   letter-spacing: -0.15px;
 }
 
-::selection {
-  background: #cfe2cf;
-  color: var(--color-ink);
+.tt-site ::selection {
+  background: #5a4520;
+  color: #fff7e6;
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -88,11 +100,69 @@ body {
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover { background: #bcc9b1; }
+html:has(.tt-site) ::-webkit-scrollbar-thumb { background: #2e2721; }
+html:has(.tt-site) ::-webkit-scrollbar-thumb:hover { background: #3d342c; }
+
+/* Subtle film grain + top glow for the marketing site only (.tt-site). */
+.tt-site {
+  position: relative;
+  isolation: isolate;
+  /* Site-only knobs read by shared primitives below (the app keeps the
+     fallback values, so its buttons/cards render exactly as before). */
+  --btn-bg: linear-gradient(180deg, #ecc064 0%, #dfae4c 100%);
+  --btn-bg-hover: linear-gradient(180deg, #f2ca70 0%, #e6b653 100%);
+  --btn-ink: #1b1307;
+  --btn-border: rgba(255, 226, 160, 0.35);
+  --btn-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 8px 24px rgba(223, 174, 76, 0.22);
+  --btn-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 12px 34px rgba(223, 174, 76, 0.34);
+  --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)), var(--color-surface);
+  --card-hover-border: rgba(223, 174, 76, 0.28);
+  --card-hover-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  --live-glow: 0 0 10px rgba(92, 207, 138, 0.7);
+  /* CandleChart chrome (component falls back to its light values elsewhere) */
+  --chart-up: #5ccf8a;
+  --chart-down: #ef7a5f;
+  --chart-grid: #2a241f;
+  --chart-axis: #2a241f;
+  --chart-label: #8c8073;
+  --chart-badge: #1a1613;
+  --chart-badge-line: #3a322a;
+  --chart-crosshair: #8c8073;
+  --chart-dot: #141110;
+}
+.tt-site::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 420px at 50% -120px, rgba(223, 174, 76, 0.10), transparent 70%),
+    radial-gradient(700px 500px at 100% 20%, rgba(111, 195, 148, 0.05), transparent 65%),
+    var(--color-void);
+}
+.tt-site::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
+
+/* Dotted grid for hero backdrops */
+.grid-dots {
+  background-image: radial-gradient(rgba(243, 237, 227, 0.09) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(closest-side at 50% 30%, #000 30%, transparent 100%);
+}
 
 /* Surfaces */
 .card {
   border: 1px solid var(--color-soil-600);
-  background: var(--color-surface);
+  background: var(--card-bg, var(--color-surface));
   border-radius: 12px;
 }
 
@@ -102,11 +172,22 @@ body {
   border-radius: 12px;
 }
 
-/* Dark code blocks remain dark on the white site (terminal authenticity). */
+/* Gold-lit feature card */
+.card-gold {
+  border-color: rgba(223, 174, 76, 0.32);
+  background:
+    radial-gradient(520px 220px at 0% 0%, rgba(223, 174, 76, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+    var(--color-surface);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.card-gold:hover { border-color: rgba(223, 174, 76, 0.5); }
+
+/* Code blocks — a shade deeper than cards */
 .code-block {
-  background: #14231a;
-  color: #d5e6d2;
-  border: 1px solid #23392b;
+  background: #0a0806;
+  color: #e6dccb;
+  border: 1px solid var(--color-soil-600);
   border-radius: 10px;
 }
 
@@ -128,33 +209,69 @@ body {
   right: 0;
 }
 
-/* Buttons */
+/* Eyebrow label */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--color-truffle-300);
+}
+.eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-truffle-400), transparent);
+}
+
+/* Gradient headline accent */
+.text-gold {
+  background: linear-gradient(100deg, #f6d68c 0%, #dfae4c 55%, #b9832b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Buttons — shared with the app, which keeps the fallback (green) values. */
 .btn-primary {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  background: var(--color-truffle-500);
-  color: #fff;
+  background: var(--btn-bg, var(--color-truffle-500));
+  color: var(--btn-ink, #fff);
   border-radius: 8px;
   font-weight: 600;
   font-size: 12px;
   letter-spacing: 0.02em;
   padding: 12px 22px;
-  box-shadow: 0 2px 4px rgba(24, 68, 47, 0.14);
-  transition: background 0.16s, box-shadow 0.16s;
+  box-shadow: var(--btn-shadow, 0 2px 4px rgba(24, 68, 47, 0.14));
+  transition: background 0.16s, box-shadow 0.16s, transform 0.16s;
 }
-.btn-primary:hover { background: var(--color-truffle-600); box-shadow: 0 3px 10px rgba(24, 68, 47, 0.2); }
+.btn-primary:hover {
+  background: var(--btn-bg-hover, var(--color-truffle-600));
+  box-shadow: var(--btn-shadow-hover, 0 3px 10px rgba(24, 68, 47, 0.2));
+}
+.tt-site .btn-primary { border: 1px solid var(--btn-border); border-radius: 10px; font-weight: 700; }
+.tt-site .btn-primary:hover { transform: translateY(-1px); }
 
 .btn-secondary {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  background: #fff;
-  color: var(--color-truffle-500);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-ink);
   border: 1px solid var(--color-soil-500);
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 12px;
   padding: 12px 22px;
-  transition: background 0.16s, border-color 0.16s;
+  backdrop-filter: blur(6px);
+  transition: background 0.16s, border-color 0.16s, transform 0.16s;
 }
-.btn-secondary:hover { background: var(--color-soil-950); border-color: #c4d1bd; }
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(223, 174, 76, 0.45);
+  transform: translateY(-1px);
+}
 
 .positive { color: var(--color-jade) !important; }
 .negative { color: var(--color-blood) !important; }
@@ -164,6 +281,7 @@ body {
   position: relative;
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--color-jade);
+  box-shadow: var(--live-glow, none);
 }
 .live-dot::after {
   content: "";
@@ -181,16 +299,16 @@ body {
 .candle-tooltip {
   position: absolute;
   pointer-events: none;
-  background: #fff;
+  background: var(--color-soil-800);
   border: 1px solid var(--color-soil-500);
   border-radius: 8px;
-  box-shadow: 0 6px 22px rgba(38, 53, 45, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   padding: 8px 11px;
   transform: translate(-50%, 0);
   white-space: nowrap;
   z-index: 10;
 }
-.candle-tooltip > span { display: block; font-size: 10px; color: #77837a; }
+.candle-tooltip > span { display: block; font-size: 10px; color: var(--color-faint); }
 .candle-tooltip > strong { display: block; font-size: 13px; font-weight: 700; color: var(--color-ink); margin-top: 2px; }
 
 /* ── Site polish: motion & focus (state-communicating only) ── */
@@ -198,8 +316,8 @@ body {
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 .card:hover {
-  border-color: #c9d5c0;
-  box-shadow: 0 10px 30px rgba(38, 53, 45, 0.08);
+  border-color: var(--card-hover-border, #c9d5c0);
+  box-shadow: var(--card-hover-shadow, 0 10px 30px rgba(38, 53, 45, 0.08));
   transform: translateY(-1px);
 }
 .btn-primary:active, .btn-secondary:active { transform: translateY(1px); }
@@ -209,6 +327,13 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* Staggered reveal helpers */
+.arrive { animation: var(--animate-arrive); }
+.arrive-1 { animation-delay: 0.05s; }
+.arrive-2 { animation-delay: 0.15s; }
+.arrive-3 { animation-delay: 0.25s; }
+.arrive-4 { animation-delay: 0.35s; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

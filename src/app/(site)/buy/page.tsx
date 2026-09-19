@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BuyPanel from "@/components/site/BuyPanel";
+import { JsonLd } from "@/components/site/JsonLd";
+import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Get access — 1,000 sats, no KYC",
   description:
-    "Pay 1,000 sats over Bitcoin Lightning for 30 days of TruffleTrade. No account, no email, no KYC. Your access code appears on this page once payment confirms.",
+    "Pay 1,000 sats over Bitcoin Lightning for 30 days of TruffleTrade AI. No account, no email, no KYC. Your access code appears on this page once payment confirms.",
   alternates: { canonical: "/buy" },
   openGraph: {
     title: "Get TruffleTrade access — 1,000 sats",
@@ -15,12 +17,21 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Get TruffleTrade access — 1,000 sats" },
 };
 
+const buyJsonLd = [
+  productJsonLd(),
+  breadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Get access", path: "/buy" },
+  ]),
+];
+
 export default function BuyPage() {
   return (
     <div className="mx-auto max-w-[900px] px-5 py-20 sm:px-8">
-      <span className="font-mono text-[0.62rem] uppercase tracking-[0.32em] text-truffle-300">Checkout</span>
-      <h1 className="font-display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] font-semibold leading-[1.05] text-bone">
-        Thirty days of TruffleTrade
+      <JsonLd data={buyJsonLd} />
+      <span className="eyebrow">Checkout</span>
+      <h1 className="font-display mt-5 text-[clamp(2.2rem,5vw,3.6rem)] font-extrabold leading-[1.05] tracking-[-1.8px] text-bone">
+        Thirty days of <span className="text-gold">TruffleTrade AI</span>
       </h1>
       <p className="mt-4 max-w-2xl text-[0.98rem] leading-relaxed text-bone-soft">
         One payment of <span className="text-bone">1,000 sats</span> over the Bitcoin Lightning Network. No account
@@ -28,12 +39,12 @@ export default function BuyPage() {
         confirmed — usually within minutes.
       </p>
 
-      <div className="mt-8 rounded-xl border border-soil-500 bg-mint p-5">
+      <div className="mt-8 rounded-xl border border-forest/25 bg-mint p-5">
         <p className="text-[0.85rem] leading-relaxed text-bone-soft">
-          <strong className="text-truffle-600">Age requirement:</strong> by purchasing you confirm you are 18 or older —
+          <strong className="text-forest">Age requirement:</strong> by purchasing you confirm you are 18 or older —
           or that a parent or guardian has reviewed and approved this purchase and will supervise your use of the
           product. See the{" "}
-          <Link href="/terms" className="text-truffle-300 underline decoration-truffle-400/40 underline-offset-2">
+          <Link href="/terms" className="text-truffle-400 underline decoration-truffle-400/40 underline-offset-2 hover:text-truffle-600">
             Terms
           </Link>{" "}
           for details.
@@ -47,14 +58,14 @@ export default function BuyPage() {
           <ul className="mt-4 space-y-3 text-[0.9rem] text-bone-soft">
             {[
               "Unlimited AI chart analyses on any ticker",
-              "Six-analyst council with fact-checker and red team",
+              "Nine-analyst council with fact-checker and red team",
               "Versioned theses with audited forecast history",
               "Local memory system that updates itself",
               "Federated learning across all installations",
               "Runs on your machine — your data stays local",
             ].map((f) => (
               <li key={f} className="flex gap-3">
-                <span aria-hidden className="text-truffle-400">◆</span>
+                <span aria-hidden className="text-forest">◆</span>
                 {f}
               </li>
             ))}

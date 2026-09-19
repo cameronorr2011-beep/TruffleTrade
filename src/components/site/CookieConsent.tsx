@@ -41,12 +41,12 @@ export default function CookieConsent() {
       aria-label="Cookie consent"
       className="fixed inset-x-3 bottom-3 z-[95] sm:left-auto sm:right-5 sm:max-w-md"
     >
-      <div className="card p-5 shadow-xl shadow-emerald-900/10">
+      <div className="card p-5 shadow-2xl shadow-black/60">
         <h2 className="text-[1rem] font-bold text-ink">A word about cookies</h2>
         <p className="mt-2 text-[12.5px] leading-relaxed text-bone-soft">
           We use strictly-necessary cookies to run this site (consent, purchase session). Optional analytics stay
           anonymous and on-device unless you allow them. No ad networks, no cross-site tracking, ever. See our{" "}
-          <a href="/privacy" className="font-semibold text-truffle-500 underline decoration-truffle-400/50 underline-offset-2">
+          <a href="/privacy" className="font-semibold text-truffle-400 underline decoration-truffle-400/50 underline-offset-2 hover:text-truffle-600">
             Privacy Policy
           </a>
           .
